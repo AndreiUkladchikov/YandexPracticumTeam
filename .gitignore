@@ -1,0 +1,10 @@
+.venv
+postgres_to_es/dotenv
+postgres_to_es/pydantic
+postgres_to_es/urllib3
+postgres_to_es/elastic_transport
+postgres_to_es/elasticsearch
+postgres_to_es/typing_extensions.py
+postgres_to_es/.env
+postgres_to_es/state.json
+commands.txt
