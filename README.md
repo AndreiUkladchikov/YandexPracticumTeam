@@ -1,7 +1,7 @@
 # YandexPracticumTeam
-db_create - заполнение для postgres
-postgres_to_es - etl сервис
-fast_api - задание спринта
+- db_create - заполнение для postgres
+- postgres_to_es - etl сервис
+- fast_api - задание спринта
 
 
 Все нужные сервисы собраны в одном проекте (один docker-compose):
