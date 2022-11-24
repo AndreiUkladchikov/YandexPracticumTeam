@@ -7,4 +7,6 @@ postgres_to_es/elasticsearch
 postgres_to_es/typing_extensions.py
 postgres_to_es/.env
 postgres_to_es/state.json
+postgres_to_es/typing_extensions.py
+fast_api/src/typing_extensions.py
 commands.txt
