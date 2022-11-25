@@ -1,12 +1,11 @@
 import json
 import logging
 import datetime
-from config_models import State
-import db_config
+from config.config_models import State, Indexes
 
 
-def get_state() -> State:
-    with open(db_config.STATE_CON) as file:
+def get_state(conn: str) -> State:
+    with open(conn) as file:
         try:
             data = json.load(file)
             state = State.parse_raw(data)
@@ -17,12 +16,13 @@ def get_state() -> State:
             return State(
                 last_update=datetime.datetime(2000, 1, 1),
                 last_row=0,
-                is_finished=False
+                is_finished=False,
+                index=Indexes.MOVIE.value
             )
 
 
-def save_state(state: State) -> None:
-    with open(db_config.STATE_CON, 'w') as file:
+def save_state(conn: str, state: State) -> None:
+    with open(conn, 'w') as file:
         try:
             json.dump(state.json(), file)
         except FileNotFoundError:
@@ -30,8 +30,20 @@ def save_state(state: State) -> None:
 
 
 # В начале нового цикла загрузки в ETL - обновляем state
-def refresh_state(state: State) -> State:
+def refresh_state(conn: str, state: State) -> State:
     state.is_finished = False
     state.last_row = 0
-    save_state(state)
+    state.index = Indexes.MOVIE.value
+    save_state(conn, state)
+    return state
+
+
+def get_next_state(state: State) -> State:
+    if state.index == Indexes.MOVIE.value:
+        state.index = Indexes.GENRE.value
+    elif state.index == Indexes.GENRE.value:
+        state.index = Indexes.PERSONS.value
+    else:
+        state.is_finished = True
+    state.last_row = 0
     return state

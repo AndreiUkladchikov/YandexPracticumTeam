@@ -1,6 +1,10 @@
 import os
 from pydantic import BaseSettings
 
+# For local debug
+# from dotenv import load_dotenv
+# load_dotenv()
+
 
 STATE_CON = os.environ.get('STATE_CON')
 

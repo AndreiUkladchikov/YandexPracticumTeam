@@ -6,10 +6,13 @@ from pydantic import BaseModel
 
 class Person(BaseModel):
     id: uuid.UUID
-    name: str
+    full_name: str
+    actor_in: list | None = []
+    writer_in: list | None = []
+    director_in: list | None = []
 
 
-class Genre(BaseModel):
+class NestedModel(BaseModel):
     id: uuid.UUID
     name: str
 
@@ -27,6 +30,7 @@ class Movie(BaseModel):
     writers: list
     genres: list
     genre: list
+    directors: list
 
 
 class PersonTypes(str, Enum):
