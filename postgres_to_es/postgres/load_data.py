@@ -84,3 +84,30 @@ def load_film_works(conn: _connection, date: datetime, offset: int, limit: int) 
         return movies_list
     except (psycopg2.Error) as error:
         logging.error(error)
+
+
+def load_genres(conn: _connection, date: datetime, offset: int, limit: int) -> list[Genre]:
+    try:
+        curs = conn.cursor(cursor_factory=NamedTupleCursor)
+        curs.execute(
+            """
+                SELECT genres.id, genres.name
+                FROM content.genre as genres
+                WHERE genres.modified > %s
+
+                LIMIT %s OFFSET %s;""",
+            (date, limit, offset)
+            )
+        result = curs.fetchall()
+        genres = []
+        if len(result) > 0:
+            for genre in result:
+                genres.extend([
+                    Genre(
+                        id=genre.id,
+                        name=genre.name
+                    )
+                ])
+        return genres
+    except (psycopg2.Error) as error:
+        logging.error(error)
