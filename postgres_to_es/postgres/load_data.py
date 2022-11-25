@@ -6,7 +6,7 @@ import psycopg2
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import NamedTupleCursor
 
-from models import Movie, PersonTypes, Person, Genre
+from models import Movie, PersonTypes, Person, NestedModel
 
 
 def load_film_works(conn: _connection, date: datetime, offset: int, limit: int) -> list[Movie]:
@@ -67,26 +67,28 @@ def load_film_works(conn: _connection, date: datetime, offset: int, limit: int) 
                         actors=[],
                         writers=[],
                         genres=[],
-                        genre=[]
+                        genre=[],
+                        directors=[]
                     )
                 if film.role == PersonTypes.DIRECTOR:
                     movies[film.id].director = film.full_name
+                    movies[film.id].directors = [NestedModel(id=film.person_id, name=film.full_name)]
                 elif film.role == PersonTypes.ACTOR and film.full_name not in movies[film.id].actors_names:
                     movies[film.id].actors_names.extend([film.full_name])
-                    movies[film.id].actors.extend([Person(id=film.person_id, name=film.full_name)])
+                    movies[film.id].actors.extend([NestedModel(id=film.person_id, name=film.full_name)])
                 elif film.role == PersonTypes.WRITER and film.full_name not in movies[film.id].writers_names:
                     movies[film.id].writers_names.extend([film.full_name])
-                    movies[film.id].writers.extend([Person(id=film.person_id, name=film.full_name)])
+                    movies[film.id].writers.extend([NestedModel(id=film.person_id, name=film.full_name)])
                 if film.genre_name not in movies[film.id].genre:
                     movies[film.id].genre.extend([film.genre_name])
-                    movies[film.id].genres.extend([Genre(id=film.genre_id, name=film.genre_name)])
+                    movies[film.id].genres.extend([NestedModel(id=film.genre_id, name=film.genre_name)])
             movies_list = list(movies.values())[1:]
         return movies_list
     except (psycopg2.Error) as error:
         logging.error(error)
 
 
-def load_genres(conn: _connection, date: datetime, offset: int, limit: int) -> list[Genre]:
+def load_genres(conn: _connection, date: datetime, offset: int, limit: int) -> list[NestedModel]:
     try:
         curs = conn.cursor(cursor_factory=NamedTupleCursor)
         curs.execute(
@@ -103,11 +105,61 @@ def load_genres(conn: _connection, date: datetime, offset: int, limit: int) -> l
         if len(result) > 0:
             for genre in result:
                 genres.extend([
-                    Genre(
+                    NestedModel(
                         id=genre.id,
                         name=genre.name
                     )
                 ])
         return genres
+    except (psycopg2.Error) as error:
+        logging.error(error)
+
+
+def load_persons(conn: _connection, date: datetime, offset: int, limit: int) -> list[Person]:
+    try:
+        curs = conn.cursor(cursor_factory=NamedTupleCursor)
+        curs.execute(
+            """
+                DROP TABLE IF EXISTS temp_table;
+
+                SELECT DISTINCT person.id, person.full_name
+                INTO TEMP TABLE temp_table
+                FROM content.person as person
+                LEFT JOIN content.person_film_work as person_filmworks on person.id = person_filmworks.person_id
+                WHERE person_filmworks.created > %s OR
+                    person.modified > %s
+
+                LIMIT %s OFFSET %s;
+
+                SELECT temp_table.id as id,
+                    temp_table.full_name,
+                    person_filmworks.film_work_id,
+                    person_filmworks.role
+                FROM temp_table as temp_table
+                LEFT JOIN content.person_film_work as person_filmworks on temp_table.id = person_filmworks.person_id
+                ORDER BY temp_table.id;""",
+            (date, date, limit, offset)
+            )
+        result = curs.fetchall()
+        persons = {uuid.UUID: Person}
+        persons_list = []
+        if len(result) > 0:
+            for person in result:
+                if person.id not in persons.keys():
+                    persons[person.id] = Person(
+                        id=person.id,
+                        full_name=person.full_name,
+                        actor_in=[],
+                        writer_in=[],
+                        director_in=[]
+                    )
+                if person.role == PersonTypes.DIRECTOR:
+                    persons[person.id].director_in.extend([person.film_work_id])
+                elif person.role == PersonTypes.ACTOR:
+                    persons[person.id].actor_in.extend([person.film_work_id])
+                elif person.role == PersonTypes.WRITER:
+                    persons[person.id].writer_in.extend([person.film_work_id])
+            persons_list = list(persons.values())[1:]
+        return persons_list
     except (psycopg2.Error) as error:
         logging.error(error)

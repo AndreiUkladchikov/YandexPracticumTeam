@@ -72,7 +72,7 @@ def load(state: State) -> list[Any]:
         elif state.index == Indexes.GENRE.value:
             data = load_data.load_genres(conn, state.last_update, state.last_row, limit)
         else:
-            data = []
+            data = load_data.load_persons(conn, state.last_update, state.last_row, limit)
         return data
 
 

@@ -120,6 +120,19 @@ movies = {
                         "analyzer": "ru_en"
                     }
                 }
+            },
+            "directors": {
+                "type": "nested",
+                "dynamic": "strict",
+                "properties": {
+                    "id": {
+                        "type": "keyword"
+                    },
+                    "name": {
+                        "type": "text",
+                        "analyzer": "ru_en"
+                    }
+                }
             }
         }
     }
@@ -135,6 +148,30 @@ genres = {
             "name": {
                 "type": "text",
                 "analyzer": "ru_en"
+            },
+        }
+    }
+}
+
+persons = {
+    "mappings": {
+        "dynamic": "strict",
+        "properties": {
+            "id": {
+                "type": "keyword"
+            },
+            "full_name": {
+                "type": "text",
+                "analyzer": "ru_en"
+            },
+            "actor_in": {
+                "type": "keyword"
+            },
+            "director_in": {
+                "type": "keyword"
+            },
+            "writer_in": {
+                "type": "keyword"
             },
         }
     }

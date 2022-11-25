@@ -11,6 +11,7 @@ es = Elasticsearch(db_config.ELASTIC_CON, timeout=300)
 def main() -> None:
     create_movies()
     create_genres()
+    create_persons()
 
 
 def create_movies() -> None:
@@ -27,6 +28,14 @@ def create_genres() -> None:
         es.indices.create(index='genres', body=genres)
     except exceptions.RequestError:
         logging.exception('Cannot create GENRES schema')
+
+
+def create_persons() -> None:
+    try:
+        persons = etl_schemas.settings.update(etl_schemas.persons)
+        es.indices.create(index='persons', body=persons)
+    except exceptions.RequestError:
+        logging.exception('Cannot create PERSONS schema')
 
 
 if __name__ == '__main__':
