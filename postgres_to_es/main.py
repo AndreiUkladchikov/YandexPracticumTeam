@@ -1,15 +1,16 @@
 import time
+from typing import Any
 
 import logging
-import elastic
-import elasticsearch
+import etl.etl_save as etl_save
 import psycopg2
+import elasticsearch
 
 import postgres.load_data as load_data
 import postgres.pg_context as pg_context
-import state_worker
-from config_models import State
-from models import Movie
+import services.state_worker as state_worker
+from config.config_models import State, Indexes
+import config.db_config as db_config
 
 
 """
@@ -41,46 +42,51 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, exception: Exc
 
 
 def main():
-    state = state_worker.get_state()
+    state = state_worker.get_state(db_config.STATE_CON)
     if state.is_finished is True:
-        state = state_worker.refresh_state(state)
+        state = state_worker.refresh_state(db_config.STATE_CON, state)
     while True:
         state = etl_worker(state)
         if state.is_finished:
             time.sleep(etl_update_frequency)
-            state = state_worker.refresh_state(state)
+            state = state_worker.refresh_state(db_config.STATE_CON, state)
 
 
 def etl_worker(state: State) -> State:
     while state.is_finished is False:
-        movies = load_movies(state)
-        if len(movies):
-            save_movies(movies)
-            state.last_row = state.last_row + len(movies)
+        data = load(state)
+        if len(data) > 0:
+            save(data, state.index)
+            state.last_row = state.last_row + len(data)
         else:
-            state.is_finished = True
-        state_worker.save_state(state)
+            state = state_worker.get_next_state(state)
+        state_worker.save_state(db_config.STATE_CON, state)
         return state
 
 
 @backoff(exception=psycopg2.OperationalError)
-def load_movies(state: State) -> list[Movie]:
-    with pg_context.conn_context() as conn:
-        movies = load_data.load_film_works(conn, state.last_update, state.last_row, limit)
-        return movies
+def load(state: State) -> list[Any]:
+    with pg_context.conn_context(str(db_config.PostgresSettings())) as conn:
+        if state.index == Indexes.MOVIE.value:
+            data = load_data.load_film_works(conn, state.last_update, state.last_row, limit)
+        elif state.index == Indexes.GENRE.value:
+            data = load_data.load_genres(conn, state.last_update, state.last_row, limit)
+        else:
+            data = load_data.load_persons(conn, state.last_update, state.last_row, limit)
+        return data
 
 
-@backoff(exception=elasticsearch.ElasticsearchException)
-def save_movies(movies: list[Movie]) -> None:
+@backoff(exception=elasticsearch.exceptions.RequestError)
+def save(source: list[Any], index: str) -> None:
     data = []
-    for movie in movies:
-        json = movie.json()
+    for item in source:
+        json = item.json()
         data.append({
-            "_id": movie.id,
-            "_index": "movies",
+            "_id": item.id,
+            "_index": index,
             "_source": json
         })
-    elastic.put_data(data)
+    etl_save.put_data(db_config.ELASTIC_CON, data)
 
 
 if __name__ == '__main__':
