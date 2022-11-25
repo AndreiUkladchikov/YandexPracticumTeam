@@ -1,5 +1,5 @@
 from typing import Optional
-from elasticsearch_async import AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch
 
 es: Optional[AsyncElasticsearch] = None
 
