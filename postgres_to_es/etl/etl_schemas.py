@@ -102,7 +102,7 @@ movies = {
                     "id": {
                         "type": "keyword"
                     },
-                    "name": {
+                    "full_name": {
                         "type": "text",
                         "analyzer": "ru_en"
                     }
@@ -115,7 +115,7 @@ movies = {
                     "id": {
                         "type": "keyword"
                     },
-                    "name": {
+                    "full_name": {
                         "type": "text",
                         "analyzer": "ru_en"
                     }
@@ -128,7 +128,7 @@ movies = {
                     "id": {
                         "type": "keyword"
                     },
-                    "name": {
+                    "full_name": {
                         "type": "text",
                         "analyzer": "ru_en"
                     }
