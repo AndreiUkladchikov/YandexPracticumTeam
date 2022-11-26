@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-from functools import lru_cache
-from typing import Optional
-
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
@@ -10,9 +7,9 @@ from fastapi import Depends
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.person import PersonDetailed
-from services.film import FilmService
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 1  # секунда
+
+FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # секунда
 
 
 class PersonService:
@@ -32,10 +29,10 @@ class PersonService:
 
     async def _get_person_from_elastic(self, person_id: str) -> PersonDetailed | None:
         try:
-            doc = await self.elastic.get(index='persons', id=person_id)
+            doc = await self.elastic.get(index="persons", id=person_id)
         except NotFoundError:
             return None
-        return PersonDetailed(**doc['_source'])
+        return PersonDetailed(**doc["_source"])
 
     async def _person_from_cache(self, person_id: str) -> PersonDetailed | None:
         data = await self.redis.get(person_id)
@@ -45,11 +42,13 @@ class PersonService:
         return person
 
     async def _put_person_to_cache(self, person: PersonDetailed):
-        await self.redis.set(person.id, person.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
+        await self.redis.set(
+            person.id, person.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS
+        )
 
 
 def get_person_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    redis: Redis = Depends(get_redis),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> PersonService:
     return PersonService(redis, elastic)

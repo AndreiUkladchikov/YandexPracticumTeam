@@ -10,7 +10,7 @@ def orjson_dumps(v, *, default):
 
 class Person(BaseModel):
     id: str
-    full_name: str | None
+    full_name: str
 
     class Config:
         json_loads = orjson.loads

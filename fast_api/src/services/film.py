@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-from functools import lru_cache
-from typing import Optional
-
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
@@ -37,11 +34,11 @@ class FilmService:
 
     async def _get_film_from_elastic(self, film_id: str) -> Film | None:
         try:
-            doc = await self.elastic.get(index='movies', id=film_id)
-            print(doc['_source'])
+            doc = await self.elastic.get(index="movies", id=film_id)
         except NotFoundError:
             return None
-        return Film(**doc['_source'])
+        print(doc["_source"])
+        return Film(**doc["_source"])
 
     async def _film_from_cache(self, film_id: str) -> Film | None:
         # Пытаемся получить данные о фильме из кеша, используя команду get
@@ -61,7 +58,9 @@ class FilmService:
         # pydantic позволяет сериализовать модель в json
         await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
-    async def get_films_by_person(self, person_detailed: PersonDetailed) -> list[Film] | None:
+    async def get_films_by_person(
+        self, person_detailed: PersonDetailed
+    ) -> list[Film] | None:
         films: list[Film] = []
 
         for film_id in person_detailed.actor_in:
@@ -78,7 +77,7 @@ class FilmService:
 
 
 def get_film_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    redis: Redis = Depends(get_redis),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> FilmService:
     return FilmService(redis, elastic)
