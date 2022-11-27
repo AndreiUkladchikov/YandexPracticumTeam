@@ -6,9 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from services.genre import GenreService, get_genre_service
 
-from api.v1.schema import Genre
+from api.models.models import Genre
 
 router = APIRouter()
+
+# ToDo: Genre model from Elastic should map to response Genre model
 
 
 @router.get("/", response_model=list[Genre])
