@@ -7,20 +7,21 @@ from fastapi import APIRouter, Depends, HTTPException
 from services.person import PersonService, get_person_service
 from services.film import FilmService, get_film_service
 
-from api.v1.schema import PersonDetailed, Film
+from api.models.models import Film, Person
 
 router = APIRouter()
 
+# ToDo: Person model from Elastic should map to response Person model
 
-@router.get("/{person_id}", response_model=PersonDetailed)
+
+@router.get("/{person_id}", response_model=Person)
 async def person_details(
     person_id: str, person_service: PersonService = Depends(get_person_service)
-) -> PersonDetailed:
+) -> Person:
     person = await person_service.get_by_id(person_id)
     if not person:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="person not found")
-
-    return PersonDetailed(**person.dict())
+    return Person(**person.dict())
 
 
 @router.get("/{person_id}/film", response_model=list[Film])
