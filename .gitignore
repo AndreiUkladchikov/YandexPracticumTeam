@@ -4,6 +4,7 @@ postgres_to_es/state.json
 postgres_to_es/typing_extensions.py
 fast_api/src/typing_extensions.py
 commands.txt
+db_create/.env
 
 # Byte-compiled / optimized / DLL files
 **/__pycache__
