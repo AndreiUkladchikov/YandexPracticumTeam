@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch, exceptions
 import config.db_config as db_config
 import etl.etl_schemas as etl_schemas
 
-es = Elasticsearch(db_config.ELASTIC_CON, timeout=300)
+es = Elasticsearch(db_config.ELASTIC_CON)
 
 
 def main() -> None:

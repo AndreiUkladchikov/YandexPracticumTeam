@@ -6,7 +6,7 @@ import psycopg2
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import NamedTupleCursor
 
-from models import Movie, PersonTypes, Person, NestedModel
+from models import Movie, PersonTypes, Person, NestedModel, NestedModelPerson
 
 
 def load_film_works(conn: _connection, date: datetime, offset: int, limit: int) -> list[Movie]:
@@ -72,13 +72,13 @@ def load_film_works(conn: _connection, date: datetime, offset: int, limit: int) 
                     )
                 if film.role == PersonTypes.DIRECTOR:
                     movies[film.id].director = film.full_name
-                    movies[film.id].directors = [NestedModel(id=film.person_id, name=film.full_name)]
+                    movies[film.id].directors = [NestedModelPerson(id=film.person_id, full_name=film.full_name)]
                 elif film.role == PersonTypes.ACTOR and film.full_name not in movies[film.id].actors_names:
                     movies[film.id].actors_names.extend([film.full_name])
-                    movies[film.id].actors.extend([NestedModel(id=film.person_id, name=film.full_name)])
+                    movies[film.id].actors.extend([NestedModelPerson(id=film.person_id, full_name=film.full_name)])
                 elif film.role == PersonTypes.WRITER and film.full_name not in movies[film.id].writers_names:
                     movies[film.id].writers_names.extend([film.full_name])
-                    movies[film.id].writers.extend([NestedModel(id=film.person_id, name=film.full_name)])
+                    movies[film.id].writers.extend([NestedModelPerson(id=film.person_id, full_name=film.full_name)])
                 if film.genre_name not in movies[film.id].genre:
                     movies[film.id].genre.extend([film.genre_name])
                     movies[film.id].genres.extend([NestedModel(id=film.genre_id, name=film.genre_name)])
@@ -86,6 +86,7 @@ def load_film_works(conn: _connection, date: datetime, offset: int, limit: int) 
         return movies_list
     except (psycopg2.Error) as error:
         logging.error(error)
+        print(error)
 
 
 def load_genres(conn: _connection, date: datetime, offset: int, limit: int) -> list[NestedModel]:

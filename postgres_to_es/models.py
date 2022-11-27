@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from enum import Enum
 
@@ -16,6 +18,10 @@ class NestedModel(BaseModel):
     id: uuid.UUID
     name: str
 
+
+class NestedModelPerson(BaseModel):
+    id: uuid.UUID
+    full_name: str
 
 class Movie(BaseModel):
     id: uuid.UUID
