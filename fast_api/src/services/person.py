@@ -18,13 +18,12 @@ class PersonService:
         self.elastic = elastic
 
     async def get_by_id(self, person_id: str) -> Person | None:
-        # person = await self._person_from_cache(person_id)
-        person = None
+        person = await self._person_from_cache(person_id)
         if not person:
             person = await self._get_person_from_elastic(person_id)
             if not person:
                 return None
-            # await self._put_person_to_cache(person)
+            await self._put_person_to_cache(person)
 
         return person
 
