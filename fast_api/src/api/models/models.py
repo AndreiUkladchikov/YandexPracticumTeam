@@ -2,17 +2,15 @@ from enum import Enum
 
 import orjson
 
-# Используем pydantic для упрощения работы при перегонке данных из json в объекты
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator, root_validator
 
 
 def orjson_dumps(v, *, default):
-    # orjson.dumps возвращает bytes, а pydantic требует unicode, поэтому декодируем
     return orjson.dumps(v, default=default).decode()
 
 
 class Genre(BaseModel):
-    uuid: str = Field(alias='id')  # в ES у нас id вместо uuid
+    uuid: str = Field(alias='id')
     name: str
 
     class Config:
@@ -26,10 +24,18 @@ class PersonRole(str, Enum):
     director = 'director'
 
 
-class Person(BaseModel):
-    uuid: str = Field(alias='id')  # в ES у нас id вместо uuid
+class PersonShortInfo(BaseModel):
+    uuid: str = Field(alias='id')
     full_name: str
-    role: PersonRole | None
+
+    class Config:
+        use_enum_values = True
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps
+
+
+class PersonDetailedInfo(PersonShortInfo):
+    roles: list[PersonRole] | None
     film_ids: list[str] | None
 
     class Config:
@@ -38,15 +44,22 @@ class Person(BaseModel):
         json_dumps = orjson_dumps
 
 
-class Film(BaseModel):
-    uuid: str = Field(alias='id')  # в ES у нас id вместо uuid
+class FilmShortInfo(BaseModel):
+    uuid: str = Field(alias='id')
     title: str
     imdb_rating: float
-    description: str | None
-    genres: list[Genre] | None
-    actors: list[Person] | None
-    writers: list[Person] | None
-    directors: list[Person] | None
+
+    class Config:
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps
+
+
+class FilmDetailedInfo(FilmShortInfo):
+    description: str
+    genres: list[Genre]
+    actors: list[PersonShortInfo]
+    directors: list[PersonShortInfo]
+    writers: list[PersonShortInfo]
 
     class Config:
         json_loads = orjson.loads

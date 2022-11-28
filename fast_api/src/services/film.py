@@ -7,7 +7,7 @@ from fastapi import Depends
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.film import Film
-from models.person import PersonDetailed
+from models.person import Person
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 1  # 5 минут
 
@@ -20,7 +20,7 @@ class FilmService:
     # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
     async def get_by_id(self, film_id: str) -> Film | None:
         # Пытаемся получить данные из кеша, потому что оно работает быстрее
-        film = await self._film_from_cache(film_id)
+        film = None
         if not film:
             # Если фильма нет в кеше, то ищем его в Elasticsearch
             film = await self._get_film_from_elastic(film_id)
@@ -28,7 +28,7 @@ class FilmService:
                 # Если он отсутствует в Elasticsearch, значит, фильма вообще нет в базе
                 return None
             # Сохраняем фильм  в кеш
-            await self._put_film_to_cache(film)
+            # await self._put_film_to_cache(film)
 
         return film
 
@@ -37,7 +37,6 @@ class FilmService:
             doc = await self.elastic.get(index="movies", id=film_id)
         except NotFoundError:
             return None
-        print(doc["_source"])
         return Film(**doc["_source"])
 
     async def _film_from_cache(self, film_id: str) -> Film | None:
@@ -59,12 +58,11 @@ class FilmService:
         await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
     async def get_films_by_person(
-        self, person_detailed: PersonDetailed
+        self, person_detailed: Person
     ) -> list[Film] | None:
         films: list[Film] = []
 
         for film_id in person_detailed.actor_in:
-            print(film_id)
             films.append(await self.get_by_id(film_id))
 
         for film_id in person_detailed.writer_in:
@@ -74,6 +72,21 @@ class FilmService:
             films.append(await self.get_by_id(film_id))
 
         return films
+
+    async def get_films_main_page(self, field: str) -> list[Film]:
+        order = "desc" if field[0] == '-' else "asc"
+        field = field.lstrip('-')
+        films = await self.elastic.search(
+            index="movies",
+            sort=[
+                {
+                    field: {
+                        "order": order
+                    }
+                }
+            ]
+        )
+        return [Film(**film["_source"]) for film in films.body["hits"]["hits"]]
 
 
 def get_film_service(
