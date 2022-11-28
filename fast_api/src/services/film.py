@@ -7,7 +7,6 @@ from fastapi import Depends
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.film import Film
-from models.person import PersonDetailed
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 1  # 5 минут
 
@@ -37,7 +36,6 @@ class FilmService:
             doc = await self.elastic.get(index="movies", id=film_id)
         except NotFoundError:
             return None
-        print(doc["_source"])
         return Film(**doc["_source"])
 
     async def _film_from_cache(self, film_id: str) -> Film | None:
@@ -57,23 +55,6 @@ class FilmService:
         # https://redis.io/commands/set
         # pydantic позволяет сериализовать модель в json
         await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
-
-    async def get_films_by_person(
-        self, person_detailed: PersonDetailed
-    ) -> list[Film] | None:
-        films: list[Film] = []
-
-        for film_id in person_detailed.actor_in:
-            print(film_id)
-            films.append(await self.get_by_id(film_id))
-
-        for film_id in person_detailed.writer_in:
-            films.append(await self.get_by_id(film_id))
-
-        for film_id in person_detailed.director_in:
-            films.append(await self.get_by_id(film_id))
-
-        return films
 
 
 def get_film_service(

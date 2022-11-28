@@ -9,7 +9,7 @@ from db.redis import get_redis
 from models.person import PersonDetailed
 
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # секунда
+FILM_CACHE_EXPIRE_IN_SECONDS = 5  # секунда
 
 
 class PersonService:
