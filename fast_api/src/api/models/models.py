@@ -1,3 +1,5 @@
+from __future__ import annotations  # Для обратной совместимости с 3.8 и ниже
+
 from enum import Enum
 
 import orjson

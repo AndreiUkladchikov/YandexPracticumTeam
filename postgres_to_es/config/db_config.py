@@ -2,8 +2,8 @@ import os
 from pydantic import BaseSettings, Field
 
 # For local debug
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 
 STATE_CON = os.environ.get('STATE_CON', 'state.json')
