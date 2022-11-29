@@ -5,6 +5,7 @@ import uvicorn
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi_pagination import add_pagination
 
 from api.v1 import films, genres, persons
 from core import config
@@ -19,6 +20,8 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     default_response_class=ORJSONResponse,
 )
+
+add_pagination(app)
 
 
 @app.on_event("startup")

@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
@@ -16,6 +15,7 @@ class PersonService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
+        self.index = "persons"
 
     async def get_by_id(self, person_id: str) -> PersonDetailed | None:
         person = await self._person_from_cache(person_id)
@@ -45,6 +45,19 @@ class PersonService:
         await self.redis.set(
             person.id, person.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS
         )
+
+    async def search(self, query: str) -> list[PersonDetailed]:
+        body = {
+            "match": {
+                "full_name": {
+                    "query": query,
+                    "fuzziness": "auto"
+                }
+            }
+        }
+        persons = await self.elastic.search(index=self.index, query=body, size=10000)
+
+        return [PersonDetailed(**p['_source']) for p in persons['hits']['hits']]
 
 
 def get_person_service(
