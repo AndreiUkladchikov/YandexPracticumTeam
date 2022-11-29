@@ -8,6 +8,7 @@ from db.redis import get_redis
 from models.person import PersonDetailed
 
 FILM_CACHE_EXPIRE_IN_SECONDS = 5  # секунда
+MAX_SIZE_FROM_ELASTIC = 10000
 
 
 class PersonService:
@@ -54,7 +55,7 @@ class PersonService:
                 }
             }
         }
-        persons = await self.elastic.search(index=self.index, query=body, size=10000)
+        persons = await self.elastic.search(index=self.index, query=body, size=MAX_SIZE_FROM_ELASTIC)
 
         return [PersonDetailed(**p['_source']) for p in persons['hits']['hits']]
 
