@@ -18,8 +18,8 @@ router = APIRouter()
 @router.get("/search", response_model=Page[PersonExtended])
 async def person_details(
     query: str,
-    page_number: int | None = Query(alias="page[number]", ge=1),
-    page_size: int | None = Query(alias="page[size]", ge=1),
+    page_number: int | None = Query(alias="page[number]", ge=1, default=1),
+    page_size: int | None = Query(alias="page[size]", ge=1, default=50),
     person_service: PersonService = Depends(get_person_service),
 ):
     persons = await person_service.search(query)
@@ -53,7 +53,7 @@ async def movies_by_person(
     return films
 
 
-# где расположить?
+# TODO где расположить?
 async def films_by_id(person: PersonExtended, film_service: FilmService) -> list[Film]:
     films: list[Film] = []
     for ids in person.film_ids:

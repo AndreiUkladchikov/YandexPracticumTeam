@@ -10,6 +10,7 @@ from models.genre import Genre
 
 
 GENRE_CACHE_EXPIRE_IN_SECONDS = 5  # 5 минут
+MAX_SIZE_FROM_ELASTIC = 10000
 
 
 class GenreService:
@@ -25,7 +26,7 @@ class GenreService:
 
     async def _get_genres_from_elastic(self) -> list[Genre] | None:
         try:
-            doc = await self.elastic.search(index="genres")
+            doc = await self.elastic.search(index="genres", size=MAX_SIZE_FROM_ELASTIC)
         except NotFoundError:
             return None
         return [Genre(**genre["_source"]) for genre in doc.body["hits"]["hits"]]
