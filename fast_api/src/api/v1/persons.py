@@ -8,6 +8,7 @@ from services.person import PersonService, get_person_service
 from services.film import FilmService, get_film_service
 
 from api.models.models import PersonDetailedInfo, FilmShortInfo
+from services.transformation import person_transformation
 
 router = APIRouter()
 
@@ -21,7 +22,7 @@ async def person_details(
     person = await person_service.get_by_id(person_id)
     if not person:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="person not found")
-    return PersonDetailedInfo(**person.dict())
+    return person_transformation(person)
 
 
 @router.get("/{person_id}/film", response_model=list[FilmShortInfo])

@@ -3,6 +3,7 @@ from __future__ import annotations
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Query
 
 from api.models.models import FilmShortInfo, FilmDetailedInfo
 from services.film import FilmService, get_film_service
@@ -12,9 +13,10 @@ router = APIRouter()
 # ToDo: Genre model from Elastic should map to response Genre model
 
 
-@router.get("/", response_model=list[FilmShortInfo])
+@router.get("", response_model=list[FilmShortInfo])
 async def film_main_page(
-        sort: str, film_service: FilmService = Depends(get_film_service)
+        sort: str = Query(default='imdb_rating', regex="^imdb_rating$"),
+        film_service: FilmService = Depends(get_film_service)
 ) -> list[FilmShortInfo]:
     films = await film_service.get_films_main_page(sort)
     return [FilmShortInfo(**film.dict()) for film in films]

@@ -18,17 +18,9 @@ class PersonShortInfo(BaseModel):
 
 
 class Person(PersonShortInfo):
-    actor_in: list[str] | None
-    director_in: list[str] | None
-    writer_in: list[str] | None
-    roles: list[str] | None
-    film_ids: list[str] | None
-
-    @root_validator
-    def set_film_ids_and_roles(cls, values):
-        values['roles'] = [key[:-3] for key in values.keys() if key.endswith('_in')]
-        values['film_ids'] = set(values['actor_in'] + values['director_in'] + values['writer_in'])
-        return values
+    actor_in: list[str]
+    writer_in: list[str]
+    director_in: list[str]
 
     class Config:
         json_loads = orjson.loads
