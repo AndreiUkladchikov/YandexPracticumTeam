@@ -1,11 +1,47 @@
 version: '3.8'
 services:
+  redis:
+    image: redis:7.0.5
+    ports:
+      - 6379:6379
   fast_api:
-    # Запуск Fast API
+    build: fast_api
+    # restart: always
+    container_name: fast_api_container
+    depends_on:
+      - elastic
+      - redis
+    ports:
+      - 8008:8008
   etl:
-    # Запуск ETL
+    build: postgres_to_es
+    # restart: always
+    container_name: etl_container
+    env_file:
+      - docker-settings.env
+    depends_on:
+      - db
+      - elastic
   elastic:
-    # Запуск Elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.0
+    container_name: elastic
+    environment:
+      - node.name=es01
+      - cluster.name=elastic-cluster
+      - cluster.initial_master_nodes=es01
+      - bootstrap.memory_lock=false
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - 9200:9200
+    volumes: 
+      - data:/usr/share/elasticsearch
   db:
     image: postgres:14
     container_name: db

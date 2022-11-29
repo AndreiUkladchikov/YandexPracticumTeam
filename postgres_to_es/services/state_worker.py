@@ -45,5 +45,6 @@ def get_next_state(state: State) -> State:
         state.index = Indexes.PERSONS.value
     else:
         state.is_finished = True
+        state.last_update = datetime.datetime.now()
     state.last_row = 0
     return state

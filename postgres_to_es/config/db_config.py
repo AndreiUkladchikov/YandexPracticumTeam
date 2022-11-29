@@ -6,17 +6,17 @@ from pydantic import BaseSettings, Field
 # load_dotenv()
 
 
-STATE_CON = os.environ.get('STATE_CON', 'state.json')
+STATE_CON = os.environ.get('STATE_CON')
 
-ELASTIC_CON = os.environ.get('ELASTIC_CON', 'http://localhost:9200')
+ELASTIC_CON = os.environ.get('ELASTIC_CON')
 
 
 class PostgresSettings(BaseSettings):
-    dbname: str = Field(default="movies_database")
-    user: str = Field(default="app")
-    password: str = Field(default="123qwe")
-    host: str = Field(default="localhost")
-    port: str = Field(default="5432")
+    dbname: str = Field(default=os.environ.get('DB_NAME'))
+    user: str = Field(default=os.environ.get('POSTGRES_USER'))
+    password: str = Field(default=os.environ.get('POSTGRES_PASSWORD'))
+    host: str = Field(default=os.environ.get('DB_HOST'))
+    port: str = Field(default=os.environ.get('DB_PORT'))
 
     class Config:
         env_file = '.env'

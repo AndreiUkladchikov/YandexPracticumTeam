@@ -9,8 +9,11 @@
 - ETL
 - Fast API
 - Elasticsearch
+- Redis
 
-После запуска контейнеров:
+Как запустить:
+- docker-compose build
+- docker-compose -f docker-compose.yml up -d
 - Создать базу: python db_create/create_pgdb.py
 - Заполнить базу данными из sqlite: python db_create/main.py
-- создать схемы для ETL: python postgres_to_es/create_etl.py
+- перезапустить ETL container
