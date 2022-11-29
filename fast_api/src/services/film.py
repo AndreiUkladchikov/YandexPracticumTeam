@@ -56,6 +56,21 @@ class FilmService:
         # pydantic позволяет сериализовать модель в json
         await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
+    async def get_films_main_page(self, field: str) -> list[Film]:
+        order = "desc" if field[0] == '-' else "asc"
+        field = field.lstrip('-')
+        films = await self.elastic.search(
+            index="movies",
+            sort=[
+                {
+                    field: {
+                        "order": order
+                    }
+                }
+            ]
+        )
+        return [Film(**film["_source"]) for film in films.body["hits"]["hits"]]
+
 
 def get_film_service(
     redis: Redis = Depends(get_redis),

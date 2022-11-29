@@ -7,7 +7,6 @@ from db.elastic import get_elastic
 from db.redis import get_redis
 from models.person import PersonDetailed
 
-
 FILM_CACHE_EXPIRE_IN_SECONDS = 5  # секунда
 
 
@@ -29,7 +28,7 @@ class PersonService:
 
     async def _get_person_from_elastic(self, person_id: str) -> PersonDetailed | None:
         try:
-            doc = await self.elastic.get(index="persons", id=person_id)
+            doc = await self.elastic.get(index=self.index, id=person_id)
         except NotFoundError:
             return None
         return PersonDetailed(**doc["_source"])
