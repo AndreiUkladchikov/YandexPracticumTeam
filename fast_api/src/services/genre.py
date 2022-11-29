@@ -9,7 +9,7 @@ from db.redis import get_redis
 from models.genre import Genre
 
 
-GENRE_CACHE_EXPIRE_IN_SECONDS = 60 * 5  # 5 минут
+GENRE_CACHE_EXPIRE_IN_SECONDS = 5  # 5 минут
 
 
 class GenreService:
