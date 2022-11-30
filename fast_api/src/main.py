@@ -8,11 +8,10 @@ from fastapi.responses import ORJSONResponse
 from fastapi_pagination import add_pagination
 
 from api.v1 import films, genres, persons
-from core import config
+from core.config import settings
 from core.logger import LOGGING
 from db import elastic, redis
 
-settings = config.Settings()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -53,3 +52,4 @@ if __name__ == "__main__":
         host=str(settings.BACKEND_HOST),
         port=settings.BACKEND_PORT,
     )
+

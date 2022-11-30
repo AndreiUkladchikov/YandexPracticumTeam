@@ -16,7 +16,8 @@ def main() -> None:
 
 def create_movies() -> None:
     try:
-        movies = etl_schemas.settings.update(etl_schemas.movies)
+        movies = etl_schemas.settings
+        movies.update(etl_schemas.movies)
         es.indices.create(index='movies', body=movies)
     except exceptions.RequestError:
         logging.exception('Cannot create MOVIES schema')
@@ -24,7 +25,8 @@ def create_movies() -> None:
 
 def create_genres() -> None:
     try:
-        genres = etl_schemas.settings.update(etl_schemas.genres)
+        genres = etl_schemas.settings
+        genres.update(etl_schemas.genres)
         es.indices.create(index='genres', body=genres)
     except exceptions.RequestError:
         logging.exception('Cannot create GENRES schema')
@@ -32,7 +34,8 @@ def create_genres() -> None:
 
 def create_persons() -> None:
     try:
-        persons = etl_schemas.settings.update(etl_schemas.persons)
+        persons = etl_schemas.settings
+        persons.update(etl_schemas.persons)
         es.indices.create(index='persons', body=persons)
     except exceptions.RequestError:
         logging.exception('Cannot create PERSONS schema')
