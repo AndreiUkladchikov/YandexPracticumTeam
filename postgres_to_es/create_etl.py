@@ -9,6 +9,10 @@ es = Elasticsearch(db_config.ELASTIC_CON)
 
 
 def main() -> None:
+    create_indexes()
+
+
+def create_indexes() -> None:
     create_movies()
     create_genres()
     create_persons()

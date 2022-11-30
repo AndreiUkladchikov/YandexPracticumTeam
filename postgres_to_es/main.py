@@ -11,6 +11,7 @@ import postgres.pg_context as pg_context
 import services.state_worker as state_worker
 from config.config_models import State, Indexes
 import config.db_config as db_config
+from create_etl import create_indexes
 
 
 """
@@ -42,6 +43,8 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, exception: Exc
 
 
 def main():
+    # Create indexes
+    create_indexes()
     logging.info('Service started')
     state = state_worker.get_state(db_config.STATE_CON)
     if state.is_finished is True:

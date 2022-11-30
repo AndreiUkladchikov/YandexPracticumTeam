@@ -14,6 +14,8 @@
 Как запустить:
 - docker-compose build
 - docker-compose -f docker-compose.yml up -d
+
+Запустить в виртуальном окружение (requirements.txt внутри папки):
 - Создать базу: python db_create/create_pgdb.py
 - Заполнить базу данными из sqlite: python db_create/main.py
 - перезапустить ETL container
