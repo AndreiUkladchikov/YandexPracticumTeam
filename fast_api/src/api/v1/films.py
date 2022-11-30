@@ -5,7 +5,7 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.models.models import FilmExtended, Film
-from main import settings
+from core.config import settings
 from services.film import FilmService, get_film_service
 
 router = APIRouter()
@@ -15,7 +15,7 @@ router = APIRouter()
 async def films_main_page(
         sort: str = Query(default='-imdb_rating', regex="^-?imdb_rating$"),
         page_number: int | None = Query(default=1, alias="page[number]", ge=1),
-        page_size: int | None = Query(default=settings.PAGINATION_SIZE, alias="page[size]", ge=1),
+        page_size: int | None = Query(default=int(settings.PAGINATION_SIZE), alias="page[size]", ge=1),
         genre: str | None = Query(None, alias="filter[genre]"),
         film_service: FilmService = Depends(get_film_service)
 ) -> list[Film]:
@@ -28,7 +28,7 @@ async def films_main_page(
 async def search_films(
         query: str,
         page_number: int | None = Query(default=1, alias="page[number]", ge=1),
-        page_size: int | None = Query(default=settings.PAGINATION_SIZE, alias="page[size]", ge=1),
+        page_size: int | None = Query(default=int(settings.PAGINATION_SIZE), alias="page[size]", ge=1),
         film_service: FilmService = Depends(get_film_service)
 ) -> list[Film]:
 
