@@ -15,6 +15,7 @@ class FilmService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
+        self.index = "movies"
 
     # get_by_id возвращает объект фильма. Он опционален, так как фильм может отсутствовать в базе
     async def get_by_id(self, film_id: str) -> Film | None:
@@ -55,6 +56,62 @@ class FilmService:
         # https://redis.io/commands/set
         # pydantic позволяет сериализовать модель в json
         await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
+
+    async def get_films_main_page(self, field: str, genre: str, page_number: int, page_size: int) -> list[Film]:
+        order = "desc" if field[0] == '-' else "asc"
+        field = field.lstrip('-')
+        body = {
+            "sort": [{
+                field: {
+                    "order": order
+                }
+            }]
+        }
+        if genre:
+            filter_by_genre = {
+                "query": {
+                    "bool": {
+                        "filter": {
+                            "nested": {
+                                "path": "genres",
+                                "query": {
+                                    "term": {
+                                        "genres.id": genre
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            body.update(filter_by_genre)
+
+        films = await self.elastic.search(
+            index=self.index,
+            body=body,
+            from_=(page_number - 1) * page_size,
+            size=page_size
+        )
+        return [Film(**film["_source"]) for film in films["hits"]["hits"]]
+
+    async def search(self, query: str, page_number: int, page_size: int) -> list[Film]:
+        body = {
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": [
+                        "title^6", "description^5", "genre^4", "actors_names^3", "writers_names^2", "director"
+                    ]
+                }
+            }
+        }
+        films = await self.elastic.search(
+            index=self.index,
+            body=body,
+            from_=(page_number - 1) * page_size,
+            size=page_size
+        )
+        return [Film(**film["_source"]) for film in films["hits"]["hits"]]
 
 
 def get_film_service(

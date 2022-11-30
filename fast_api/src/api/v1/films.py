@@ -2,19 +2,44 @@ from __future__ import annotations
 
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException
-from api.models.models import FilmExtended
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from api.models.models import FilmExtended, Film
 from services.film import FilmService, get_film_service
 
 router = APIRouter()
 
-# ToDo: Genre model from Elastic should map to response Genre model
+
+@router.get("", response_model=list[Film])
+async def films_main_page(
+        sort: str = Query(default='-imdb_rating', regex="^-?imdb_rating$"),
+        page_number: int | None = Query(alias="page[number]", ge=1),
+        page_size: int | None = Query(alias="page[size]", ge=1),
+        genre: str | None = Query(None, alias="filter[genre]"),
+        film_service: FilmService = Depends(get_film_service)
+) -> list[Film]:
+
+    films = await film_service.get_films_main_page(sort, genre, page_number, page_size)
+    return [Film(**film.dict()) for film in films]
 
 
-@router.get("/{film_id}", response_model=FilmExtended)
+@router.get("/search", response_model=list[Film])
+async def search_films(
+        query: str,
+        page_number: int | None = Query(alias="page[number]", ge=1),
+        page_size: int | None = Query(alias="page[size]", ge=1),
+        film_service: FilmService = Depends(get_film_service)
+) -> list[Film]:
+
+    films = await film_service.search(query, page_number, page_size)
+    return [Film(**film.dict()) for film in films]
+
+
+@router.get("/{film_id}/", response_model=FilmExtended)
 async def film_details(
     film_id: str, film_service: FilmService = Depends(get_film_service)
 ) -> FilmExtended:
+
     film = await film_service.get_by_id(film_id)
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="film not found")

@@ -46,7 +46,7 @@ class PersonExtended(Person):
 class Film(BaseModel):
     uuid: str = Field(alias='id')  # в ES у нас id вместо uuid
     title: str
-    imdb_rating: float
+    imdb_rating: float | None
 
     class Config:
         json_loads = orjson.loads
