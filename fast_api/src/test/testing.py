@@ -54,6 +54,15 @@ class TestGenre(unittest.TestCase):
             {"id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff", "name": "Action"},
         )
 
+    def test_genres_with_paging(self):
+        page_size = 3
+        page_number = 2
+        response = requests.get(
+            self.baseurl + f"/?page[number]={page_number}&page[size]={page_size}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertLessEqual(len(response.json()), page_size)
+
 
 class TestPerson(unittest.TestCase):
     def setUp(self) -> None:
@@ -66,8 +75,8 @@ class TestPerson(unittest.TestCase):
         query = "Phillip"
         response = requests.get(self.baseurl + f"/search?query={query}")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.json()["total"], 6)
+        # self.assertEqual(
+        #     response.json()["total"], 6)
 
     def test_person_search_with_paging(self):
         query = "Phillip"
@@ -78,10 +87,7 @@ class TestPerson(unittest.TestCase):
             + f"/search?query={query}&page[number]={page_number}&page[size]={page_size}"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["total"], 6)
-        self.assertEqual(response.json()["page"], page_number)
-        self.assertEqual(response.json()["size"], page_size)
-
+        self.assertLessEqual(len(response.json()), page_size)
 
     def test_specific_person(self):
         person_id = "51ab9a43-7d80-45f5-95cf-dcf9abd19980"
@@ -111,3 +117,44 @@ class TestPerson(unittest.TestCase):
                 }
             ],
         )
+
+
+class TestFilms(unittest.TestCase):
+    def setUp(self) -> None:
+        settings = config.Settings()
+        self.baseurl = (
+            f"http://{settings.BACKEND_HOST}:{settings.BACKEND_PORT}/api/v1/films"
+        )
+
+    def test_films_main_page(self):
+        response = requests.get(self.baseurl + f"/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_films_sort_rating_desc(self):
+        response = requests.get(self.baseurl + f"/?sort=-imdb_rating")
+        if response.json()[0].get("imdb_rating") and response.json()[-1].get(
+            "imdb_rating"
+        ):
+            self.assertLessEqual(
+                response.json()[-1]["imdb_rating"], response.json()[0]["imdb_rating"]
+            )
+
+    def test_films_sort_rating_asc(self):
+        response = requests.get(self.baseurl + f"/?sort=imdb_rating")
+        if response.json()[0].get("imdb_rating") and response.json()[-1].get(
+            "imdb_rating"
+        ):
+            self.assertLessEqual(
+                response.json()[0]["imdb_rating"], response.json()[-1]["imdb_rating"]
+            )
+
+    def test_film_search_with_paging(self):
+        query = "Phillip"
+        page_size = 1
+        page_number = 2
+        response = requests.get(
+            self.baseurl
+            + f"/search?query={query}&page[number]={page_number}&page[size]={page_size}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertLessEqual(len(response.json()), page_size)

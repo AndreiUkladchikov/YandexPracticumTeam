@@ -6,9 +6,9 @@ from fastapi import Depends
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.person import PersonDetailed
+from core.config import settings
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 5  # секунда
-MAX_SIZE_FROM_ELASTIC = 10000
+FILM_CACHE_EXPIRE_IN_SECONDS = settings.CACHE_EXPIRE_IN_SECONDS
 
 
 class PersonService:
@@ -46,18 +46,23 @@ class PersonService:
             person.id, person.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS
         )
 
-    async def search(self, query: str) -> list[PersonDetailed]:
+    async def search(
+        self, query: str, page_number: int, page_size: int
+    ) -> list[PersonDetailed] | None:
         body = {
-            "match": {
-                "full_name": {
-                    "query": query,
-                    "fuzziness": "auto"
-                }
-            }
+            "query": {"match": {"full_name": {"query": query, "fuzziness": "auto"}}}
         }
-        persons = await self.elastic.search(index=self.index, query=body, size=MAX_SIZE_FROM_ELASTIC)
+        try:
+            persons = await self.elastic.search(
+                index=self.index,
+                body=body,
+                from_=(page_number - 1) * page_size,
+                size=page_size,
+            )
+        except NotFoundError:
+            return None
 
-        return [PersonDetailed(**p['_source']) for p in persons['hits']['hits']]
+        return [PersonDetailed(**p["_source"]) for p in persons["hits"]["hits"]]
 
 
 def get_person_service(
