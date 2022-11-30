@@ -27,3 +27,6 @@ class Settings(BaseSettings):
 
     BACKEND_HOST: IPv4Address = Field(default="0.0.0.0")
     BACKEND_PORT: int = Field(default=8008)
+
+    PAGINATION_SIZE: str = Field(default=os.environ.get('PAGINATION_SIZE'))
+
