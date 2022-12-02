@@ -1,8 +1,10 @@
 import os
-from pydantic import BaseSettings, Field
 from ipaddress import IPv4Address
 from logging import config as logging_config
 from pathlib import Path
+
+from pydantic import BaseSettings, Field
+
 from .logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
@@ -27,11 +29,12 @@ class Settings(BaseSettings):
 
     BACKEND_HOST: IPv4Address = Field(default="0.0.0.0")
     BACKEND_PORT: int = Field(default=8008)
+    CACHE_EXPIRE_IN_SECONDS: int = Field(default=1)
 
-    PAGINATION_SIZE: str = Field(default=os.environ.get('PAGINATION_SIZE', 50))
+    PAGINATION_SIZE: int = Field(default=50)
 
     class Config:
-        env_file = '.env'
+        env_file = ".env"
 
 
 settings = Settings()

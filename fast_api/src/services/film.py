@@ -4,11 +4,12 @@ from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
 
+from core.config import settings
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.film import Film
 
-FILM_CACHE_EXPIRE_IN_SECONDS = 1  # 5 минут
+FILM_CACHE_EXPIRE_IN_SECONDS = settings.CACHE_EXPIRE_IN_SECONDS
 
 
 class FilmService:
@@ -57,16 +58,12 @@ class FilmService:
         # pydantic позволяет сериализовать модель в json
         await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
-    async def get_films_main_page(self, field: str, genre: str, page_number: int, page_size: int) -> list[Film]:
-        order = "desc" if field[0] == '-' else "asc"
-        field = field.lstrip('-')
-        body = {
-            "sort": [{
-                field: {
-                    "order": order
-                }
-            }]
-        }
+    async def get_films_main_page(
+        self, field: str, genre: str, page_number: int, page_size: int
+    ) -> list[Film] | None:
+        order = "desc" if field[0] == "-" else "asc"
+        field = field.lstrip("-")
+        body = {"sort": [{field: {"order": order}}]}
         if genre:
             filter_by_genre = {
                 "query": {
@@ -74,11 +71,7 @@ class FilmService:
                         "filter": {
                             "nested": {
                                 "path": "genres",
-                                "query": {
-                                    "term": {
-                                        "genres.id": genre
-                                    }
-                                }
+                                "query": {"term": {"genres.id": genre}},
                             }
                         }
                     }
@@ -86,12 +79,15 @@ class FilmService:
             }
             body.update(filter_by_genre)
 
-        films = await self.elastic.search(
-            index=self.index,
-            body=body,
-            from_=(page_number - 1) * page_size,
-            size=page_size
-        )
+        try:
+            films = await self.elastic.search(
+                index=self.index,
+                body=body,
+                from_=(page_number - 1) * page_size,
+                size=page_size,
+            )
+        except NotFoundError:
+            return None
         return [Film(**film["_source"]) for film in films["hits"]["hits"]]
 
     async def search(self, query: str, page_number: int, page_size: int) -> list[Film]:
@@ -100,8 +96,13 @@ class FilmService:
                 "multi_match": {
                     "query": query,
                     "fields": [
-                        "title^6", "description^5", "genre^4", "actors_names^3", "writers_names^2", "director"
-                    ]
+                        "title^6",
+                        "description^5",
+                        "genre^4",
+                        "actors_names^3",
+                        "writers_names^2",
+                        "director",
+                    ],
                 }
             }
         }
@@ -109,7 +110,7 @@ class FilmService:
             index=self.index,
             body=body,
             from_=(page_number - 1) * page_size,
-            size=page_size
+            size=page_size,
         )
         return [Film(**film["_source"]) for film in films["hits"]["hits"]]
 

@@ -4,6 +4,7 @@ import orjson
 
 # Используем pydantic для упрощения работы при перегонке данных из json в объекты
 from pydantic import BaseModel
+
 from models.genre import Genre
 from models.person import Person
 

@@ -17,5 +17,9 @@ def person_transformation(person_from_db: PersonDetailed) -> PersonExtended:
         film_ids.add(film_id)
         person_roles.add(PersonRole.director)
 
-    return PersonExtended(id=person_from_db.id, full_name=person_from_db.full_name,
-                          role=person_roles, film_ids=film_ids)
+    return PersonExtended(
+        id=person_from_db.id,
+        full_name=person_from_db.full_name,
+        role=person_roles,
+        film_ids=film_ids,
+    )

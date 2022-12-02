@@ -14,7 +14,7 @@ def orjson_dumps(v, *, default):
 
 
 class Genre(BaseModel):
-    uuid: str = Field(alias='id')  # в ES у нас id вместо uuid
+    uuid: str = Field(alias="id")  # в ES у нас id вместо uuid
     name: str
 
     class Config:
@@ -23,13 +23,13 @@ class Genre(BaseModel):
 
 
 class PersonRole(str, Enum):
-    actor = 'actor'
-    writer = 'writer'
-    director = 'director'
+    actor = "actor"
+    writer = "writer"
+    director = "director"
 
 
 class Person(BaseModel):
-    uuid: str = Field(alias='id')  # в ES у нас id вместо uuid
+    uuid: str = Field(alias="id")  # в ES у нас id вместо uuid
     full_name: str
 
     class Config:
@@ -44,7 +44,7 @@ class PersonExtended(Person):
 
 
 class Film(BaseModel):
-    uuid: str = Field(alias='id')  # в ES у нас id вместо uuid
+    uuid: str = Field(alias="id")  # в ES у нас id вместо uuid
     title: str
     imdb_rating: float | None
 

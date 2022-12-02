@@ -2,22 +2,23 @@ from __future__ import annotations
 
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException
-
-from services.genre import GenreService, get_genre_service
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.models.models import Genre
+from core.config import settings
+from services.genre import GenreService, get_genre_service
 
 router = APIRouter()
-
-# ToDo: Genre model from Elastic should map to response Genre model
 
 
 @router.get("/", response_model=list[Genre])
 async def genre_list(
+    page_number: int | None = Query(alias="page[number]", ge=1, default=1),
+    page_size: int
+    | None = Query(alias="page[size]", ge=1, default=settings.PAGINATION_SIZE),
     film_service: GenreService = Depends(get_genre_service),
 ) -> list[Genre]:
-    genres = await film_service.get_list_genres()
+    genres = await film_service.get_list_genres(page_number, page_size)
     if not genres:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="genres not found")
     return genres

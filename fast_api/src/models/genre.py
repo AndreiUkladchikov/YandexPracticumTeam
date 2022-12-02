@@ -1,6 +1,6 @@
 from __future__ import annotations
-import orjson
 
+import orjson
 from pydantic import BaseModel
 
 
