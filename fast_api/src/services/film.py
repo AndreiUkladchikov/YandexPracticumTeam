@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import pickle
+import json
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
+from pydantic import parse_obj_as
 
 from core.config import settings
 from db.elastic import get_elastic
@@ -59,60 +62,84 @@ class FilmService:
         await self.redis.set(film.id, film.json(), expire=FILM_CACHE_EXPIRE_IN_SECONDS)
 
     async def get_films_main_page(
-        self, field: str, genre: str, page_number: int, page_size: int
+        self, url: str, field: str, genre: str, page_number: int, page_size: int
     ) -> list[Film] | None:
-        order = "desc" if field[0] == "-" else "asc"
-        field = field.lstrip("-")
-        body = {"sort": [{field: {"order": order}}]}
-        if genre:
-            filter_by_genre = {
-                "query": {
-                    "bool": {
-                        "filter": {
-                            "nested": {
-                                "path": "genres",
-                                "query": {"term": {"genres.id": genre}},
+        films_ = await self._films_from_cache(url)
+        if not films_:
+            order = "desc" if field[0] == "-" else "asc"
+            field = field.lstrip("-")
+            body = {"sort": [{field: {"order": order}}]}
+            if genre:
+                filter_by_genre = {
+                    "query": {
+                        "bool": {
+                            "filter": {
+                                "nested": {
+                                    "path": "genres",
+                                    "query": {"term": {"genres.id": genre}},
+                                }
                             }
                         }
                     }
                 }
-            }
-            body.update(filter_by_genre)
+                body.update(filter_by_genre)
 
-        try:
+            try:
+                films = await self.elastic.search(
+                    index=self.index,
+                    body=body,
+                    from_=(page_number - 1) * page_size,
+                    size=page_size,
+                )
+            except NotFoundError:
+                return None
+            films_ = [Film(**film["_source"]) for film in films["hits"]["hits"]]
+            if not films_:
+                return None
+            await self._put_films_to_cache(url, films_)
+        return films_
+
+    async def search(self, url: str,  query: str, page_number: int, page_size: int) -> list[Film] | None:
+        films_ = await self._films_from_cache(url)
+        if not films_:
+            body = {
+                "query": {
+                    "multi_match": {
+                        "query": query,
+                        "fields": [
+                            "title^6",
+                            "description^5",
+                            "genre^4",
+                            "actors_names^3",
+                            "writers_names^2",
+                            "director",
+                        ],
+                    }
+                }
+            }
             films = await self.elastic.search(
                 index=self.index,
                 body=body,
                 from_=(page_number - 1) * page_size,
                 size=page_size,
             )
-        except NotFoundError:
-            return None
-        return [Film(**film["_source"]) for film in films["hits"]["hits"]]
+            films_ = [Film(**film["_source"]) for film in films["hits"]["hits"]]
+            if not films_:
+                return None
+            await self._put_films_to_cache(url, films_)
+        return films_
 
-    async def search(self, query: str, page_number: int, page_size: int) -> list[Film]:
-        body = {
-            "query": {
-                "multi_match": {
-                    "query": query,
-                    "fields": [
-                        "title^6",
-                        "description^5",
-                        "genre^4",
-                        "actors_names^3",
-                        "writers_names^2",
-                        "director",
-                    ],
-                }
-            }
-        }
-        films = await self.elastic.search(
-            index=self.index,
-            body=body,
-            from_=(page_number - 1) * page_size,
-            size=page_size,
+    async def _films_from_cache(self, url: str) -> list[Film] | None:
+        data = await self.redis.get(url)
+        if not data:
+            return None
+        persons = parse_obj_as(list[Film], [json.loads(d) for d in pickle.loads(data)])
+        return persons
+
+    async def _put_films_to_cache(self, url: str, films: list[Film]):
+        await self.redis.set(
+            url, pickle.dumps([p.json() for p in films]), expire=FILM_CACHE_EXPIRE_IN_SECONDS
         )
-        return [Film(**film["_source"]) for film in films["hits"]["hits"]]
 
 
 def get_film_service(

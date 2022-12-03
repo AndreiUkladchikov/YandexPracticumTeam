@@ -29,7 +29,7 @@ class Settings(BaseSettings):
 
     BACKEND_HOST: IPv4Address = Field(default="0.0.0.0")
     BACKEND_PORT: int = Field(default=8008)
-    CACHE_EXPIRE_IN_SECONDS: int = Field(default=1)
+    CACHE_EXPIRE_IN_SECONDS: int = Field(default=100)
 
     PAGINATION_SIZE: int = Field(default=50)
 
