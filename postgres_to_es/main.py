@@ -11,6 +11,7 @@ import postgres.pg_context as pg_context
 import services.state_worker as state_worker
 from config.config_models import State, Indexes
 import config.db_config as db_config
+from create_etl import create_indexes
 
 
 """
@@ -19,7 +20,7 @@ limit - количество записей для загрузки пачкой
 """
 
 etl_update_frequency = 60
-limit = 20
+limit = 50
 
 
 def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, exception: Exception = None):
@@ -42,6 +43,9 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, exception: Exc
 
 
 def main():
+    # Create indexes
+    create_indexes()
+    logging.info('Service started')
     state = state_worker.get_state(db_config.STATE_CON)
     if state.is_finished is True:
         state = state_worker.refresh_state(db_config.STATE_CON, state)
@@ -58,6 +62,8 @@ def etl_worker(state: State) -> State:
         if len(data) > 0:
             save(data, state.index)
             state.last_row = state.last_row + len(data)
+            msg = str(len(data)) + ' items updated in ' + state.index
+            logging.info(msg)
         else:
             state = state_worker.get_next_state(state)
         state_worker.save_state(db_config.STATE_CON, state)

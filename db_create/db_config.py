@@ -2,7 +2,7 @@ POSTGRES_CON = {
     'dbname': 'postgres',
     'user': 'postgres',
     'password': 'postgrespw',
-    'host': 'db',
+    'host': 'localhost',
     'port': 5432
 }
 

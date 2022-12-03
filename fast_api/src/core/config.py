@@ -19,9 +19,9 @@ class Settings(BaseSettings):
     """
 
     PROJECT_NAME: str = Field(default="movies")
-    REDIS_HOST: IPv4Address = Field(default="127.0.0.1")
+    REDIS_HOST: str = Field(default="redis")
     REDIS_PORT: int = Field(default=6379)
-    ELASTIC_HOST: IPv4Address = Field(default="127.0.0.1")
+    ELASTIC_HOST: str = Field(default="elastic")
     ELASTIC_PORT: int = Field(default=9200)
     BASE_DIR: Path = Field(
         default=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

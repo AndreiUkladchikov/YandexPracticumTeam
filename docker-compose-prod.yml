@@ -36,15 +36,15 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-    ports:
-      - 9200:9200
+    expose:
+      - 9200
     volumes: 
       - etl_volume:/usr/share/elasticsearch
   db:
     image: postgres:14
     container_name: db
-    ports:
-      - 5432:5432
+    expose:
+      - 5432
     env_file:
       - docker-settings.env
     volumes:
