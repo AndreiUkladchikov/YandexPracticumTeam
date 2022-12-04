@@ -4,6 +4,9 @@
 - fast_api - задание спринта
 
 
+Настройки для compose: docker-settings-sample.env
+
+
 Все нужные сервисы собраны в одном проекте (один docker-compose):
 - Postgres
 - ETL
