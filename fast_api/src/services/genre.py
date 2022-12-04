@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import json
+import pickle
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
 from fastapi import Depends
+from pydantic import parse_obj_as
 
 from core.config import settings
 from db.elastic import get_elastic
@@ -18,10 +21,15 @@ class GenreService:
         self.elastic = elastic
         self.index = "genres"
 
-    async def get_list_genres(self, page_number, page_size) -> list[Genre] | None:
-        genres = await self._get_genres_from_elastic(page_number, page_size)
+    async def get_list_genres(self, url: str, page_number, page_size) -> list[Genre] | None:
+        print(url)
+        genres = await self._list_genres_from_cache(url)
         if not genres:
-            return None
+            genres = await self._get_genres_from_elastic(page_number, page_size)
+            if not genres:
+                return None
+            await self._put_list_genres_to_cache(url, genres)
+
         return genres
 
     async def _get_genres_from_elastic(
@@ -36,14 +44,26 @@ class GenreService:
             return None
         return [Genre(**genre["_source"]) for genre in doc.body["hits"]["hits"]]
 
-    async def get_genre_by_id(self, genre_id: str) -> Genre | None:
-        genre = await self._genre_from_cache(genre_id)
+    async def _list_genres_from_cache(self, url: str) -> list[Genre] | None:
+        data = await self.redis.get(url)
+        if not data:
+            return None
+        persons = parse_obj_as(list[Genre], [json.loads(d) for d in pickle.loads(data)])
+        return persons
+
+    async def _put_list_genres_to_cache(self, url: str, genres: list[Genre]):
+        await self.redis.set(
+            url, pickle.dumps([p.json() for p in genres]), expire=GENRE_CACHE_EXPIRE_IN_SECONDS
+        )
+
+    async def get_genre_by_id(self, url: str, genre_id: str) -> Genre | None:
+        genre = await self._genre_from_cache(url)
         if not genre:
             genre = await self._get_genre_from_elastic(genre_id)
             if not genre:
                 return None
 
-            await self._put_genre_to_cache(genre)
+            await self._put_genre_to_cache(url, genre)
         return genre
 
     async def _get_genre_from_elastic(self, genre_id: str) -> Genre | None:
@@ -53,17 +73,17 @@ class GenreService:
             return None
         return Genre(**doc["_source"])
 
-    async def _genre_from_cache(self, genre_id: str) -> Genre | None:
-        data = await self.redis.get(genre_id)
+    async def _genre_from_cache(self, url: str) -> Genre | None:
+        data = await self.redis.get(url)
         if not data:
             return None
 
         genre = Genre.parse_raw(data)
         return genre
 
-    async def _put_genre_to_cache(self, genre: Genre):
+    async def _put_genre_to_cache(self, url: str, genre: Genre):
         await self.redis.set(
-            genre.id, genre.json(), expire=GENRE_CACHE_EXPIRE_IN_SECONDS
+            url, genre.json(), expire=GENRE_CACHE_EXPIRE_IN_SECONDS
         )
 
 

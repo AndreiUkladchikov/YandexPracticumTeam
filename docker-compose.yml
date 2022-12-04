@@ -12,6 +12,8 @@ services:
       - redis
     ports:
       - 8008:8008
+    env_file:
+      - docker-settings.env
   etl:
     build: postgres_to_es
     container_name: etl_container
