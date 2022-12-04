@@ -20,7 +20,6 @@ async def genre_list(
     film_service: GenreService = Depends(get_genre_service),
 ) -> list[Genre]:
     url = request.url.path + request.url.query
-    print(url)
     genres = await film_service.get_list_genres(url, page_number, page_size)
     if not genres:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="genres not found")
