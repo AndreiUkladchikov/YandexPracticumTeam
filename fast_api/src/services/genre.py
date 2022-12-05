@@ -12,7 +12,7 @@ from db.elastic import get_elastic
 from db.redis import get_redis
 from models.genre import Genre
 
-GENRE_CACHE_EXPIRE_IN_SECONDS = settings.CACHE_EXPIRE_IN_SECONDS
+GENRE_CACHE_EXPIRE_IN_SECONDS = settings.cache_expire_in_seconds
 
 
 class GenreService:
