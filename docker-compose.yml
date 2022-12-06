@@ -2,8 +2,8 @@ version: '3.8'
 services:
   redis:
     image: redis:7.0.5
-    ports:
-      - 6379:6379
+    expose:
+      - 6379
   fast_api:
     build: fast_api
     container_name: fast_api_container
@@ -38,8 +38,8 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-    ports:
-      - 9200:9200
+    expose:
+      - 9200
     volumes: 
       - etl_volume:/usr/share/elasticsearch
   db:
