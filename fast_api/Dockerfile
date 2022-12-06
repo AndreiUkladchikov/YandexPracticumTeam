@@ -13,4 +13,6 @@ RUN pip3 install -r requirements.txt --no-cache-dir
 
 COPY . .
 
-CMD [ "python", "src/main.py"]
+WORKDIR /fast_api/src
+
+ENTRYPOINT gunicorn main:app --workers ${GUNICORN_NUM_WORKERS} --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${BACKEND_PORT}

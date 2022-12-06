@@ -1,5 +1,5 @@
 .venv
-docker-settings.env
+.env
 postgres_to_es/.env
 # postgres_to_es/state.json
 postgres_to_es/typing_extensions.py
