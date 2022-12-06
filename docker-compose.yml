@@ -19,8 +19,8 @@ services:
     image: redis:7.0.5
     env_file:
       - .env
-    ports:
-      - '${REDIS_PORT}:${REDIS_PORT}'
+    expose:
+      - '${REDIS_PORT}'
 
   fast_api:
     build: fast_api
@@ -58,8 +58,8 @@ services:
       nofile:
         soft: 65536
         hard: 65536
-    ports:
-      - '${ELASTIC_PORT}:${ELASTIC_PORT}'
+    expose:
+      - '${ELASTIC_PORT}'
     volumes:
       - etl_volume:/usr/share/elasticsearch
 
