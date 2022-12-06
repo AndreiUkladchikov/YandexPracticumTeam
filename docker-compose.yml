@@ -30,8 +30,8 @@ services:
     depends_on:
       - elastic
       - redis
-    ports:
-      - '${BACKEND_PORT}:${BACKEND_PORT}'
+    expose:
+      - '${BACKEND_PORT}'
 
   etl:
     build: postgres_to_es
