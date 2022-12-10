@@ -2,14 +2,13 @@ import unittest
 
 import requests
 
-from core import config
+from core.config import settings
 
 
 class TestGenre(unittest.TestCase):
     def setUp(self) -> None:
-        settings = config.Settings()
         self.baseurl = (
-            f"http://{settings.BACKEND_HOST}:{settings.BACKEND_PORT}/api/v1/genres"
+            f"http://{settings.backend_host}:{settings.backend_port}/api/v1/genres"
         )
 
     def test_genre_list(self):
@@ -68,9 +67,8 @@ class TestGenre(unittest.TestCase):
 
 class TestPerson(unittest.TestCase):
     def setUp(self) -> None:
-        settings = config.Settings()
         self.baseurl = (
-            f"http://{settings.BACKEND_HOST}:{settings.BACKEND_PORT}/api/v1/persons"
+            f"http://{settings.backend_host}:{settings.backend_port}/api/v1/persons"
         )
 
     def test_person_search_without_paging(self):
@@ -123,9 +121,8 @@ class TestPerson(unittest.TestCase):
 
 class TestFilms(unittest.TestCase):
     def setUp(self) -> None:
-        settings = config.Settings()
         self.baseurl = (
-            f"http://{settings.BACKEND_HOST}:{settings.BACKEND_PORT}/api/v1/films"
+            f"http://{settings.backend_host}:{settings.backend_port}/api/v1/films"
         )
 
     def test_films_main_page(self):
