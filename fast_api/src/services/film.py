@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import pickle
-import json
 from aioredis import Redis
-from elasticsearch import AsyncElasticsearch, NotFoundError
+from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
-from pydantic import parse_obj_as
 
 from core.config import settings
 from db.elastic import get_elastic
