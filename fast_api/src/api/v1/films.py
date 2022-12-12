@@ -27,8 +27,13 @@ async def films_main_page(
     genre: str | None = Query(None, alias="filter[genre]"),
     film_service: FilmService = Depends(get_film_service),
 ) -> list[Film]:
-    url = request.url.path + request.url.query
+    url = request.url.path + "?" + request.url.query
     films = await film_service.get_films_main_page(url, sort, genre, page_number, page_size)
+    if not films:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=FilmMsg.no_search_result,
+        )
     return [Film(**film.dict()) for film in films]
 
 
@@ -46,7 +51,7 @@ async def search_films(
     | None = Query(default=int(settings.pagination_size), alias="page[size]", ge=1),
     film_service: FilmService = Depends(get_film_service),
 ) -> list[Film]:
-    url = request.url.path + request.url.query
+    url = request.url.path + "?" + request.url.query
     films = await film_service.search(url, query, page_number, page_size)
     if not films:
         raise HTTPException(

@@ -118,7 +118,9 @@ class FilmService:
         return films_
 
     async def _films_from_cache(self, url: str) -> list[Film] | None:
+
         data = await self.redis.get(url)
+
         if not data:
             return None
         persons = parse_obj_as(list[Film], [json.loads(d) for d in pickle.loads(data)])
