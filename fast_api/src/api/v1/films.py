@@ -29,6 +29,11 @@ async def films_main_page(
 ) -> list[Film]:
     url = request.url.path + request.url.query
     films = await film_service.get_films_main_page(url, sort, genre, page_number, page_size)
+    if not films:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=FilmMsg.no_search_result,
+        )
     return [Film(**film.dict()) for film in films]
 
 
