@@ -50,7 +50,7 @@ class FilmService:
         if not doc:
             return None
 
-        return [Film(**genre["_source"]) for genre in doc["hits"]["hits"]]
+        return [Film(**film["_source"]) for film in doc["hits"]["hits"]]
 
     async def search(self, url: str,  query: str, page_number: int, page_size: int) -> list[Film] | None:
         body = {
@@ -73,7 +73,7 @@ class FilmService:
         if not doc:
             return None
 
-        return [Film(**genre["_source"]) for genre in doc["hits"]["hits"]]
+        return [Film(**film["_source"]) for film in doc["hits"]["hits"]]
 
 
 def get_film_service(
