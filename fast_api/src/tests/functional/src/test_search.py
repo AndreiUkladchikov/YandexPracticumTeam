@@ -8,17 +8,9 @@ from tests.functional.testdata.data_search import test_data_films
 pytestmark = pytest.mark.asyncio
 
 
-async def test_search_no_films_in_es(make_get_request):
-    query_data = "Test film"
-    response = await make_get_request("films/search", query_data)
-    assert response.status == 404
-
-    response = await make_get_request("films/search/vkrltmb", query_data)
-    assert response.status == 404
-
-
 async def test_cache_after_delete_index_in_es(make_get_request, es_write_data, es_delete_data):
     await es_write_data(test_data_films, test_settings.movie_index)
+
     query_data = "Test film"
     response = await make_get_request("films/search", query_data)
     assert response.status == 200
@@ -33,7 +25,6 @@ class TestSearch:
     async def test_search(self, make_get_request, set_up_search_films):
         query_data = "Test film"
 
-        # 4. Проверяем ответ
         response = await make_get_request("films/search", query_data)
 
         assert response.status == 200
@@ -44,7 +35,6 @@ class TestSearch:
         page_number = 1
         page_size = 20
 
-        # 4. Проверяем ответ
         response = await make_get_request(
             "films/search", query_data, page_number=page_number, page_size=page_size
         )

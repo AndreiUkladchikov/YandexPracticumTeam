@@ -13,13 +13,6 @@ class Film(BaseModel):
 
 
 @pytest.mark.asyncio
-async def test_empty_es(make_get_request, es_delete_data):
-    response = await make_get_request("films")
-    assert response.status == 404
-    await es_delete_data(test_settings.genre_index)
-
-
-@pytest.mark.asyncio
 async def test_cache(make_get_request, es_delete_data, es_write_data):
     await es_write_data(test_films_main_page, test_settings.movie_index)
 
