@@ -58,6 +58,8 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+    env_file:
+      - .env
     expose:
       - '${ELASTIC_PORT}'
     volumes:
