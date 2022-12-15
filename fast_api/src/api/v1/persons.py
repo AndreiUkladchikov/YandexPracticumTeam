@@ -74,6 +74,12 @@ async def movies_by_person(
     url = request.url.path + request.url.query
     person = await person_service.get_by_id(url[-4], person_id)
 
+    if not person:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=PersonMsg.no_films_by_person
+        )
+
     films = await films_by_id(person_transformation(person), film_service)
     if not films:
         raise HTTPException(
@@ -86,5 +92,5 @@ async def movies_by_person(
 async def films_by_id(person: PersonExtended, film_service: FilmService) -> list[Film]:
     films: list[Film] = []
     for ids in person.film_ids:
-        films.append(await film_service.get_by_id(ids))
+        films.append(await film_service.get_by_id(None, ids))
     return films

@@ -17,7 +17,7 @@ class FilmService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.db_context = DbContext(redis, elastic, "movies", settings.cache_expire_in_seconds)
 
-    async def get_by_id(self, url: str, film_id: str) -> Film | None:
+    async def get_by_id(self, url: str | None, film_id: str) -> Film | None:
         data = await self.db_context.get_by_id(url, film_id)
         if not data:
             return None
@@ -68,7 +68,6 @@ class FilmService:
                     }
                 }
             }
-
 
         doc = await self.db_context.get_list(url, page_number, page_size, body)
         if not doc:

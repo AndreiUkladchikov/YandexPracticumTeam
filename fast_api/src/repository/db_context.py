@@ -44,15 +44,18 @@ class DbContext:
             return None
         return doc
 
-    async def get_by_id(self, url: str, id: str) -> Any | None:
-        item = await self._get_from_cache(url)
-        if not item:
+    async def get_by_id(self, url: str | None, id: str) -> Any | None:
+        if url:
+            item = await self._get_from_cache(url)
+            if not item:
+                item = await self._get_from_elastic(id)
+                if not item:
+                    return None
+                await self._put_to_cache(url, bytes(str(item), "utf-8"))
+        else:
             item = await self._get_from_elastic(id)
             if not item:
                 return None
-
-            await self._put_to_cache(url, bytes(str(item), "utf-8"))
-
         return item
 
     async def get_list(self, url: str, page_number, page_size, body=None) -> list[Any] | None:
@@ -61,7 +64,6 @@ class DbContext:
             items = await self._get_list_from_elastic(body, page_number, page_size)
             if not items:
                 return None
-
             await self._put_to_cache(url, bytes(str(items), "utf-8"))
 
         return items
