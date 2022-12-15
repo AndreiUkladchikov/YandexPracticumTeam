@@ -8,7 +8,6 @@ from core.config import settings
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.film import Film
-from api.models.models import PersonExtended
 from repository.db_context import DbContext
 
 FILM_CACHE_EXPIRE_IN_SECONDS = settings.cache_expire_in_seconds
