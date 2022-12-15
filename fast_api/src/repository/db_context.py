@@ -55,7 +55,7 @@ class DbContext:
 
         return item
 
-    async def get_list(self, url: str, page_number, page_size, body: Any) -> list[Any] | None:
+    async def get_list(self, url: str, page_number, page_size, body=None) -> list[Any] | None:
         items = await self._get_from_cache(url)
         if not items:
             items = await self._get_list_from_elastic(body, page_number, page_size)
