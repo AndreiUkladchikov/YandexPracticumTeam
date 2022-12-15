@@ -10,8 +10,6 @@ from db.redis import get_redis
 from models.person import PersonDetailed
 from repository.db_context import DbContext
 
-PERSON_CACHE_EXPIRE_IN_SECONDS = settings.cache_expire_in_seconds
-
 
 class PersonService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
