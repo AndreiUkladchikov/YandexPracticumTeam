@@ -1,6 +1,7 @@
 import pytest
-from tests.functional.settings import test_settings
-from tests.functional.testdata.data_search import test_data_films
+
+from integration_tests.config import test_settings
+from integration_tests.testdata.data_search import test_data_films
 #  Название теста должно начинаться со слова `test_`
 #  Любой тест с асинхронными вызовами нужно оборачивать декоратором
 #  `pytest.mark.asyncio`, который следит за запуском и работой цикла событий.
@@ -8,6 +9,7 @@ from tests.functional.testdata.data_search import test_data_films
 pytestmark = pytest.mark.asyncio
 
 
+@pytest.mark.asyncio
 async def test_cache_after_delete_index_in_es(make_get_request, es_write_data, es_delete_data):
     await es_write_data(test_data_films, test_settings.movie_index)
 

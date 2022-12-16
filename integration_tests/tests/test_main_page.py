@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import pytest
-from pydantic import BaseModel
-from tests.functional.settings import test_settings
-from tests.functional.testdata.data_main_page import test_main_page_genres, test_films_main_page
 
+from pydantic import BaseModel
+from integration_tests.config import test_settings
+from integration_tests.testdata.data_main_page import test_main_page_genres, test_films_main_page
+
+pytestmark = pytest.mark.asyncio
 
 class Film(BaseModel):
     id: str

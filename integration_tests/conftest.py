@@ -4,14 +4,21 @@ import asyncio
 from dataclasses import dataclass
 
 import aiohttp
-import pytest
+import pytest_asyncio
 from elasticsearch import AsyncElasticsearch, helpers
-from tests.functional.settings import test_settings
-from tests.functional.testdata.data_search import test_data_films
-from tests.functional.testdata.data_main_page import test_main_page_genres, test_films_main_page
+from integration_tests.config import test_settings
+from integration_tests.testdata.data_search import test_data_films
+from integration_tests.testdata.data_main_page import test_main_page_genres, test_films_main_page
 
 
-@pytest.fixture
+@pytest_asyncio.fixture(scope="session")
+def event_loop():
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest_asyncio.fixture
 def es_write_data(es_client: AsyncElasticsearch):
     async def inner(data, index):
         bulk_query = get_es_bulk_query(data, index)
@@ -19,7 +26,7 @@ def es_write_data(es_client: AsyncElasticsearch):
     return inner
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 def es_delete_data(es_client: AsyncElasticsearch):
     async def inner(index):
         response = await es_client.delete_by_query(
@@ -29,7 +36,7 @@ def es_delete_data(es_client: AsyncElasticsearch):
     return inner
 
 
-@pytest.fixture(scope="class")
+@pytest_asyncio.fixture(scope="class")
 async def set_up_search_films():
     client = AsyncElasticsearch(hosts=test_settings.es_host)
     bulk_query = get_es_bulk_query(test_data_films, test_settings.movie_index)
@@ -39,7 +46,7 @@ async def set_up_search_films():
     await client.close()
 
 
-@pytest.fixture(scope="class")
+@pytest_asyncio.fixture(scope="class")
 async def set_up_main_page():
     client = AsyncElasticsearch(hosts=test_settings.es_host)
     bulk_query_films = get_es_bulk_query(test_films_main_page, test_settings.movie_index)
@@ -54,7 +61,7 @@ async def set_up_main_page():
     await client.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def es_client():
     client = AsyncElasticsearch(hosts=test_settings.es_host)
     yield client
@@ -74,7 +81,7 @@ class Response:
     status: int
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 def make_get_request():
     async def inner(
         end_of_url,
@@ -106,10 +113,3 @@ def make_get_request():
         return Response(body=body, status=status)
 
     return inner
-
-
-@pytest.fixture(scope="session")
-def event_loop():
-    loop = asyncio.get_event_loop()
-    yield loop
-    loop.close()
