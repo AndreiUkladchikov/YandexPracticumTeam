@@ -15,7 +15,7 @@ class TestGenre(unittest.TestCase):
         response = requests.get(self.baseurl + "/")
         self.assertEqual(response.status_code, 200)
         self.assertListEqual(
-            response.json(),
+            response.json()["genres"],
             [
                 {"id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff", "name": "Action"},
                 {"id": "120a21cf-9097-479e-904a-13dd7198c1dd", "name": "Adventure"},
@@ -62,7 +62,7 @@ class TestGenre(unittest.TestCase):
             self.baseurl + f"/?page[number]={page_number}&page[size]={page_size}"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertLessEqual(len(response.json()), page_size)
+        self.assertLessEqual(len(response.json()["genres"]), page_size)
 
 
 class TestPerson(unittest.TestCase):
@@ -131,20 +131,18 @@ class TestFilms(unittest.TestCase):
 
     def test_films_sort_rating_desc(self):
         response = requests.get(self.baseurl + f"/?sort=-imdb_rating")
-        if response.json()[0].get("imdb_rating") and response.json()[-1].get(
-            "imdb_rating"
-        ):
+        if response.json()["films"][0].get("imdb_rating") and response.json()["films"][-1].get("imdb_rating"):
             self.assertLessEqual(
-                response.json()[-1]["imdb_rating"], response.json()[0]["imdb_rating"]
+                response.json()["films"][-1]["imdb_rating"],
+                response.json()["films"][0]["imdb_rating"],
             )
 
     def test_films_sort_rating_asc(self):
         response = requests.get(self.baseurl + f"/?sort=imdb_rating")
-        if response.json()[0].get("imdb_rating") and response.json()[-1].get(
-            "imdb_rating"
-        ):
+        if response.json()["films"][0].get("imdb_rating") and response.json()["films"][-1].get("imdb_rating"):
             self.assertLessEqual(
-                response.json()[0]["imdb_rating"], response.json()[-1]["imdb_rating"]
+                response.json()["films"][0]["imdb_rating"],
+                response.json()["films"][-1]["imdb_rating"],
             )
 
     def test_film_search_with_paging(self):
@@ -156,4 +154,4 @@ class TestFilms(unittest.TestCase):
             + f"/search?query={query}&page[number]={page_number}&page[size]={page_size}"
         )
         self.assertEqual(response.status_code, 200)
-        self.assertLessEqual(len(response.json()), page_size)
+        self.assertLessEqual(len(response.json()["films"]), page_size)

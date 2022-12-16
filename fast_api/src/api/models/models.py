@@ -3,7 +3,6 @@ from __future__ import annotations  # Для обратной совместим
 from enum import Enum
 
 import orjson
-
 from pydantic import BaseModel, Field
 
 
@@ -58,3 +57,16 @@ class FilmExtended(Film):
     actors: list[Person] | None
     writers: list[Person] | None
     directors: list[Person] | None
+
+
+class WithPaging(BaseModel):
+    total_pages: int | None
+    total_items: int | None
+
+
+class FilmsWithPaging(WithPaging):
+    films: list[Film]
+
+
+class GenresWithPaging(WithPaging):
+    genres: list[Genre]
