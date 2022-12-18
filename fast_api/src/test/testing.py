@@ -106,7 +106,7 @@ class TestPerson(unittest.TestCase):
         response = requests.get(self.baseurl + f"/{person_id}/film")
         self.assertEqual(response.status_code, 200)
         self.assertListEqual(
-            response.json(),
+            response.json()["films"],
             [
                 {
                     "id": "c8316f09-81ca-4b71-a879-405e740acee5",

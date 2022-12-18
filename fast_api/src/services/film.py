@@ -129,7 +129,9 @@ class FilmService:
         }
 
         doc = await self.db_context.get_list(url, page_number, page_size, filter_by_person_id)
-        return [Film(**film["_source"]) for film in doc["hits"]["hits"]]
+        total_items: int = doc["hits"]["total"]["value"]
+
+        return [Film(**film["_source"]) for film in doc["hits"]["hits"]], total_items
 
 
 def get_film_service(
