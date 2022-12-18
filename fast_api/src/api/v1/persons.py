@@ -72,15 +72,19 @@ async def movies_by_person(
     film_service: FilmService = Depends(get_film_service),
 ) -> list[Film]:
     url = request.url.path + request.url.query
-    person = await person_service.get_by_id(url[-4], person_id)
+    # person = await person_service.get_by_id(url[-4], person_id)
+    #
+    # if not person:
+    #     raise HTTPException(
+    #         status_code=HTTPStatus.NOT_FOUND,
+    #         detail=PersonMsg.no_films_by_person
+    #     )
 
-    if not person:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=PersonMsg.no_films_by_person
-        )
+    # films = await films_by_id(person_transformation(person), film_service)
+    # transformed_person: PersonExtended = person_transformation(person)
 
-    films = await films_by_id(person_transformation(person), film_service)
+    films = await film_service.get_films_by_person_id(url, 1, 50, person_id)
+
     if not films:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
