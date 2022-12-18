@@ -27,7 +27,6 @@ async def genre_list(
     film_service: GenreService = Depends(get_genre_service),
 ) -> GenresWithPaging:
     url = request.url.path + request.url.query
-    print(url)
     genres, total_items = await film_service.get_list_genres(
         url, page_number, page_size
     )

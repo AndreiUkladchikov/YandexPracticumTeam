@@ -129,7 +129,6 @@ class FilmService:
         }
 
         doc = await self.db_context.get_list(url, page_number, page_size, filter_by_person_id)
-        print(doc)
         return [Film(**film["_source"]) for film in doc["hits"]["hits"]]
 
 

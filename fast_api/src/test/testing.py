@@ -75,8 +75,6 @@ class TestPerson(unittest.TestCase):
         query = "Phillip"
         response = requests.get(self.baseurl + f"/search?query={query}")
         self.assertEqual(response.status_code, 200)
-        # self.assertEqual(
-        #     response.json()["total"], 6)
 
     def test_person_search_with_paging(self):
         query = "Phillip"

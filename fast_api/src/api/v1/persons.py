@@ -68,22 +68,14 @@ async def person_details(
 async def movies_by_person(
     request: Request,
     person_id: str,
-    person_service: PersonService = Depends(get_person_service),
+    page_number: int | None = Query(default=1, alias="page[number]", ge=1, le=200),
+    page_size: int
+    | None = Query(default=int(settings.pagination_size), alias="page[size]", ge=1, le=10000),
     film_service: FilmService = Depends(get_film_service),
 ) -> list[Film]:
     url = request.url.path + request.url.query
-    # person = await person_service.get_by_id(url[-4], person_id)
-    #
-    # if not person:
-    #     raise HTTPException(
-    #         status_code=HTTPStatus.NOT_FOUND,
-    #         detail=PersonMsg.no_films_by_person
-    #     )
 
-    # films = await films_by_id(person_transformation(person), film_service)
-    # transformed_person: PersonExtended = person_transformation(person)
-
-    films = await film_service.get_films_by_person_id(url, 1, 50, person_id)
+    films = await film_service.get_films_by_person_id(url, page_number, page_size, person_id)
 
     if not films:
         raise HTTPException(
