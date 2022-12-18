@@ -9,7 +9,7 @@ test_films_main_page = [
     {
         "id": '5ff2a59d-495d-40fe-826d-ec41ba7943c7',
         "type": "movie",
-        "imdb_rating": 9.9,
+        "imdb_rating": 99.9,
         "genre": ["Action"],
         "genres": [
             {"id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff", "name": "Action"},
