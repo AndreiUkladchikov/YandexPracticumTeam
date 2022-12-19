@@ -7,11 +7,11 @@ import aiohttp
 import pytest
 from elasticsearch import AsyncElasticsearch, helpers
 from tests.functional.settings import test_settings
-from tests.functional.testdata.data_search import test_data_films
+from tests.functional.testdata.data_search import test_data_films, test_genres
 from tests.functional.testdata.data_main_page import test_main_page_genres, test_films_main_page
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def es_write_data(es_client: AsyncElasticsearch):
     async def inner(data, index):
         bulk_query = get_es_bulk_query(data, index)
@@ -19,13 +19,12 @@ def es_write_data(es_client: AsyncElasticsearch):
     return inner
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
 def es_delete_data(es_client: AsyncElasticsearch):
     async def inner(index):
         response = await es_client.delete_by_query(
             index=index, body={"query": {"match_all": {}}}
         )
-
     return inner
 
 
@@ -54,7 +53,14 @@ async def set_up_main_page():
     await client.close()
 
 
-@pytest.fixture
+@pytest.fixture(scope="class")
+async def set_up_genres(es_write_data, es_delete_data):
+    await es_write_data(test_genres, test_settings.genre_index)
+    yield es_client
+    await es_delete_data(test_settings.genre_index)
+
+
+@pytest.fixture(scope="class")
 async def es_client():
     client = AsyncElasticsearch(hosts=test_settings.es_host)
     yield client
@@ -74,7 +80,7 @@ class Response:
     status: int
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def make_get_request():
     async def inner(
         end_of_url,
@@ -100,7 +106,6 @@ def make_get_request():
 
         async with session.get(url, params=query_data) as response:
             body = await response.json()
-            headers = response.headers
             status = response.status
         await session.close()
         return Response(body=body, status=status)
