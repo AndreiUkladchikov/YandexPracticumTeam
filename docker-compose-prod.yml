@@ -14,6 +14,7 @@ services:
       - elastic
     ports:
       - '${NGINX_PUBLIC_PORT}:${NGINX_PORT}'
+    restart: always
 
   redis:
     image: redis:7.0.5
@@ -21,6 +22,7 @@ services:
       - .env
     expose:
       - '${REDIS_PORT}'
+    restart: always
 
   fast_api:
     build: fast_api
@@ -32,6 +34,7 @@ services:
       - redis
     expose:
       - '${BACKEND_PORT}'
+    restart: always
 
   etl:
     build: postgres_to_es
@@ -41,6 +44,7 @@ services:
     depends_on:
       - db
       - elastic
+    restart: always
 
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.5.0
@@ -64,6 +68,7 @@ services:
       - '${ELASTIC_PORT}'
     volumes: 
       - etl_volume:/usr/share/elasticsearch
+    restart: always
 
   db:
     image: postgres:14
@@ -74,6 +79,7 @@ services:
       - '${DB_PORT}'
     volumes:
       - db:/var/lib/postgresql
+    restart: always
 
 volumes:
   db:
