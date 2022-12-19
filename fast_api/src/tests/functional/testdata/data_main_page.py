@@ -1,5 +1,3 @@
-import uuid
-
 test_main_page_genres = [
     {"id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff", "name": "Action"},
     {"id": "6c162475-c7ed-4461-9184-001ef3d9f26e", "name": "Sci-Fi"}

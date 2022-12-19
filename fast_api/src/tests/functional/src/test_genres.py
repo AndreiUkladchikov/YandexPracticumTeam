@@ -1,7 +1,7 @@
 import pytest
 
 from tests.functional.models.models import Genre
-from tests.functional.testdata.data_search import test_genres
+from tests.functional.testdata.data_genres import test_genres
 
 
 @pytest.mark.asyncio
@@ -16,6 +16,3 @@ class TestGenre:
         genre = Genre(**test_genres[0])
         response = await make_get_request(f"genres/{genre.id}")
         assert response.status == 200 and genre == response.body
-
-
-

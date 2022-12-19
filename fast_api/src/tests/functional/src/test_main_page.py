@@ -1,17 +1,12 @@
 from __future__ import annotations
 
 import pytest
-from pydantic import BaseModel
+
+from tests.functional.models.models import Film
 from tests.functional.settings import test_settings
 from tests.functional.testdata.data_main_page import (
     test_films_main_page,
 )
-
-
-class Film(BaseModel):
-    id: str
-    title: str
-    imdb_rating: float | None
 
 
 @pytest.mark.asyncio

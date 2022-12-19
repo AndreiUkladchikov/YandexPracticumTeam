@@ -6,6 +6,7 @@ class TestSettings(BaseSettings):
     es_host: str = Field('http://127.0.0.1:9200')
     movie_index: str = Field('movies')
     genre_index: str = Field('genres')
+    person_index: str = Field('persons')
 
     es_id_field: str = Field(str(uuid4()))
 
