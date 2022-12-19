@@ -8,7 +8,7 @@ import pytest
 from elasticsearch import AsyncElasticsearch, helpers
 from integration_tests.config import test_settings
 from integration_tests.testdata.data_search import test_data_films
-from integration_tests.testdata.data_main_page import test_main_page_genres, test_films_main_page
+from integration_tests.testdata.data_main_page import test_main_page_genres, test_films_main_page, cache_films_main_page
 
 
 @pytest.fixture(scope="session")
@@ -28,10 +28,8 @@ def es_write_data(es_client: AsyncElasticsearch):
 
 @pytest.fixture
 def es_delete_data(es_client: AsyncElasticsearch):
-    async def inner(index):
-        response = await es_client.delete_by_query(
-            index=index, body={"query": {"match_all": {}}}
-        )
+    async def inner(index, id):
+        response = await es_client.delete(index=index, id=id)
 
     return inner
 
@@ -42,7 +40,6 @@ async def set_up_search_films():
     bulk_query = get_es_bulk_query(test_data_films, test_settings.movie_index)
     await helpers.async_bulk(client, bulk_query, refresh="wait_for")
     yield client
-    # await client.delete_by_query(index=test_settings.movie_index, body={"query": {"match_all": {}}})
     await client.close()
 
 
@@ -52,12 +49,13 @@ async def set_up_main_page():
     bulk_query_films = get_es_bulk_query(test_films_main_page, test_settings.movie_index)
     await helpers.async_bulk(client, bulk_query_films, refresh="wait_for")
 
+    bulk_query_cache_films = get_es_bulk_query(cache_films_main_page, test_settings.movie_index)
+    await helpers.async_bulk(client, bulk_query_cache_films, refresh="wait_for")
+
     bulk_query_genres = get_es_bulk_query(test_main_page_genres, test_settings.genre_index)
     await helpers.async_bulk(client, bulk_query_genres, refresh="wait_for")
 
     yield client
-    # await client.delete_by_query(index=test_settings.movie_index, body={"query": {"match_all": {}}})
-    # await client.delete_by_query(index=test_settings.genre_index, body={"query": {"match_all": {}}})
     await client.close()
 
 
