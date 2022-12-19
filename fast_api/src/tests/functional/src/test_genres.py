@@ -1,5 +1,4 @@
 import pytest
-
 from tests.functional.models.models import Genre
 from tests.functional.testdata.data_genres import test_genres
 

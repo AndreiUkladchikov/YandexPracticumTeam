@@ -1,5 +1,6 @@
-from pydantic import BaseSettings, Field
 from uuid import uuid4
+
+from pydantic import BaseSettings, Field
 
 
 class TestSettings(BaseSettings):

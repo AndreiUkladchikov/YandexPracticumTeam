@@ -1,7 +1,7 @@
 import pytest
-
 from tests.functional.models.models import Film
-from tests.functional.testdata.data_persons import test_persons, test_film_by_person
+from tests.functional.testdata.data_persons import (test_film_by_person,
+                                                    test_persons)
 
 
 @pytest.mark.asyncio
