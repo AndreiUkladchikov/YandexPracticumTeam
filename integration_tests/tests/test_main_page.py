@@ -8,6 +8,7 @@ from integration_tests.testdata.data_main_page import test_main_page_genres, tes
 
 pytestmark = pytest.mark.asyncio
 
+
 class Film(BaseModel):
     id: str
     title: str
@@ -19,17 +20,17 @@ async def test_cache(make_get_request, es_delete_data, es_write_data):
     await es_write_data(test_films_main_page, test_settings.movie_index)
 
     response = await make_get_request("films")
+    firstResponse = response.body
     assert response.status == 200
 
-    # await es_delete_data(test_settings.movie_index)
+    # Delete 1 film from elastic
+    await es_delete_data(test_settings.movie_index, 'a38e738e-ac45-40ff-9f98-ab7a0ff45054')
 
     response = await make_get_request("films")
 
     assert response.status == 200
 
-    films = [Film(**film) for film in test_films_main_page]
-
-    assert films == response.body
+    assert firstResponse == response.body
 
 
 @pytest.mark.asyncio

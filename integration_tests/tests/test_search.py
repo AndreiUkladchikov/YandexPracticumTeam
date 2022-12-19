@@ -1,26 +1,10 @@
 import pytest
 
-from integration_tests.config import test_settings
-from integration_tests.testdata.data_search import test_data_films
 #  Название теста должно начинаться со слова `test_`
 #  Любой тест с асинхронными вызовами нужно оборачивать декоратором
 #  `pytest.mark.asyncio`, который следит за запуском и работой цикла событий.
 
 pytestmark = pytest.mark.asyncio
-
-
-@pytest.mark.asyncio
-async def test_cache_after_delete_index_in_es(make_get_request, es_write_data, es_delete_data):
-    # Предлагаю кэш тестировать отдельно - положить именно в кэш через db_context фильм, которого больше нет нигде и получить его
-    await es_write_data(test_data_films, test_settings.movie_index)
-
-    query_data = "Test film"
-    response = await make_get_request("films/search", query_data)
-    assert response.status == 200
-    # await es_delete_data(test_settings.movie_index)
-
-    response = await make_get_request("films/search", query_data)
-    assert response.status == 200
 
 
 @pytest.mark.asyncio
