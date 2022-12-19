@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from http import HTTPStatus
 
-import requests
+import math
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
-from api.models.models import Film, PersonExtended
+from api.models.models import Film, PersonExtended, FilmsWithPaging
 from core.config import settings
 from services.film import FilmService, get_film_service
 from services.person import PersonService, get_person_service
@@ -62,31 +62,33 @@ async def person_details(
 
 @router.get(
     "/{person_id}/film",
-    response_model=list[Film],
+    response_model=FilmsWithPaging,
     description='Get list of Films by Person'
 )
 async def movies_by_person(
     request: Request,
     person_id: str,
-    person_service: PersonService = Depends(get_person_service),
+    page_number: int | None = Query(default=1, alias="page[number]", ge=1, le=200),
+    page_size: int
+    | None = Query(default=int(settings.pagination_size), alias="page[size]", ge=1, le=10000),
     film_service: FilmService = Depends(get_film_service),
-) -> list[Film]:
+) -> FilmsWithPaging:
     url = request.url.path + request.url.query
-    person = await person_service.get_by_id(url[-4], person_id)
 
-    if not person:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=PersonMsg.no_films_by_person
-        )
+    films, total_items = await film_service.get_films_by_person_id(url, page_number, page_size, person_id)
 
-    films = await films_by_id(person_transformation(person), film_service)
     if not films:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=PersonMsg.no_films_by_person
         )
-    return films
+    total_pages = math.ceil(total_items / page_size)
+
+    return FilmsWithPaging(
+        films=[Film(**film.dict()) for film in films],
+        total_pages=total_pages,
+        total_items=total_items,
+    )
 
 
 async def films_by_id(person: PersonExtended, film_service: FilmService) -> list[Film]:
