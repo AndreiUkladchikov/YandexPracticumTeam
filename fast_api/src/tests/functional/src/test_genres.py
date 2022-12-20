@@ -1,7 +1,8 @@
 import pytest
-from tests.functional.models.models import Genre
-from tests.functional.settings import test_settings
-from tests.functional.testdata.data_genres import test_genres
+
+from config import test_settings
+from models.models import Genre
+from testdata.data_genres import test_genres
 
 
 @pytest.mark.asyncio
@@ -52,10 +53,8 @@ class TestGenre:
         )
         assert response.status == 404
 
-
-@pytest.mark.asyncio
-async def test_cache_genres(set_up_genres, make_get_request):
-    response = await make_get_request("genres")
-    assert response.status == 200
-    genres = [Genre(**genre) for genre in test_genres]
-    assert genres == response.body["genres"]
+    async def test_cache_current_genre(self, set_up_genres, make_get_request, es_delete_data):
+        genre = Genre(**test_genres[0])
+        await es_delete_data(test_settings.genre_index, genre.id)
+        response = await make_get_request(f"genres/{genre.id}")
+        assert response.status == 200 and genre == response.body

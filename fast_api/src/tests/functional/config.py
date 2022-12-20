@@ -11,8 +11,8 @@ class TestSettings(BaseSettings):
 
     es_id_field: str = Field(str(uuid4()))
 
-    redis_host: str = Field('http://localhost:6379')
-    service_url: str = Field('http://localhost:8080')
+    redis_host: str = Field('http://127.0.0.1:6379')
+    service_url: str = Field('http://127.0.0.1:8080')
 
 
 test_settings = TestSettings()

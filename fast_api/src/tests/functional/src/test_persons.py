@@ -1,8 +1,7 @@
 import pytest
-from tests.functional.models.models import Film
-from tests.functional.settings import test_settings
-from tests.functional.testdata.data_persons import (test_film_by_person,
-                                                    test_persons)
+from models.models import Film
+from config import test_settings
+from testdata.data_persons import (test_film_by_person, test_persons)
 
 
 @pytest.mark.asyncio
@@ -75,13 +74,13 @@ class TestPerson:
         film = Film(**test_film_by_person[0])
         assert film == response.body["films"][0]
 
-    async def test_search_cache_person(self, set_up_persons, make_get_request, es_delete_data):
-        await es_delete_data(test_settings.person_index)
-        person_name = test_persons[0]["full_name"]
+    async def test_search_cached_current_person(self, set_up_persons, make_get_request, es_delete_data):
+        person_id = test_persons[1]["id"]
+        await es_delete_data(test_settings.person_index, person_id)
         response = await make_get_request(
-            end_of_url="persons/search",
-            query=person_name
+            end_of_url=f"persons/{person_id}"
         )
         assert response.status == 200
-        person_id = test_persons[0]["id"]
-        assert person_id == response.body[0]["id"] and person_name == response.body[0]["full_name"]
+        person_name = test_persons[1]["full_name"]
+        person_film = test_persons[1]["writer_in"]
+        assert person_name == response.body["full_name"] and person_film == response.body["film_ids"]
