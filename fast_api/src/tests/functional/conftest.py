@@ -6,9 +6,18 @@ from dataclasses import dataclass
 import aiohttp
 import pytest
 from elasticsearch import AsyncElasticsearch, helpers
-from tests.functional.settings import test_settings
-from tests.functional.testdata.data_search import test_data_films
-from tests.functional.testdata.data_main_page import test_main_page_genres, test_films_main_page
+from config import test_settings
+from testdata.data_search import test_data_films
+from testdata.data_main_page import test_main_page_genres, test_films_main_page
+from testdata.data_genres import test_genres
+from testdata.data_persons import test_film_by_person, test_persons
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
 
 
 @pytest.fixture(scope="class")
@@ -25,16 +34,13 @@ def es_delete_data(es_client: AsyncElasticsearch):
         response = await es_client.delete_by_query(
             index=index, body={"query": {"match_all": {}}}
         )
-
     return inner
 
 
 @pytest.fixture(scope="class")
 async def set_up_search_films(es_write_data, es_delete_data):
     await es_write_data(test_data_films, test_settings.movie_index)
-
     yield es_client
-
     await es_delete_data(test_settings.movie_index)
 
 
@@ -47,6 +53,22 @@ async def set_up_main_page(es_write_data, es_delete_data):
 
     await es_delete_data(test_settings.movie_index)
     await es_delete_data(test_settings.genre_index)
+
+
+@pytest.fixture(scope="class")
+async def set_up_genres(es_write_data, es_delete_data):
+    await es_write_data(test_genres, test_settings.genre_index)
+    yield es_client
+    await es_delete_data(test_settings.genre_index)
+
+
+@pytest.fixture(scope="class")
+async def set_up_persons(es_write_data, es_delete_data):
+    await es_write_data(test_persons, test_settings.person_index)
+    await es_write_data(test_film_by_person, test_settings.movie_index)
+    yield es_client
+    await es_delete_data(test_settings.person_index)
+    await es_delete_data(test_settings.movie_index)
 
 
 @pytest.fixture(scope="session")
@@ -69,7 +91,7 @@ class Response:
     status: int
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def make_get_request():
     async def inner(
         end_of_url,
@@ -95,16 +117,8 @@ def make_get_request():
 
         async with session.get(url, params=query_data) as response:
             body = await response.json()
-            headers = response.headers
             status = response.status
         await session.close()
         return Response(body=body, status=status)
 
     return inner
-
-
-@pytest.fixture(scope="session")
-def event_loop():
-    loop = asyncio.get_event_loop()
-    yield loop
-    loop.close()

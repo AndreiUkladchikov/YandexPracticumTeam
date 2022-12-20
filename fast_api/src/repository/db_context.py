@@ -5,7 +5,7 @@ from typing import Any
 from aioredis import Redis
 from loguru import logger
 import elasticsearch
-from elasticsearch import AsyncElasticsearch
+from elasticsearch import AsyncElasticsearch, NotFoundError
 from repository.custom_exceptions import ElasticSearchIsNotAvailable
 
 
@@ -41,21 +41,27 @@ class DbContext:
         except elasticsearch.ConnectionError as ce:
             logger.critical("Enable get data from ElasticSearch", ce)
             raise ElasticSearchIsNotAvailable
+        except NotFoundError:
+            return None
         return doc
 
     async def _get_list_from_elastic(
         self, body: Any, page_number: int, page_size: int
     ) -> list[Any] | None:
         try:
-            doc = await self.elastic.search(
-                index=self.index,
-                body=body,
-                from_=(page_number - 1) * page_size,
-                size=page_size,
-            )
+            if body is None:
+                doc = await self.elastic.search(
+                    index=self.index, from_=(page_number - 1) * page_size, size=page_size
+                )
+            else:
+                doc = await self.elastic.search(
+                    index=self.index, body=body, from_=(page_number - 1) * page_size, size=page_size
+                )
         except elasticsearch.ConnectionError as ce:
             logger.critical("Enable get data from ElasticSearch", ce)
             raise ElasticSearchIsNotAvailable
+        except NotFoundError:
+            return None
         return doc
 
     async def get_by_id(self, url: str | None, id: str) -> Any | None:

@@ -1,6 +1,7 @@
 version: '3.8'
 services:
-
+  test_service:
+    build: fast_api/src/tests/functional
   nginx:
     image: nginx:1.23
     env_file:
@@ -60,8 +61,8 @@ services:
         hard: 65536
     env_file:
       - .env
-    expose:
-      - '${ELASTIC_PORT}'
+    ports:
+      - '${ELASTIC_PORT}:${ELASTIC_PORT}'
     volumes:
       - etl_volume:/usr/share/elasticsearch
 
@@ -73,7 +74,7 @@ services:
     ports:
       - '${DB_PORT}:${DB_PORT}'
     volumes:
-      - db:/var/lib/postgresql
+      - db:/var/lib/postgresql/data/
 
 volumes:
   db:

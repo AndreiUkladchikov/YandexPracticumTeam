@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/",
+    "",
     response_model=GenresWithPaging,
     summary="Get Genres",
     description="Get list of genres (page by page)",
@@ -59,16 +59,18 @@ async def genre_list(
 async def genre_details(
     request: Request,
     genre_id: str,
-    film_service: GenreService = Depends(get_genre_service),
+    genre_service: GenreService = Depends(get_genre_service),
 ) -> Genre:
+
     url = request.url.path + "?" + request.url.query
     try:
-        genre = await film_service.get_genre_by_id(url, genre_id)
+        genre = await genre_service.get_genre_by_id(url, genre_id)
     except ElasticSearchIsNotAvailable:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=ElasticMsg.elasticsearch_is_not_available,
         )
+
     if not genre:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail=GenreMsg.not_found_by_id

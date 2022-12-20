@@ -98,6 +98,7 @@ async def movies_by_person(
     ),
     film_service: FilmService = Depends(get_film_service),
 ) -> FilmsWithPaging:
+
     url = request.url.path + request.url.query
     try:
         films, total_items = await film_service.get_films_by_person_id(
