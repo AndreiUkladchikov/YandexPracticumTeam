@@ -14,20 +14,20 @@ router = APIRouter()
 
 
 @router.get(
-    "/",
+    "",
     response_model=GenresWithPaging,
     summary="Get Genres",
     description="Get list of genres (page by page)",
 )
 async def genre_list(
     request: Request,
-    page_number: int | None = Query(alias="page[number]", ge=1, default=1),
+    page_number: int | None = Query(default=1, alias="page[number]", ge=1),
     page_size: int
-    | None = Query(alias="page[size]", ge=1, default=settings.pagination_size),
-    film_service: GenreService = Depends(get_genre_service),
+    | None = Query(default=settings.pagination_size, alias="page[size]", ge=1),
+    genre_service: GenreService = Depends(get_genre_service),
 ) -> GenresWithPaging:
     url = request.url.path + request.url.query
-    genres, total_items = await film_service.get_list_genres(
+    genres, total_items = await genre_service.get_list_genres(
         url, page_number, page_size
     )
     if not genres:
@@ -46,10 +46,10 @@ async def genre_list(
 async def genre_details(
     request: Request,
     genre_id: str,
-    film_service: GenreService = Depends(get_genre_service),
+    genre_service: GenreService = Depends(get_genre_service),
 ) -> Genre:
     url = request.url.path + request.url.query
-    genre = await film_service.get_genre_by_id(url, genre_id)
+    genre = await genre_service.get_genre_by_id(url, genre_id)
     if not genre:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail=GenreMsg.not_found_by_id

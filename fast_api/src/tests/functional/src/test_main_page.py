@@ -2,17 +2,12 @@ from __future__ import annotations
 
 import pytest
 
-from pydantic import BaseModel
 from config import test_settings
-from testdata.data_main_page import test_main_page_genres, test_films_main_page, cache_films_main_page
 
 pytestmark = pytest.mark.asyncio
 
-
-class Film(BaseModel):
-    id: str
-    title: str
-    imdb_rating: float | None
+from models.models import Film
+from testdata.data_main_page import test_films_main_page, cache_films_main_page
 
 
 @pytest.mark.asyncio
@@ -25,7 +20,7 @@ async def test_cache(make_get_request, es_delete_data, es_write_data):
     assert response.status == 200
 
     # Delete 1 film from elastic
-    await es_delete_data(test_settings.movie_index, 'a38e738e-ac45-40ff-9f98-ab7a0ff45054')
+    await es_delete_data(test_settings.movie_index)
 
     response = await make_get_request("films")
 

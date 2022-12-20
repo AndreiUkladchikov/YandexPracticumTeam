@@ -1,12 +1,12 @@
 import pytest
 
-from config import test_settings
-from testdata.data_search import test_data_films
-from testdata.data_main_page import cache_films_main_page
 
 #  Название теста должно начинаться со слова `test_`
 #  Любой тест с асинхронными вызовами нужно оборачивать декоратором
 #  `pytest.mark.asyncio`, который следит за запуском и работой цикла событий.
+from config import test_settings
+from testdata.data_main_page import cache_films_main_page
+from testdata.data_search import test_data_films
 
 pytestmark = pytest.mark.asyncio
 
@@ -18,7 +18,7 @@ async def test_cache_after_delete(make_get_request, es_write_data, es_delete_dat
     query_data = "Test film"
     response = await make_get_request("films/search", query_data)
     assert response.status == 200
-    await es_delete_data(test_settings.movie_index, 'a38e738e-ac45-40ff-9f98-ab7a0ff45054')
+    await es_delete_data(test_settings.movie_index)
 
     response = await make_get_request("films/search", query_data)
     assert response.status == 200
@@ -27,7 +27,7 @@ async def test_cache_after_delete(make_get_request, es_write_data, es_delete_dat
 @pytest.mark.asyncio
 class TestSearch:
     async def test_search(self, make_get_request, set_up_search_films):
-        query_data = "First film"
+        query_data = "Test film"
 
         response = await make_get_request("films/search", query_data)
 
@@ -56,7 +56,7 @@ class TestSearch:
         )
 
         assert response.status == 200
-        assert len(response.body['films']) == page_size
+        assert len(response.body['films']) == 10
 
     async def test_validate_page_size(self, make_get_request, set_up_search_films):
         query_data = "Test film"
@@ -72,7 +72,7 @@ class TestSearch:
         # Граничное условие. Тестируем 100 страницу
         query_data = "Test film"
         page_number = 100
-        page_size = 20
+        page_size = 50
         response = await make_get_request(
             "films/search", query_data, page_number=page_number, page_size=page_size
         )

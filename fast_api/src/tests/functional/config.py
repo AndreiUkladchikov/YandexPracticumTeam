@@ -1,11 +1,13 @@
-from pydantic import BaseSettings, Field
 from uuid import uuid4
+
+from pydantic import BaseSettings, Field
 
 
 class TestSettings(BaseSettings):
     es_host: str = Field('http://elastic:9200')
     movie_index: str = Field('movies')
     genre_index: str = Field('genres')
+    person_index: str = Field('persons')
 
     es_id_field: str = Field(str(uuid4()))
 
