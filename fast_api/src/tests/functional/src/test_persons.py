@@ -1,5 +1,6 @@
 import pytest
 from tests.functional.models.models import Film
+from tests.functional.settings import test_settings
 from tests.functional.testdata.data_persons import (test_film_by_person,
                                                     test_persons)
 
@@ -32,7 +33,7 @@ class TestPerson:
         page_size = 20
 
         response = await make_get_request(
-            "films/search", person_name, page_number=page_number, page_size=page_size
+            "persons/search", person_name, page_number=page_number, page_size=page_size
         )
         assert response.status == 422
 
@@ -72,4 +73,15 @@ class TestPerson:
         )
         assert response.status == 200
         film = Film(**test_film_by_person[0])
-        assert film == response.body[0]
+        assert film == response.body["films"][0]
+
+    async def test_search_cache_person(self, set_up_persons, make_get_request, es_delete_data):
+        await es_delete_data(test_settings.person_index)
+        person_name = test_persons[0]["full_name"]
+        response = await make_get_request(
+            end_of_url="persons/search",
+            query=person_name
+        )
+        assert response.status == 200
+        person_id = test_persons[0]["id"]
+        assert person_id == response.body[0]["id"] and person_name == response.body[0]["full_name"]

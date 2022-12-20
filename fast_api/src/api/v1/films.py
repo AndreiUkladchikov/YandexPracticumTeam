@@ -58,7 +58,7 @@ async def search_films(
     query: str,
     page_number: int | None = Query(default=1, alias="page[number]", ge=1),
     page_size: int
-    | None = Query(default=int(settings.pagination_size), alias="page[size]", ge=1),
+    | None = Query(default=settings.pagination_size, alias="page[size]", ge=1),
     film_service: FilmService = Depends(get_film_service),
 ) -> FilmsWithPaging:
     url = request.url.path + "?" + request.url.query
