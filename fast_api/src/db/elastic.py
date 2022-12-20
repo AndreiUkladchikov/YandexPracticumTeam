@@ -1,10 +1,14 @@
-from typing import Optional
-
 from elasticsearch import AsyncElasticsearch
 
-es: Optional[AsyncElasticsearch] = None
+from db.protocols.db_protocol import DbProtocol
 
 
-# Функция понадобится при внедрении зависимостей
-async def get_elastic() -> AsyncElasticsearch:
-    return es
+class ElasticDb(DbProtocol):
+    def __init__(self, elastic: AsyncElasticsearch):
+        self.elastic = elastic
+
+    async def _close(self):
+        await self.elastic.close()
+
+    async def _get_by_id(self, index: str, id: str):
+        return await self.elastic.get(index=index, id=id)

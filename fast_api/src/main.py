@@ -9,7 +9,9 @@ from fastapi.responses import ORJSONResponse
 from api.v1 import films, genres, persons
 from core.config import settings
 from core.logger import LOGGING
-from db import elastic, redis
+from db.elastic import ElasticDb
+from db.redis import RedisCache
+from repository import db_context
 
 
 app = FastAPI(
@@ -22,19 +24,19 @@ app = FastAPI(
 
 @app.on_event("startup")
 async def startup():
-    redis.redis = await aioredis.create_redis_pool(
-        f"redis://{settings.redis_host}:{settings.redis_port}", minsize=10, maxsize=20
+    db_context.db = ElasticDb(
+        AsyncElasticsearch(hosts=[f"http://{settings.elastic_host}:{settings.elastic_port}"])
     )
-    elastic.es = AsyncElasticsearch(
-        hosts=[f"http://{settings.elastic_host}:{settings.elastic_port}"]
+    db_context.cache = RedisCache(
+        await aioredis.create_redis_pool(
+            f"redis://{settings.redis_host}:{settings.redis_port}", minsize=10, maxsize=20
+        )
     )
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    redis.redis.close()
-    await redis.redis.wait_closed()
-    await elastic.es.close()
+    await db_context._close()
 
 
 # Подключаем роутер к серверу, указав префикс /v1/films
@@ -49,4 +51,3 @@ if __name__ == "__main__":
         host=str(settings.backend_host),
         port=settings.backend_port,
     )
-

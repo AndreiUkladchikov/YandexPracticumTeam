@@ -1,10 +1,24 @@
-from typing import Optional
+import ast
 
 from aioredis import Redis
 
-redis: Optional[Redis] = None
+from db.protocols.cache_protocol import CacheProtocol
 
 
-# Функция понадобится при внедрении зависимостей
-async def get_redis() -> Redis:
-    return redis
+class RedisCache(CacheProtocol):
+    def __init__(self, redis: Redis):
+        self.redis = redis
+
+    async def _close(self):
+        self.redis.close()
+        await self.redis.wait_closed()
+
+    async def _get(self, url):
+        data = await self.redis.get(url)
+        return ast.literal_eval(data.decode("utf-8"))
+
+    async def _put(self, url, object, expire):
+        item = bytes(str(object), "utf-8")
+        await self.redis.set(
+            url, item, expire=expire
+        )
