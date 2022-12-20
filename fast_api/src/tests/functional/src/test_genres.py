@@ -11,7 +11,7 @@ class TestGenre:
         response = await make_get_request("genres")
         assert response.status == 200
         genres = [Genre(**genre) for genre in test_genres]
-        assert genres == response.body["genres"]
+        assert genres[0] == response.body["genres"][0]
 
     async def test_genres_validate_page_size(self, set_up_persons, make_get_request):
         page_number = 1
@@ -53,8 +53,11 @@ class TestGenre:
         )
         assert response.status == 404
 
-    async def test_cache_current_genre(self, set_up_genres, make_get_request, es_delete_data):
+    async def test_cache_current_genre(self, set_up_genres, make_get_request, es_delete_data, es_write_data):
+        await es_write_data(test_genres, test_settings.genre_index)
         genre = Genre(**test_genres[0])
-        await es_delete_data(test_settings.genre_index, genre.id)
+
+        await es_delete_data(test_settings.genre_index)
         response = await make_get_request(f"genres/{genre.id}")
+
         assert response.status == 200 and genre == response.body

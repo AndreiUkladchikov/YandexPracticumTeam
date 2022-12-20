@@ -20,7 +20,7 @@ async def test_cache(make_get_request, es_delete_data, es_write_data):
     assert response.status == 200
 
     # Delete 1 film from elastic
-    await es_delete_data(test_settings.movie_index, 'a38e738e-ac45-40ff-9f98-ab7a0ff45054')
+    await es_delete_data(test_settings.movie_index)
 
     response = await make_get_request("films")
 
@@ -58,21 +58,3 @@ class TestMainPage:
     async def test_invalid_genre(self, make_get_request, set_up_main_page):
         response = await make_get_request("films", genre="1234")
         assert response.status == 404
-
-
-@pytest.mark.asyncio
-async def test_cache(make_get_request, es_delete_data, es_write_data):
-    await es_write_data(test_films_main_page, test_settings.movie_index)
-
-    response = await make_get_request("films")
-    assert response.status == 200
-
-    await es_delete_data(test_settings.movie_index)
-
-    response = await make_get_request("films")
-
-    assert response.status == 200
-
-    films = [Film(**film) for film in test_films_main_page]
-
-    assert films == response.body["films"]

@@ -30,8 +30,10 @@ def es_write_data(es_client: AsyncElasticsearch):
 
 @pytest.fixture(scope="class")
 def es_delete_data(es_client: AsyncElasticsearch):
-    async def inner(index, id):
-        response = await es_client.delete(index=index, id=id)
+    async def inner(index):
+        response = await es_client.delete_by_query(
+            index=index, body={"query": {"match_all": {}}}
+        )
     return inner
 
 
@@ -41,6 +43,7 @@ async def set_up_search_films():
     bulk_query = get_es_bulk_query(test_data_films, test_settings.movie_index)
     await helpers.async_bulk(client, bulk_query, refresh="wait_for")
     yield client
+    await client.delete_by_query(index=test_settings.movie_index, body={"query": {"match_all": {}}})
     await client.close()
 
 
@@ -57,13 +60,18 @@ async def set_up_main_page():
     await helpers.async_bulk(client, bulk_query_genres, refresh="wait_for")
 
     yield client
+    await client.delete_by_query(index=test_settings.movie_index, body={"query": {"match_all": {}}})
+    await client.delete_by_query(index=test_settings.genre_index, body={"query": {"match_all": {}}})
     await client.close()
 
 
 @pytest.fixture(scope="class")
 async def set_up_genres(es_write_data):
+    client = AsyncElasticsearch(hosts=test_settings.es_host)
     await es_write_data(test_genres, test_settings.genre_index)
-    yield es_client
+    yield client
+    await client.delete_by_query(index=test_settings.genre_index, body={"query": {"match_all": {}}})
+    await client.close()
 
 
 @pytest.fixture(scope="class")

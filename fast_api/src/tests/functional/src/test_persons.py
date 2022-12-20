@@ -76,7 +76,7 @@ class TestPerson:
 
     async def test_search_cached_current_person(self, set_up_persons, make_get_request, es_delete_data):
         person_id = test_persons[1]["id"]
-        await es_delete_data(test_settings.person_index, person_id)
+        await es_delete_data(test_settings.person_index)
         response = await make_get_request(
             end_of_url=f"persons/{person_id}"
         )
