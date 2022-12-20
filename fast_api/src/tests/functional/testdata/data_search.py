@@ -26,7 +26,3 @@ test_data_films = [
     }
     for _ in range(50)
 ]
-
-
-
-

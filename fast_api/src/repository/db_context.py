@@ -36,9 +36,14 @@ class DbContext:
         self, body: Any, page_number: int, page_size: int
     ) -> list[Any] | None:
         try:
-            doc = await self.elastic.search(
-                index=self.index, body=body, from_=(page_number - 1) * page_size, size=page_size
-            )
+            if body is None:
+                doc = await self.elastic.search(
+                    index=self.index, from_=(page_number - 1) * page_size, size=page_size
+                )
+            else:
+                doc = await self.elastic.search(
+                    index=self.index, body=body, from_=(page_number - 1) * page_size, size=page_size
+                )
 
         except NotFoundError:
             return None
