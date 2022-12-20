@@ -6,9 +6,9 @@ from dataclasses import dataclass
 import aiohttp
 import pytest
 from elasticsearch import AsyncElasticsearch, helpers
-from integration_tests.config import test_settings
-from integration_tests.testdata.data_search import test_data_films
-from integration_tests.testdata.data_main_page import test_main_page_genres, test_films_main_page, cache_films_main_page
+from config import test_settings
+from testdata.data_search import test_data_films
+from testdata.data_main_page import test_main_page_genres, test_films_main_page, cache_films_main_page
 
 
 @pytest.fixture(scope="session")

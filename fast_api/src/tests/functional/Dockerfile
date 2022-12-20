@@ -1,6 +1,6 @@
 FROM --platform=linux/amd64 python:3.10.2-buster
 
-WORKDIR /integration_tests
+WORKDIR /functional
 
 RUN apt update && apt install -y netcat
 RUN pip3 install --upgrade pip
@@ -11,6 +11,6 @@ RUN pip3 install -r requirements.txt --no-cache-dir
 
 COPY . .
 
-WORKDIR /integration_tests
+WORKDIR /functional
 
 CMD ["pytest"]

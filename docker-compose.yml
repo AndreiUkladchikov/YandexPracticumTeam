@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   test_service:
-    build: integration_tests
+    build: fast_api/src/tests/functional
   nginx:
     image: nginx:1.23
     env_file:
