@@ -26,7 +26,7 @@ class FilmService:
         return film
 
     async def get_films_main_page(
-            self, url: str, field: str, genre: str, page_number: int, page_size: int
+        self, url: str, field: str, genre: str, page_number: int, page_size: int
     ) -> (list[Film] | None, int):
         order = "desc" if field[0] == "-" else "asc"
         field = field.lstrip("-")
@@ -48,13 +48,13 @@ class FilmService:
 
         doc = await self.db_context.get_list(url, page_number, page_size, body)
         if not doc:
-            return None
+            return None, None
 
         total_items: int = doc["hits"]["total"]["value"]
         return [Film(**film["_source"]) for film in doc["hits"]["hits"]], total_items
 
     async def search(
-            self, url: str, query: str, page_number: int, page_size: int
+        self, url: str, query: str, page_number: int, page_size: int
     ) -> (list[Film] | None, int):
         body = {
             "query": {
@@ -79,7 +79,9 @@ class FilmService:
         total_items: int = doc["hits"]["total"]["value"]
         return [Film(**film["_source"]) for film in doc["hits"]["hits"]], total_items
 
-    async def get_films_by_person_id(self, url: str, page_number: int, page_size: int, person_id: str):
+    async def get_films_by_person_id(
+        self, url: str, page_number: int, page_size: int, person_id: str
+    ):
 
         filter_by_person_id = {
             "query": {
@@ -94,7 +96,7 @@ class FilmService:
                                             {"term": {"actors.id": person_id}},
                                         ]
                                     }
-                                }
+                                },
                             }
                         },
                         {
@@ -106,7 +108,7 @@ class FilmService:
                                             {"term": {"writers.id": person_id}},
                                         ]
                                     }
-                                }
+                                },
                             }
                         },
                         {
@@ -118,24 +120,24 @@ class FilmService:
                                             {"term": {"directors.id": person_id}},
                                         ]
                                     }
-                                }
+                                },
                             }
                         },
                     ]
                 }
-
-
             }
         }
 
-        doc = await self.db_context.get_list(url, page_number, page_size, filter_by_person_id)
+        doc = await self.db_context.get_list(
+            url, page_number, page_size, filter_by_person_id
+        )
         total_items: int = doc["hits"]["total"]["value"]
 
         return [Film(**film["_source"]) for film in doc["hits"]["hits"]], total_items
 
 
 def get_film_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic),
+    redis: Redis = Depends(get_redis),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> FilmService:
     return FilmService(redis, elastic)
