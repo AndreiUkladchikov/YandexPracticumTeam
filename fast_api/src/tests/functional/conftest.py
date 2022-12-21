@@ -21,6 +21,7 @@ def event_loop():
 
 
 @pytest.fixture(scope="class")
+@pytest.fixture(scope="class")
 def es_write_data(es_client: AsyncElasticsearch):
     async def inner(data, index):
         bulk_query = get_es_bulk_query(data, index)
@@ -28,6 +29,7 @@ def es_write_data(es_client: AsyncElasticsearch):
     return inner
 
 
+@pytest.fixture(scope="class")
 @pytest.fixture(scope="class")
 def es_delete_data(es_client: AsyncElasticsearch):
     async def inner(index):

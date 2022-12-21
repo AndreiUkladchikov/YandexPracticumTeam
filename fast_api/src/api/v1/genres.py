@@ -15,6 +15,7 @@ router = APIRouter()
 
 @router.get(
     "",
+    "",
     response_model=GenresWithPaging,
     summary="Get Genres",
     description="Get list of genres (page by page)",
@@ -59,6 +60,7 @@ async def genre_list(
 async def genre_details(
     request: Request,
     genre_id: str,
+    genre_service: GenreService = Depends(get_genre_service),
     genre_service: GenreService = Depends(get_genre_service),
 ) -> Genre:
 
