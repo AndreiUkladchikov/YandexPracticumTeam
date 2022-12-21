@@ -4,8 +4,6 @@ import pytest
 
 from config import test_settings
 
-pytestmark = pytest.mark.asyncio
-
 from models.models import Film
 from testdata.data_main_page import test_films_main_page, cache_films_main_page
 

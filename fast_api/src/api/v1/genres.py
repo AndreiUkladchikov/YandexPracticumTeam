@@ -3,11 +3,11 @@ from __future__ import annotations
 import math
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-
-from api.constants.error_msgs import GenreMsg
+from api.constants.error_msgs import ElasticMsg, GenreMsg
 from api.models.models import Genre, GenresWithPaging
 from core.config import settings
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from repository.custom_exceptions import ElasticSearchIsNotAvailable
 from services.genre import GenreService, get_genre_service
 
 router = APIRouter()
@@ -21,15 +21,28 @@ router = APIRouter()
 )
 async def genre_list(
     request: Request,
-    page_number: int | None = Query(default=1, alias="page[number]", ge=1),
+    page_number: int
+    | None = Query(alias="page[number]", ge=1, default=1, le=settings.max_page_number),
     page_size: int
-    | None = Query(default=settings.pagination_size, alias="page[size]", ge=1),
-    genre_service: GenreService = Depends(get_genre_service),
+    | None = Query(
+        alias="page[size]",
+        ge=1,
+        default=settings.pagination_size,
+        le=settings.max_page_size,
+    ),
+    film_service: GenreService = Depends(get_genre_service),
 ) -> GenresWithPaging:
-    url = request.url.path + request.url.query
-    genres, total_items = await genre_service.get_list_genres(
-        url, page_number, page_size
-    )
+    url = request.url.path + "?" + request.url.query
+    try:
+        genres, total_items = await film_service.get_list_genres(
+            url, page_number, page_size
+        )
+    except ElasticSearchIsNotAvailable:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=ElasticMsg.elasticsearch_is_not_available,
+        )
+
     if not genres:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail=GenreMsg.no_search_result
@@ -48,8 +61,16 @@ async def genre_details(
     genre_id: str,
     genre_service: GenreService = Depends(get_genre_service),
 ) -> Genre:
-    url = request.url.path + request.url.query
-    genre = await genre_service.get_genre_by_id(url, genre_id)
+
+    url = request.url.path + "?" + request.url.query
+    try:
+        genre = await genre_service.get_genre_by_id(url, genre_id)
+    except ElasticSearchIsNotAvailable:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=ElasticMsg.elasticsearch_is_not_available,
+        )
+
     if not genre:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail=GenreMsg.not_found_by_id

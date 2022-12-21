@@ -6,6 +6,17 @@ from testdata.data_genres import test_genres
 
 
 @pytest.mark.asyncio
+async def test_cache_current_genre(make_get_request, es_delete_data, es_write_data):
+    await es_write_data(test_genres, test_settings.genre_index)
+    genre = Genre(**test_genres[0])
+    await make_get_request(f"genres/{genre.id}")
+    await es_delete_data(test_settings.genre_index)
+    response = await make_get_request(f"genres/{genre.id}")
+
+    assert response.status == 200 and genre == response.body
+
+
+@pytest.mark.asyncio
 class TestGenre:
     async def test_genres(self, set_up_genres, make_get_request):
         response = await make_get_request("genres")
@@ -52,12 +63,3 @@ class TestGenre:
             end_of_url=f"genres/{genre_id}"
         )
         assert response.status == 404
-
-    async def test_cache_current_genre(self, set_up_genres, make_get_request, es_delete_data, es_write_data):
-        await es_write_data(test_genres, test_settings.genre_index)
-        genre = Genre(**test_genres[0])
-
-        await es_delete_data(test_settings.genre_index)
-        response = await make_get_request(f"genres/{genre.id}")
-
-        assert response.status == 200 and genre == response.body

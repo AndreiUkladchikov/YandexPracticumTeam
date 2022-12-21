@@ -3,11 +3,11 @@ from __future__ import annotations
 import math
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-
-from api.constants.error_msgs import FilmMsg
+from api.constants.error_msgs import ElasticMsg, FilmMsg
 from api.models.models import Film, FilmExtended, FilmsWithPaging
 from core.config import settings
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from repository.custom_exceptions import ElasticSearchIsNotAvailable
 from services.film import FilmService, get_film_service
 
 router = APIRouter()
@@ -22,16 +22,29 @@ router = APIRouter()
 async def films_main_page(
     request: Request,
     sort: str = Query(default="-imdb_rating", regex="^-?imdb_rating$"),
-    page_number: int | None = Query(default=1, alias="page[number]", ge=1),
+    page_number: int
+    | None = Query(default=1, alias="page[number]", ge=1, le=settings.max_page_number),
     page_size: int
-    | None = Query(default=settings.pagination_size, alias="page[size]", ge=1),
+    | None = Query(
+        default=settings.pagination_size,
+        alias="page[size]",
+        ge=1,
+        le=settings.max_page_size,
+    ),
     genre: str | None = Query(None, alias="filter[genre]"),
     film_service: FilmService = Depends(get_film_service),
 ) -> FilmsWithPaging:
     url = request.url.path + "?" + request.url.query
-    films, total_items = await film_service.get_films_main_page(
-        url, sort, genre, page_number, page_size
-    )
+    try:
+        films, total_items = await film_service.get_films_main_page(
+            url, sort, genre, page_number, page_size
+        )
+    except ElasticSearchIsNotAvailable:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=ElasticMsg.elasticsearch_is_not_available,
+        )
+
     if not films:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -56,13 +69,27 @@ async def films_main_page(
 async def search_films(
     request: Request,
     query: str,
-    page_number: int | None = Query(default=1, alias="page[number]", ge=1),
+    page_number: int
+    | None = Query(default=1, alias="page[number]", ge=1, le=settings.max_page_number),
     page_size: int
-    | None = Query(default=settings.pagination_size, alias="page[size]", ge=1),
+    | None = Query(
+        default=int(settings.pagination_size),
+        alias="page[size]",
+        ge=1,
+        le=settings.max_page_size,
+    ),
     film_service: FilmService = Depends(get_film_service),
 ) -> FilmsWithPaging:
     url = request.url.path + "?" + request.url.query
-    films, total_items = await film_service.search(url, query, page_number, page_size)
+    try:
+        films, total_items = await film_service.search(
+            url, query, page_number, page_size
+        )
+    except ElasticSearchIsNotAvailable:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=ElasticMsg.elasticsearch_is_not_available,
+        )
     if not films:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -89,8 +116,14 @@ async def film_details(
     film_id: str,
     film_service: FilmService = Depends(get_film_service),
 ) -> FilmExtended:
-    url = request.url.path + request.url.query
-    film = await film_service.get_by_id(url, film_id)
+    url = request.url.path + "?" + request.url.query
+    try:
+        film = await film_service.get_by_id(url, film_id)
+    except ElasticSearchIsNotAvailable:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=ElasticMsg.elasticsearch_is_not_available,
+        )
     if not film:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail=FilmMsg.not_found_by_id

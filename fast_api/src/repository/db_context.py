@@ -3,23 +3,33 @@ from __future__ import annotations
 import ast
 from typing import Any
 from aioredis import Redis
+from loguru import logger
+import elasticsearch
 from elasticsearch import AsyncElasticsearch, NotFoundError
+from repository.custom_exceptions import ElasticSearchIsNotAvailable
 
 
 class DbContext:
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch, index: str, expire: int):
+    def __init__(
+        self, redis: Redis, elastic: AsyncElasticsearch, index: str, expire: int
+    ):
         self.redis = redis
         self.elastic = elastic
         self.index = index
         self.expire = expire
 
     async def _put_to_cache(self, url: str, object: Any):
-        await self.redis.set(
-            url, object, expire=self.expire
-        )
+        try:
+            await self.redis.set(url, object, expire=self.expire)
+        except (ConnectionRefusedError, AttributeError) as ce:
+            logger.error("Enable put data to cache", ce)
 
     async def _get_from_cache(self, url: str) -> Any | None:
-        data = await self.redis.get(url)
+        try:
+            data = await self.redis.get(url)
+        except (ConnectionRefusedError, AttributeError) as ce:
+            logger.error("Enable get data from cache", ce)
+            data = None
         if not data:
             return None
 
@@ -28,6 +38,9 @@ class DbContext:
     async def _get_from_elastic(self, id: str) -> Any | None:
         try:
             doc = await self.elastic.get(index=self.index, id=id)
+        except elasticsearch.ConnectionError as ce:
+            logger.critical("Enable get data from ElasticSearch", ce)
+            raise ElasticSearchIsNotAvailable
         except NotFoundError:
             return None
         return doc
@@ -44,7 +57,9 @@ class DbContext:
                 doc = await self.elastic.search(
                     index=self.index, body=body, from_=(page_number - 1) * page_size, size=page_size
                 )
-
+        except elasticsearch.ConnectionError as ce:
+            logger.critical("Enable get data from ElasticSearch", ce)
+            raise ElasticSearchIsNotAvailable
         except NotFoundError:
             return None
         return doc
@@ -63,7 +78,9 @@ class DbContext:
                 return None
         return item
 
-    async def get_list(self, url: str, page_number, page_size, body=None) -> list[Any] | None:
+    async def get_list(
+        self, url: str, page_number, page_size, body=None
+    ) -> list[Any] | None:
         items = await self._get_from_cache(url)
         if not items:
             items = await self._get_list_from_elastic(body, page_number, page_size)
