@@ -11,6 +11,8 @@ RUN pip3 install -r requirements.txt --no-cache-dir
 
 COPY . .
 
+COPY ./entrypoint.sh /entrypoint.sh
+
 WORKDIR /functional
 
-CMD ["pytest"]
+ENTRYPOINT [ "/entrypoint.sh" ]
