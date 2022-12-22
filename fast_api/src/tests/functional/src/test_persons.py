@@ -1,8 +1,9 @@
 import pytest
-from config import test_settings
-from models.models import Film
-from testdata.data_persons import test_film_by_person, test_persons
-from utils.helpers import make_get_request
+import http
+from functional.config import test_settings
+from functional.models.models import Film
+from functional.testdata.data_persons import test_film_by_person, test_persons
+from functional.utils.helpers import make_get_request
 
 
 @pytest.mark.asyncio
@@ -13,7 +14,7 @@ async def test_search_cached_current_person(es_delete_data, es_write_data):
 
     await es_delete_data(test_settings.person_index)
     response = await make_get_request(end_of_url=f"persons/{person_id}")
-    assert response.status == 200
+    assert response.status == http.HTTPStatus.OK
     person_name = test_persons[1]["full_name"]
     person_film = test_persons[1]["writer_in"]
     assert (
@@ -29,7 +30,7 @@ class TestPerson:
         response = await make_get_request(
             end_of_url="persons/search", query=person_name
         )
-        assert response.status == 200
+        assert response.status == http.HTTPStatus.OK
         person_id = test_persons[0]["id"]
         assert (
             person_id == response.body[0]["id"]
@@ -44,7 +45,7 @@ class TestPerson:
         response = await make_get_request(
             "persons/search", person_name, page_number=page_number, page_size=page_size
         )
-        assert response.status == 422
+        assert response.status == http.HTTPStatus.UNPROCESSABLE_ENTITY
 
     async def test_search_person_validate_page_number(self, set_up_persons):
         person_name = test_persons[0]["full_name"]
@@ -54,7 +55,7 @@ class TestPerson:
         response = await make_get_request(
             "persons/search", person_name, page_number=page_number, page_size=page_size
         )
-        assert response.status == 422
+        assert response.status == http.HTTPStatus.UNPROCESSABLE_ENTITY
 
     async def test_search_person_page_more_than_exists(self, set_up_persons):
         person_name = test_persons[0]["full_name"]
@@ -64,12 +65,12 @@ class TestPerson:
             "persons/search", person_name, page_number=page_number, page_size=page_size
         )
 
-        assert response.status == 404
+        assert response.status == http.HTTPStatus.NOT_FOUND
 
     async def test_current_person(self, set_up_persons):
         person_id = test_persons[1]["id"]
         response = await make_get_request(end_of_url=f"persons/{person_id}")
-        assert response.status == 200
+        assert response.status == http.HTTPStatus.OK
         person_name = test_persons[1]["full_name"]
         person_film = test_persons[1]["writer_in"]
         assert (
@@ -80,11 +81,11 @@ class TestPerson:
     async def test_person_doesnt_exist(self, set_up_persons):
         person_id = "doesnt_exist"
         response = await make_get_request(end_of_url=f"persons/{person_id}")
-        assert response.status == 404
+        assert response.status == http.HTTPStatus.NOT_FOUND
 
     async def test_film_by_person(self, set_up_persons):
         person_id = test_persons[2]["id"]
         response = await make_get_request(end_of_url=f"persons/{person_id}/film")
-        assert response.status == 200
+        assert response.status == http.HTTPStatus.OK
         film = Film(**test_film_by_person[0])
         assert film == response.body["films"][0]

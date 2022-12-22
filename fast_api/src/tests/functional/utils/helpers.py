@@ -1,7 +1,7 @@
 from __future__ import annotations
 import aiohttp
-from tests.functional.config import test_settings
-from tests.functional.models.models import Response
+from functional.config import test_settings
+from functional.models.models import Response
 
 
 async def make_get_request(
