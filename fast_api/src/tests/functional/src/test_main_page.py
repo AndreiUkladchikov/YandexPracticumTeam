@@ -14,7 +14,7 @@ async def test_cache(make_get_request, es_delete_data, es_write_data):
     await es_write_data(cache_films_main_page, test_settings.movie_index)
 
     response = await make_get_request("films")
-    firstResponse = response.body
+    first_response = response.body
     assert response.status == 200
 
     # Delete 1 film from elastic
@@ -24,7 +24,7 @@ async def test_cache(make_get_request, es_delete_data, es_write_data):
 
     assert response.status == 200
 
-    assert firstResponse == response.body
+    assert first_response == response.body
 
 
 @pytest.mark.asyncio
