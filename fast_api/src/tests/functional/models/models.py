@@ -1,3 +1,4 @@
+from __future__ import annotations
 from enum import Enum
 
 from pydantic import BaseModel
@@ -25,3 +26,8 @@ class Person(BaseModel):
     full_name: str
     role: set[PersonRole] | None
     film_ids: list[str] | None
+
+
+class Response(BaseModel):
+    body: dict | list
+    status: int
