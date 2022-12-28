@@ -8,11 +8,16 @@ from flask_pydantic import validate
 from db import db, init_db
 from db_models import User
 from forms import LoginForm
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
+from config import settings
 
 app = Flask(__name__)
 
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
+
+app.config["JWT_SECRET_KEY"] = settings.jwt_secret_key
+jwt = JWTManager(app)
 
 init_db(app)
 app.app_context().push()
@@ -32,10 +37,16 @@ def check_login_password(body: LoginForm):
     if not (user and user.check_password(body.password)):
         return jsonify({"msg": "Wrong email or password"}), http.HTTPStatus.UNAUTHORIZED
 
+    # TODO Add additional_claims with role (https://flask-jwt-extended.readthedocs.io/en/stable/add_custom_data_claims/)
+    additional_claims = {"role": "subscriber", "foo": "bar"}
+    # TODO
+    access_token = create_access_token(identity=user.email)
+
     print("Success authorization!")
 
-    # TODO ("Put to DB: location, refresh_token, time")
-    return jsonify({"msg": "Success authorization!"}), http.HTTPStatus.OK
+    # TODO Put to DB (table: user_access): location, refresh_token, time
+    # TODO Generate refresh_token, put it to DB
+    return jsonify(msg="Success authorization!", access_token=access_token), http.HTTPStatus.OK
 
 
 @app.route("/api/v1/auth/registration", methods=["POST"])
@@ -62,9 +73,20 @@ def refresh_token():
     pass
 
 
+# Test route
+@app.route("/api/v1/auth/check", methods=["POST", "GET"])
+@jwt_required()
+def check():
+    current_user = get_jwt_identity()
+    return jsonify(msg="My congratulations", logged_in_as=current_user)
+
+
 @app.route("/api/v1/auth/logout", methods=["POST"])
+@jwt_required()
 def logout():
-    pass
+    # TODO put access token to black list (Redis), delete refresh token from DB
+    current_user = get_jwt_identity()
+    return jsonify(msg=f"Logout from {current_user}"), http.HTTPStatus.OK
 
 
 if __name__ == "__main__":

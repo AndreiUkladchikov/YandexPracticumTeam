@@ -18,20 +18,3 @@ class LoginForm(BaseModel):
         ):
             raise ValueError("The provided email address is invalid")
         return email
-
-
-class BaseForm(BaseModel):
-    title: str
-
-
-class ResponseRegistrationForm(BaseForm):
-    pass
-
-
-class ResponseLogoutForm(BaseForm):
-    pass
-
-
-class ResponseAuthenticationForm(BaseModel):
-    access_token: str
-    refresh_token: str
