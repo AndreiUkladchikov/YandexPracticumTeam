@@ -1,22 +1,44 @@
 # flask_app/app.py
 import http
 import os
+from datetime import timedelta
 
 from flask import Flask, jsonify
+from flask_jwt_extended import (JWTManager, create_access_token,
+                                get_jwt_identity, jwt_required)
 from flask_pydantic import validate
 
+from config import settings
 from db import db, init_db
 from db_models import User
 from forms import LoginForm
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
-from config import settings
+
+# def create_app():
+#     app = Flask(__name__)
+#     init_db(app)
+#     app.app_context().push()
+#     db.create_all()
+#
+#     SECRET_KEY = os.urandom(32)
+#     app.config["SECRET_KEY"] = SECRET_KEY
+#
+#     app.config["JWT_SECRET_KEY"] = settings.jwt_secret_key
+#     jwt = JWTManager(app)
+#
+#     return app
+
 
 app = Flask(__name__)
+
 
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
 
 app.config["JWT_SECRET_KEY"] = settings.jwt_secret_key
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(
+    seconds=settings.access_token_expires_in_seconds
+)
+
 jwt = JWTManager(app)
 
 init_db(app)
@@ -24,13 +46,8 @@ app.app_context().push()
 db.create_all()
 
 
-@app.route("/hello-world")
-def hello_world():
-    return f"Hello, World!"
-
-
 @app.route("/api/v1/auth/login", methods=["POST"])
-@validate(body=LoginForm)
+@validate()
 def check_login_password(body: LoginForm):
     user = User.query.filter_by(email=body.email).one_or_none()
 
@@ -46,7 +63,10 @@ def check_login_password(body: LoginForm):
 
     # TODO Put to DB (table: user_access): location, refresh_token, time
     # TODO Generate refresh_token, put it to DB
-    return jsonify(msg="Success authorization!", access_token=access_token), http.HTTPStatus.OK
+    return (
+        jsonify(msg="Success authorization!", access_token=access_token),
+        http.HTTPStatus.OK,
+    )
 
 
 @app.route("/api/v1/auth/registration", methods=["POST"])
@@ -81,7 +101,7 @@ def check():
     return jsonify(msg="My congratulations", logged_in_as=current_user)
 
 
-@app.route("/api/v1/auth/logout", methods=["POST"])
+@app.route("/api/v1/auth/logout", methods=["POST", "GET"])
 @jwt_required()
 def logout():
     # TODO put access token to black list (Redis), delete refresh token from DB
