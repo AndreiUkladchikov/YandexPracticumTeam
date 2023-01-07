@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  auth_db:
+      image: postgres:14
+      container_name: auth_database
+      env_file:
+        - "./flask_app/.env-dev"
+      ports:
+        - '${DB_PORT}:${DB_PORT}'
+      volumes:
+        - auth_database:/var/lib/postgresql/data/
+
+volumes:
+  auth_database:

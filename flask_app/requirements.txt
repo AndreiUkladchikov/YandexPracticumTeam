@@ -1,0 +1,8 @@
+Flask==2.2.2
+Flask_JWT_Extended==4.4.4
+Flask_Pydantic==0.11.0
+flask_sqlalchemy==3.0.2
+pydantic==1.10.2
+SQLAlchemy==1.4.45
+Werkzeug==2.2.2
+pytest~=7.2.0
