@@ -1,4 +1,7 @@
+import os
 from pydantic import BaseSettings, Field
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 class Settings(BaseSettings):
@@ -13,7 +16,7 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = (
-            "/Users/mike/study/yandex_praktikum/YandexPracticumTeam/flask_app/.env"
+            f"{base_dir}/.env"
         )
 
 

@@ -4,7 +4,7 @@ services:
       image: postgres:14
       container_name: auth_database
       env_file:
-        - "./flask_app/.env"
+        - "./flask_app/.env-dev"
       ports:
         - '${DB_PORT}:${DB_PORT}'
       volumes:
