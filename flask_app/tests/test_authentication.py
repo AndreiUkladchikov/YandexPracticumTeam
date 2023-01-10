@@ -50,6 +50,9 @@ class TestLogin:
         is_access_token_in_payload = "access_token" in response_login.json
         assert is_access_token_in_payload is True
 
+        is_refresh_token_in_payload = "refresh_token" in response_login.json
+        assert is_refresh_token_in_payload is True
+
 
 class TestJWTAccessToken:
     def test_login_with_access_token(self, create_user):

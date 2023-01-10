@@ -3,8 +3,8 @@ import http
 import os
 from datetime import timedelta
 
-from flask import Flask, jsonify
-from flask_jwt_extended import (JWTManager, create_access_token,
+from flask import Flask, jsonify, request
+from flask_jwt_extended import (JWTManager, create_access_token, create_refresh_token,
                                 get_jwt_identity, jwt_required)
 from flask_pydantic import validate
 
@@ -36,7 +36,10 @@ app.config["SECRET_KEY"] = SECRET_KEY
 
 app.config["JWT_SECRET_KEY"] = settings.jwt_secret_key
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(
-    seconds=settings.access_token_expires_in_seconds
+    hours=settings.access_token_expires_in_hours
+)
+app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(
+    days=settings.refresh_token_expires_in_days
 )
 
 jwt = JWTManager(app)
@@ -55,16 +58,18 @@ def check_login_password(body: LoginForm):
         return jsonify({"msg": "Wrong email or password"}), http.HTTPStatus.UNAUTHORIZED
 
     # TODO Add additional_claims with role (https://flask-jwt-extended.readthedocs.io/en/stable/add_custom_data_claims/)
-    additional_claims = {"role": "subscriber", "foo": "bar"}
-    # TODO
-    access_token = create_access_token(identity=user.email)
+    additional_claims = {"role": "subscriber"}
 
-    print("Success authorization!")
+    access_token = create_access_token(identity=user.email, additional_claims=additional_claims)
+    refresh_token = create_refresh_token(identity=user.email, additional_claims=additional_claims)
 
-    # TODO Put to DB (table: user_access): location, refresh_token, time
-    # TODO Generate refresh_token, put it to DB
+    user.refresh_token = refresh_token
+
+    user.save_to_db()
+
+    # TODO Put to DB (table: user_access): location, time
     return (
-        jsonify(msg="Success authorization!", access_token=access_token),
+        jsonify(msg="Success authorization!", access_token=access_token, refresh_token=refresh_token),
         http.HTTPStatus.OK,
     )
 
@@ -81,16 +86,34 @@ def registration(body: LoginForm):
             http.HTTPStatus.UNAUTHORIZED,
         )
 
-    with app.app_context():
-        db.session.add(user)
-        db.session.commit()
+    user.save_to_db()
 
     return jsonify({"msg": "Thank you for registration!"}), http.HTTPStatus.OK
 
 
 @app.route("/api/v1/auth/refresh-tokens", methods=["POST"])
-def refresh_token():
-    pass
+@jwt_required(refresh=True)
+def refresh_tokens():
+    head = request.headers
+    refresh = head.get('Authorization').split(" ")[-1]
+
+    current_user = get_jwt_identity()
+
+    user = User.query.filter_by(email=current_user).one_or_none()
+
+    if refresh != user.refresh_token:
+        user.refresh_token = None
+        user.save_to_db()
+        return (
+            jsonify({"msg": "The token has not been confirmed. Go through authorization"}),
+            http.HTTPStatus.UNAUTHORIZED,
+        )
+
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity)
+    refresh_token = create_refresh_token(identity=identity)
+
+    return jsonify(access_token=access_token, refresh_token=refresh_token)
 
 
 # Test route
