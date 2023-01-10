@@ -58,6 +58,7 @@ def check_login_password(body: LoginForm):
         return jsonify({"msg": "Wrong email or password"}), http.HTTPStatus.UNAUTHORIZED
 
     # TODO Add additional_claims with role (https://flask-jwt-extended.readthedocs.io/en/stable/add_custom_data_claims/)
+
     additional_claims = {"role": "subscriber"}
 
     access_token = create_access_token(identity=user.email, additional_claims=additional_claims)
@@ -70,6 +71,7 @@ def check_login_password(body: LoginForm):
     # TODO Put to DB (table: user_access): location, time
     return (
         jsonify(msg="Success authorization!", access_token=access_token, refresh_token=refresh_token),
+
         http.HTTPStatus.OK,
     )
 
