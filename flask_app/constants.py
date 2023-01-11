@@ -1,5 +1,8 @@
 from db_models import Role
 
+# Роли - access level с шагом 10
+# При появлении новой роли (например Subscriber+) будет проще добавить в текущую реализацию
+
 ROLE_USER = Role(
     name="user",
     permissions="",

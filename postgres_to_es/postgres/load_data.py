@@ -16,7 +16,7 @@ def load_film_works(conn: _connection, date: datetime, offset: int, limit: int) 
             """
                 DROP TABLE IF EXISTS temp_table;
 
-                SELECT DISTINCT movies.id, movies.title, movies.description, movies.type, movies.rating
+                SELECT DISTINCT movies.id, movies.title, movies.description, movies.type, movies.rating, movies.access_level
                 INTO TEMP TABLE temp_table
                 FROM content.film_work as movies
                 LEFT JOIN content.person_film_work as person_filmworks on movies.id = person_filmworks.film_work_id
@@ -36,6 +36,7 @@ def load_film_works(conn: _connection, date: datetime, offset: int, limit: int) 
                     temp_table.description,
                     temp_table.rating,
                     temp_table.type,
+                    temp_table.access_level,
                     person_filmworks.person_id,
                     person_filmworks.role,
                     person.full_name,
@@ -68,7 +69,8 @@ def load_film_works(conn: _connection, date: datetime, offset: int, limit: int) 
                         writers=[],
                         genres=[],
                         genre=[],
-                        directors=[]
+                        directors=[],
+                        access_level=film.access_level
                     )
                 if film.role == PersonTypes.DIRECTOR:
                     movies[film.id].director = film.full_name
