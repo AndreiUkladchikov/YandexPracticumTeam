@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
-from db_models import User
+from test_data import url_check, url_login, url_registration, user_credits
 
-from test_data import user_credits, url_login, url_registration, url_check
+from db_models import User
 
 
 # TODO: tests depend on each other

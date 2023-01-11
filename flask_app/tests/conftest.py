@@ -1,10 +1,9 @@
 import pytest
+from db import db
+from test_data import url_login, url_registration, user_credits
 
 from app import app
-from db import db
 from db_models import User
-
-from test_data import user_credits, url_login, url_registration
 
 
 @pytest.fixture(scope="class")
