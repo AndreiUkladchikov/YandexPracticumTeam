@@ -5,8 +5,12 @@ import uuid
 from datetime import timedelta
 
 from flask import Flask, jsonify
-from flask_jwt_extended import (JWTManager, create_access_token,
-                                get_jwt_identity, jwt_required)
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    get_jwt_identity,
+    jwt_required,
+)
 from flask_pydantic import validate
 
 from config import settings
@@ -56,15 +60,14 @@ def check_login_password(body: LoginForm):
 @app.route(f"{settings.base_api_url}/registration", methods=["POST"])
 @validate()
 def registration(body: LoginForm):
-    user = User(email=body.email)
-    user.set_password(body.password)
-
     if user_service.get({"email": body.email}):
         return (
             jsonify({"msg": "The email is already registered"}),
             http.HTTPStatus.UNAUTHORIZED,
         )
 
+    user = User(email=body.email)
+    user.set_password(body.password)
     user_service.insert(user)
 
     return jsonify({"msg": "Thank you for registration!"}), http.HTTPStatus.OK
@@ -73,6 +76,14 @@ def registration(body: LoginForm):
 @app.route(f"{settings.base_api_url}/refresh-tokens", methods=["POST"])
 def refresh_token():
     pass
+
+
+# Test route
+@app.route(f"{settings.base_api_url}/check", methods=["POST", "GET"])
+@jwt_required()
+def check():
+    current_user = get_jwt_identity()
+    return jsonify(msg="My congratulations", logged_in_as=current_user)
 
 
 @app.route(f"{settings.base_api_url}/logout", methods=["POST", "GET"])

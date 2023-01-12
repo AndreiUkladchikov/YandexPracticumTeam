@@ -37,3 +37,7 @@ class BaseService(ABC):
     @abc.abstractmethod
     def delete(self, obj: Model):
         pass
+
+    @abc.abstractmethod
+    def clear(self):
+        pass

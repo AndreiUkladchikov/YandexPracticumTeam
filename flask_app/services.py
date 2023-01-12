@@ -9,19 +9,19 @@ class UserService(BaseService):
         self.client = client
         self.model = User
 
-    def all(self):
+    def all(self) -> list[User]:
         with self.client.get_session() as session:
             users = session.scalars(select(self.model)).all()
             session.expunge_all()
             return users
 
-    def find(self, attrs: dict):
+    def find(self, attrs: dict) -> list[User]:
         with self.client.get_session() as session:
             users = session.scalars(select(self.model).filter_by(**attrs)).all()
             session.expunge_all()
             return users
 
-    def get(self, attr: dict):
+    def get(self, attr: dict) -> User:
         with self.client.get_session() as session:
             user = session.scalars(select(self.model).filter_by(**attr)).first()
             session.expunge_all()
@@ -40,3 +40,7 @@ class UserService(BaseService):
     def delete(self, user: User):
         with self.client.get_session() as session:
             session.delete(user)
+
+    def clear(self):
+        with self.client.get_session() as session:
+            session.query(User).delete()

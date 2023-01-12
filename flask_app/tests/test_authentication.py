@@ -2,52 +2,50 @@ from http import HTTPStatus
 
 from test_data import url_check, url_login, url_registration, user_credits
 
-from db_models import User
+from clients import postgres_client
+from services import UserService
+
+user_service = UserService(postgres_client)
 
 
 # TODO: tests depend on each other
 class TestRegistration:
-    def test_valid_user(self, client):
-        response_registration = client.post(url_registration, json=user_credits)
+    def test_valid_user(self, http_session):
+        response_registration = http_session.post(url_registration, json=user_credits)
 
         assert response_registration.status_code == HTTPStatus.OK
+        assert user_service.get({"email": user_credits.get("email")}) is not None
 
-        assert (
-            User.query.filter_by(email=user_credits.get("email")).one_or_none()
-            is not None
-        )
-
-    def test_repeated_registration(self, client):
-        response_registration = client.post(url_registration, json=user_credits)
+    def test_repeated_registration(self, http_session):
+        response_registration = http_session.post(url_registration, json=user_credits)
         assert response_registration.status_code == HTTPStatus.UNAUTHORIZED
 
-    def test_invalid_credentials(self, client):
-        response_registration = client.post(
+    def test_invalid_credentials(self, http_session):
+        response_registration = http_session.post(
             url_registration, json={"email": 123, "password": 123}
         )
-
         assert response_registration.status_code == HTTPStatus.BAD_REQUEST
 
 
 class TestLogin:
-    def test_without_params(self, client):
-        response = client.post(url_login, json={})
+    def test_without_params(self, http_session):
+        response = http_session.post(url_login, json={})
         assert response.status_code == HTTPStatus.BAD_REQUEST
 
-    def test_fake_credits(self, client):
-        response = client.post(
+    def test_fake_credits(self, http_session):
+        response = http_session.post(
             url_login, json={"email": "fake@user.ru", "password": "fake_password"}
         )
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
-    def test_valid_user(self, client):
-        client.post(url_registration, json=user_credits)
+    def test_valid_user(self, http_session):
+        http_session.post(url_registration, json=user_credits)
 
-        response_login = client.post(url_login, json=user_credits)
+        response_login = http_session.post(url_login, json=user_credits)
 
         assert response_login.status_code == HTTPStatus.OK
 
-        is_access_token_in_payload = "access_token" in response_login.json
+        is_access_token_in_payload = "access_token" in response_login.json().keys()
         assert is_access_token_in_payload is True
 
 
@@ -61,4 +59,4 @@ class TestJWTAccessToken:
 
         assert response.status_code == 200
 
-        assert response.json["logged_in_as"] == user_credits["email"]
+        assert response.json().get("logged_in_as") == user_credits["email"]

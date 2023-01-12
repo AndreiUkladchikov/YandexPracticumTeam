@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 
+import requests
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
@@ -33,7 +34,16 @@ class PostgresClient(BaseClient):
 
     def create_all_tables(self):
         import db_models
+
         self.base.metadata.create_all(self.engine)
+
+
+class HttpClient(BaseClient):
+    @contextmanager
+    def get_session(self):
+        session = requests.Session()
+        yield session
+        session.close()
 
 
 postgres_client = PostgresClient(
