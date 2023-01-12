@@ -1,6 +1,7 @@
 # flask_app/app.py
 import http
 import os
+import logging
 from datetime import timedelta
 
 from flask import Flask, jsonify
@@ -12,6 +13,7 @@ from config import settings
 from db import db, init_db
 from db_models import User
 from forms import LoginForm
+import constants
 
 # def create_app():
 #     app = Flask(__name__)
@@ -44,7 +46,6 @@ jwt = JWTManager(app)
 init_db(app)
 app.app_context().push()
 db.create_all()
-
 
 @app.route("/api/v1/auth/login", methods=["POST"])
 @validate()
@@ -109,5 +110,17 @@ def logout():
     return jsonify(msg=f"Logout from {current_user}"), http.HTTPStatus.OK
 
 
+def create_test_roles():
+    try:
+        db.session.add(constants.ROLE_USER)
+        db.session.add(constants.ROLE_SUBSCRIBER)
+        db.session.add(constants.ROLE_ADMIN)
+        db.session.add(constants.ROLE_OWNER)
+        db.session.commit()
+    except Exception:
+        logging.info('Roles already created')
+
+
 if __name__ == "__main__":
     app.run(debug=True)
+    create_test_roles()

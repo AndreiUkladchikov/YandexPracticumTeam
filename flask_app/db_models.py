@@ -51,7 +51,8 @@ class UserRole(db.Model):
     def __repr__(self):
         return self.role_id
 
-    # ToDo: update Role
+    def update_role(self, id):
+        self.role_id = id
 
 
 class Role(db.Model):
@@ -65,13 +66,16 @@ class Role(db.Model):
         nullable=False,
     )
     name: str = db.Column(db.String, unique=True, nullable=False)
-    permissions: str = db.Column(db.String, unique=True, nullable=True)
+    permissions: str = db.Column(db.String, nullable=True)
     access_level: int = db.Column(db.Integer, nullable=False, default=0)
 
     def __repr__(self):
         return self.permissions
 
-    # ToDo: update permissions, add permission, delete permissions
+    def update_role(self, name, permissions, access_level):
+        self.name = name
+        self.permissions = permissions
+        self.access_level = access_level
 
 
 class UserAccessHistory(db.Model):
