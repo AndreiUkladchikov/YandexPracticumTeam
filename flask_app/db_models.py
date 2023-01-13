@@ -84,10 +84,9 @@ class UserAccessHistory(db.Model):
     id: int = db.Column(db.Integer, nullable=False, primary_key=True)
     user_id: uuid.UUID = db.Column(
         UUID(as_uuid=True),
-        unique=True,
         nullable=False,
     )
 
-    location: str = db.Column(db.String, unique=True, nullable=False)
-    device: str = db.Column(db.String, unique=True, nullable=False)
-    time: datetime.datetime = db.Column(db.DateTime, unique=True, nullable=False)
+    location: str = db.Column(db.String, nullable=False)
+    device: str = db.Column(db.String, nullable=False)
+    time: datetime.datetime = db.Column(db.DateTime, nullable=False)
