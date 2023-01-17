@@ -9,7 +9,7 @@ services:
   nginx:
     image: nginx:1.23
     env_file:
-      - .env
+      - .env-sample
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./configs:/etc/nginx/conf.d:ro
@@ -31,7 +31,7 @@ services:
     build: fast_api
     container_name: fast_api_container
     env_file:
-      - .env
+      - .env-sample
     depends_on:
       - elastic
       - redis
@@ -42,7 +42,7 @@ services:
     build: postgres_to_es
     container_name: etl_container
     env_file:
-      - .env
+      - .env-sample
     depends_on:
       - db
       - elastic
@@ -64,7 +64,7 @@ services:
         soft: 65536
         hard: 65536
     env_file:
-      - .env
+      - .env-sample
     ports:
       - '${ELASTIC_PORT}:${ELASTIC_PORT}'
     volumes:
@@ -73,7 +73,7 @@ services:
   db:
     image: postgres:14
     env_file:
-      - .env
+      - .env-sample
     container_name: db
     ports:
       - '${DB_PORT}:${DB_PORT}'
