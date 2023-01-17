@@ -1,14 +1,24 @@
 version: '3.8'
 services:
   auth_db:
-      image: postgres:14
-      container_name: auth_database
-      env_file:
-        - "./flask_app/.env-dev"
-      ports:
-        - '${DB_PORT}:${DB_PORT}'
-      volumes:
-        - auth_database:/var/lib/postgresql/data/
+    image: postgres:14
+    container_name: auth_database
+    env_file:
+      - "./flask_app/.env-dev"
+    ports:
+      - '${DB_PORT}:${DB_PORT}'
+    volumes:
+      - auth_database:/var/lib/postgresql/data/
+    
+  auth_redis:
+    image: redis:7.0.5
+    container_name: auth_redis
+    env_file:
+      - "./flask_app/.env-dev"
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
+    expose:
+      - '${REDIS_PORT}'
 
 volumes:
   auth_database:

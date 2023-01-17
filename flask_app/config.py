@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     access_token_expires_in_hours: int = Field(default=1)
     refresh_token_expires_in_days: int = Field(default=30)
 
+    redis_host: str = ...
+    redis_port: int = ...
+
     class Config:
         env_file = (
             f"{base_dir}/.env"

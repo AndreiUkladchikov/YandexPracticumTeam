@@ -2,7 +2,6 @@
 import uuid
 import datetime
 
-
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -37,7 +36,9 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
+
 # TODO Create tables user_roles, roles, user_access
+
 
 class UserRole(db.Model):
     __tablename__ = "user_roles"
@@ -87,10 +88,13 @@ class UserAccessHistory(db.Model):
     id: int = db.Column(db.Integer, nullable=False, primary_key=True)
     user_id: uuid.UUID = db.Column(
         UUID(as_uuid=True),
-        unique=True,
         nullable=False,
     )
 
-    location: str = db.Column(db.String, unique=True, nullable=False)
-    device: str = db.Column(db.String, unique=True, nullable=False)
-    time: datetime.datetime = db.Column(db.DateTime, unique=True, nullable=False)
+    location: str = db.Column(db.String, nullable=True)
+    device: str = db.Column(db.String, nullable=True)
+    time: datetime.datetime = db.Column(db.DateTime, nullable=False)
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()

@@ -1,5 +1,7 @@
-import re
+from __future__ import annotations
 
+import re
+import datetime
 from pydantic import BaseModel, Field, validator
 
 
@@ -19,3 +21,19 @@ class LoginForm(BaseModel):
         ):
             raise ValueError("The provided email address is invalid")
         return email
+
+
+class PasswordResetForm(LoginForm):
+    previous_password: str = Field(min_length=3, max_length=20)
+
+
+class SingleAccessRecord(BaseModel):
+    email: str = ...
+    location: str = Field(default=None)
+    device: str = Field(default=None)
+    time: datetime.datetime = ...
+
+
+class HistoryResponseForm(BaseModel):
+    msg: str = ...
+    records: list[SingleAccessRecord] | None = Field(default=None)

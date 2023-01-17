@@ -31,5 +31,8 @@ def create_user(client):
     client.post(url_registration, json=user_credits)
     response_login = client.post(url_login, json=user_credits)
     access_token: str = response_login.json["access_token"]
+    refresh_token: str = response_login.json["refresh_token"]
 
-    yield client, access_token
+    res = {"client": client, "access_token": access_token,
+           "refresh_token": refresh_token}
+    yield res
