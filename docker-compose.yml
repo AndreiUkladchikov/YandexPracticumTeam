@@ -68,7 +68,7 @@ services:
     ports:
       - '${ELASTIC_PORT}:${ELASTIC_PORT}'
     volumes:
-      - etl_volume:/usr/share/elasticsearch
+      - etl_volume:/usr/share/elasticsearch/data
 
   db:
     image: postgres:14
