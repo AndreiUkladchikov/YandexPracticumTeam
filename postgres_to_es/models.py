@@ -23,6 +23,7 @@ class NestedModelPerson(BaseModel):
     id: uuid.UUID
     full_name: str
 
+
 class Movie(BaseModel):
     id: uuid.UUID
     imdb_rating: float | None = 0.0
