@@ -1,7 +1,6 @@
 # flask_app/app.py
 import http
 import os
-import uuid
 import logging
 from datetime import timedelta
 
@@ -16,9 +15,11 @@ from flask_pydantic import validate
 
 from config import settings
 from db_models import User
-from flask_app.clients import postgres_client
+from clients import postgres_client
 from forms import LoginForm
-from services import UserService
+from services import UserService, RoleService
+
+import constants
 
 app = Flask(__name__)
 
@@ -33,6 +34,7 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(
 jwt = JWTManager(app)
 app.app_context().push()
 user_service = UserService(postgres_client)
+role_service = RoleService(postgres_client)
 
 
 @app.route(f"{settings.base_api_url}/login", methods=["POST"])
@@ -97,11 +99,10 @@ def logout():
 
 def create_test_roles():
     try:
-        db.session.add(constants.ROLE_USER)
-        db.session.add(constants.ROLE_SUBSCRIBER)
-        db.session.add(constants.ROLE_ADMIN)
-        db.session.add(constants.ROLE_OWNER)
-        db.session.commit()
+        role_service.insert(constants.ROLE_USER)
+        role_service.insert(constants.ROLE_SUBSCRIBER)
+        role_service.insert(constants.ROLE_ADMIN)
+        role_service.insert(constants.ROLE_OWNER)
     except Exception:
         logging.info('Roles already created')
 

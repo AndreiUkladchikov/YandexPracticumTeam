@@ -1,11 +1,11 @@
 import uuid
 import datetime
 
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, ARRAY, Integer, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from flask_app.clients import postgres_client
+from clients import postgres_client
 
 Base = postgres_client.get_base()
 
@@ -20,9 +20,9 @@ class User(Base):
         unique=True,
         nullable=False,
     )
-    email: str = db.Column(db.String, unique=True, nullable=False)
-    password: str = db.Column(db.String, nullable=False)
-    refresh: str = db.Column(db.String, nullable=False)
+    email: str = Column(String, unique=True, nullable=False)
+    password: str = Column(String, nullable=False)
+    refresh: str = Column(String, nullable=False)
 
     def __repr__(self):
         return f"<User {self.email}>"
@@ -34,17 +34,17 @@ class User(Base):
         return check_password_hash(self.password, password)
 
 
-class UserRole(db.Model):
+class UserRole(Base):
     __tablename__ = "user_roles"
 
-    user_id: uuid.UUID = db.Column(
+    user_id: uuid.UUID = Column(
         UUID(as_uuid=True),
         unique=True,
         primary_key=True,
         nullable=False,
     )
 
-    role_id: uuid.UUID = db.Column(
+    role_id: uuid.UUID = Column(
         UUID(as_uuid=True),
         unique=True,
         nullable=False,
@@ -57,19 +57,19 @@ class UserRole(db.Model):
         self.role_id = id
 
 
-class Role(db.Model):
+class Role(Base):
     __tablename__ = "roles"
 
-    id: uuid.UUID = db.Column(
+    id: uuid.UUID = Column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4,
         unique=True,
         nullable=False,
     )
-    name: str = db.Column(db.String, unique=True, nullable=False)
-    permissions: str = db.Column(db.String, nullable=True)
-    access_level: int = db.Column(db.Integer, nullable=False, default=0)
+    name: str = Column(String, unique=True, nullable=False)
+    permissions: str = Column(ARRAY(String), nullable=True)
+    access_level: int = Column(Integer, nullable=False, default=0)
 
     def __repr__(self):
         return self.permissions
@@ -80,15 +80,15 @@ class Role(db.Model):
         self.access_level = access_level
 
 
-class UserAccessHistory(db.Model):
+class UserAccessHistory(Base):
     __tablename__ = "user_access_history"
 
-    id: int = db.Column(db.Integer, nullable=False, primary_key=True)
-    user_id: uuid.UUID = db.Column(
+    id: int = Column(Integer, nullable=False, primary_key=True)
+    user_id: uuid.UUID = Column(
         UUID(as_uuid=True),
         nullable=False,
     )
 
-    location: str = db.Column(db.String, nullable=False)
-    device: str = db.Column(db.String, nullable=False)
-    time: datetime.datetime = db.Column(db.DateTime, nullable=False)
+    location: str = Column(String, nullable=False)
+    device: str = Column(String, nullable=False)
+    time: datetime.datetime = Column(DateTime, nullable=False)
