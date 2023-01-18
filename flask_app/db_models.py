@@ -1,7 +1,8 @@
 import uuid
 import datetime
 
-from sqlalchemy import Column, String, ARRAY, Integer, DateTime
+from sqlalchemy import Column, String, ARRAY, Integer, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -24,6 +25,8 @@ class User(Base):
     password: str = Column(String, nullable=False)
     refresh: str = Column(String, nullable=True)
 
+    fk = relationship("UserRole", back_populates="fk")
+
     def __repr__(self):
         return f"<User {self.email}>"
 
@@ -37,8 +40,11 @@ class User(Base):
 class UserRole(Base):
     __tablename__ = "user_roles"
 
+    id: int = Column(Integer, nullable=False, primary_key=True)
+
     user_id: uuid.UUID = Column(
         UUID(as_uuid=True),
+        ForeignKey("users.id"),
         unique=True,
         primary_key=True,
         nullable=False,
@@ -46,9 +52,13 @@ class UserRole(Base):
 
     role_id: uuid.UUID = Column(
         UUID(as_uuid=True),
+        ForeignKey("roles.id"),
         unique=True,
         nullable=False,
     )
+
+    fk = relationship("User", back_populates="fk")
+    fk_2 = relationship("Role", back_populates="fk")
 
     def __repr__(self):
         return self.role_id
@@ -71,6 +81,8 @@ class Role(Base):
     permissions: str = Column(ARRAY(String), nullable=True)
     access_level: int = Column(Integer, nullable=False, default=0)
 
+    fk = relationship("UserRole", back_populates="fk_2")
+
     def __repr__(self):
         return self.permissions
 
@@ -86,6 +98,7 @@ class UserAccessHistory(Base):
     id: int = Column(Integer, nullable=False, primary_key=True)
     user_id: uuid.UUID = Column(
         UUID(as_uuid=True),
+        ForeignKey("roles.id"),
         nullable=False,
     )
 
