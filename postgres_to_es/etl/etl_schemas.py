@@ -51,6 +51,9 @@ movies = {
             "imdb_rating": {
                 "type": "float"
             },
+            "access_level": {
+                "type": "integer"
+            },
             "type": {
                 "type": "keyword"
             },

@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
 from base import BaseClient
-from flask_app.config import settings
+from config import settings
 
 
 class PostgresClient(BaseClient):

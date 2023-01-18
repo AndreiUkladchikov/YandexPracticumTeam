@@ -1,9 +1,13 @@
 import logging
+import random
 
 import psycopg2
 from models import Filmwork, Genre, GenreFilmwork, Person, PersonFilmwork
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import execute_batch as _execute_batch
+
+
+access_levels = [0, 10]
 
 
 def create_db(conn: _connection) -> None:
@@ -19,8 +23,8 @@ def save_film_works(conn: _connection, filmworks: list[Filmwork]) -> None:
     curr = conn.cursor()
     values = []
     sql_insert_query = """ INSERT INTO content.film_work
-                            (id, title, description, creation_date, rating, type, created, modified, file_path)
-                            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) """
+                            (id, title, description, creation_date, rating, type, created, modified, file_path, access_level)
+                            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) """
     for film in filmworks:
         values.append((
             film.id,
@@ -31,7 +35,8 @@ def save_film_works(conn: _connection, filmworks: list[Filmwork]) -> None:
             film.type,
             film.created,
             film.modified,
-            film.file_path
+            film.file_path,
+            random.choice(access_levels)
         ))
     try:
         _execute_batch(curr, sql_insert_query, values)

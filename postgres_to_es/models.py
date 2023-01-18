@@ -38,6 +38,7 @@ class Movie(BaseModel):
     genres: list
     genre: list
     directors: list
+    access_level: int | None = 0
 
 
 class PersonTypes(str, Enum):

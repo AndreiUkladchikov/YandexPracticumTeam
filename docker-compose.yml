@@ -78,7 +78,7 @@ services:
     ports:
       - '${DB_PORT}:${DB_PORT}'
     volumes:
-      - db:/var/lib/postgresql/data/
+      - db:/var/lib/docker/volumes/yandexpracticumteam_db/_data
 
 volumes:
   db:

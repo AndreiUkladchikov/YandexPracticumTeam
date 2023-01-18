@@ -1,10 +1,12 @@
 import uuid
+import datetime
 
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, ARRAY, Integer, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from flask_app.clients import postgres_client
+from clients import postgres_client
 
 Base = postgres_client.get_base()
 
@@ -21,6 +23,9 @@ class User(Base):
     )
     email: str = Column(String, unique=True, nullable=False)
     password: str = Column(String, nullable=False)
+    refresh: str = Column(String, nullable=True)
+
+    fk = relationship("UserRole", back_populates="fk")
 
     def __repr__(self):
         return f"<User {self.email}>"
@@ -32,4 +37,71 @@ class User(Base):
         return check_password_hash(self.password, password)
 
 
-# TODO Create tables user_roles, roles, user_access
+class UserRole(Base):
+    __tablename__ = "user_roles"
+
+    id: int = Column(Integer, nullable=False, primary_key=True)
+
+    user_id: uuid.UUID = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        unique=True,
+        primary_key=True,
+        nullable=False,
+    )
+
+    role_id: uuid.UUID = Column(
+        UUID(as_uuid=True),
+        ForeignKey("roles.id"),
+        unique=True,
+        nullable=False,
+    )
+
+    fk = relationship("User", back_populates="fk")
+    fk_2 = relationship("Role", back_populates="fk")
+
+    def __repr__(self):
+        return self.role_id
+
+    def update_role(self, id):
+        self.role_id = id
+
+
+class Role(Base):
+    __tablename__ = "roles"
+
+    id: uuid.UUID = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        unique=True,
+        nullable=False,
+    )
+    name: str = Column(String, unique=True, nullable=False)
+    permissions: str = Column(ARRAY(String), nullable=True)
+    access_level: int = Column(Integer, nullable=False, default=0)
+
+    fk = relationship("UserRole", back_populates="fk_2")
+
+    def __repr__(self):
+        return self.permissions
+
+    def update_role(self, name, permissions, access_level):
+        self.name = name
+        self.permissions = permissions
+        self.access_level = access_level
+
+
+class UserAccessHistory(Base):
+    __tablename__ = "user_access_history"
+
+    id: int = Column(Integer, nullable=False, primary_key=True)
+    user_id: uuid.UUID = Column(
+        UUID(as_uuid=True),
+        ForeignKey("roles.id"),
+        nullable=False,
+    )
+
+    location: str = Column(String, nullable=True)
+    device: str = Column(String, nullable=True)
+    time: datetime.datetime = Column(DateTime, nullable=False)
