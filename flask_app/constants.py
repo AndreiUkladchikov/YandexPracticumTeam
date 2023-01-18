@@ -5,24 +5,24 @@ from db_models import Role
 
 ROLE_USER = Role(
     name="user",
-    permissions="",
+    permissions=["api/v1/films", "api/v1/genres"],
     access_level=0
 )
 
 ROLE_SUBSCRIBER = Role(
     name="subscriber",
-    permissions="",
+    permissions=["api/v1/films", "api/v1/genres", "api/v1/persons"],
     access_level=10
 )
 
 ROLE_ADMIN = Role(
     name="admin",
-    permissions="",
+    permissions=["api/v1/films", "api/v1/genres", "api/v1/persons"],
     access_level=100
 )
 
 ROLE_OWNER = Role(
     name="owner",
-    permissions="",
+    permissions=["api/v1/films", "api/v1/genres", "api/v1/persons"],
     access_level=1000
 )

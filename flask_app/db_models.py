@@ -22,7 +22,7 @@ class User(Base):
     )
     email: str = Column(String, unique=True, nullable=False)
     password: str = Column(String, nullable=False)
-    refresh: str = Column(String, nullable=False)
+    refresh: str = Column(String, nullable=True)
 
     def __repr__(self):
         return f"<User {self.email}>"
@@ -89,6 +89,6 @@ class UserAccessHistory(Base):
         nullable=False,
     )
 
-    location: str = Column(String, nullable=False)
-    device: str = Column(String, nullable=False)
+    location: str = Column(String, nullable=True)
+    device: str = Column(String, nullable=True)
     time: datetime.datetime = Column(DateTime, nullable=False)
