@@ -2,6 +2,7 @@
 import http
 import os
 import redis
+import requests
 from datetime import timedelta, datetime, timezone
 
 from loguru import logger
@@ -80,12 +81,10 @@ def check_login_password(body: LoginForm):
 
     user.refresh_token = refresh_token
 
-    access = UserAccessHistory(user_id=user.id, time=datetime.now())
+    UserAccessHistory(user_id=user.id, time=datetime.now()).save_to_db()
 
     user.save_to_db()
-    access.save_to_db()
 
-    # TODO Put to DB (table: user_access): location, time
     return (
         jsonify(
             msg="Success authorization!",
@@ -140,7 +139,12 @@ def refresh_tokens():
     user.refresh_token = refresh_token
     user.save_to_db()
 
-    return jsonify(access_token=access_token, refresh_token=refresh_token), http.HTTPStatus.OK
+    UserAccessHistory(user_id=user.id, time=datetime.now()).save_to_db()
+
+    return (
+        jsonify(access_token=access_token, refresh_token=refresh_token),
+        http.HTTPStatus.OK,
+    )
 
 
 @app.route("/api/v1/auth/logout", methods=["POST", "GET"])
@@ -199,40 +203,52 @@ def get_login_history():
     if not user:
         return jsonify(messages.bad_token), http.HTTPStatus.UNAUTHORIZED
 
-    result = db.session.query(
-        User.email, UserAccessHistory.location, UserAccessHistory.device, UserAccessHistory.time
-    ).join(UserAccessHistory, User.id == UserAccessHistory.user_id).filter(User.email == current_user).all()
+    result = (
+        db.session.query(
+            User.email,
+            UserAccessHistory.location,
+            UserAccessHistory.device,
+            UserAccessHistory.time,
+        )
+        .join(UserAccessHistory, User.id == UserAccessHistory.user_id)
+        .filter(User.email == current_user)
+        .all()
+    )
 
     history = [SingleAccessRecord(**dict(s)) for s in result]
-    return HistoryResponseForm(msg=messages.history_response.get("msg"), records=history)
+    return HistoryResponseForm(
+        msg=messages.history_response.get("msg"), records=history
+    )
 
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-# @jwt_required(optional=True)
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+@jwt_required()
 def catch_all(path):
-    # current_user = get_jwt_identity()
-    current_user = "mikegot@mail.ru"
+    current_user = get_jwt_identity()
 
     user = User.query.filter_by(email=current_user).one_or_none()
 
     if not user:
         return jsonify(messages.bad_token), http.HTTPStatus.UNAUTHORIZED
 
-    permissions = db.session.query(
-        Role.permissions
-    ).join(UserRole, Role.id == UserRole.role_id).join(User, User.id == UserRole.user_id).filter(User.email == current_user).one_or_none()
+    result = (
+        db.session.query(Role.permissions)
+        .join(UserRole, Role.id == UserRole.role_id)
+        .join(User, User.id == UserRole.user_id)
+        .filter(User.email == current_user)
+        .one_or_none()
+    )
 
-    print(type(permissions))
-    print(dict(permissions))
-
-    if path in permissions['permissions']:
-        print("Welcome")
+    if path in result["permissions"]:
+        url = f"http://{settings.backend_host}:{settings.backend_port}/" + path
+        req = requests.models.PreparedRequest()
+        req.prepare_url(url, request.args.to_dict())
+        return requests.get(req.url).json()
     else:
         return jsonify(messages.not_allowed_resource), http.HTTPStatus.FORBIDDEN
 
-    return 'You want path: %s' % path
-
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.run(host=settings.auth_server_host, port=settings.auth_server_port, debug=True)

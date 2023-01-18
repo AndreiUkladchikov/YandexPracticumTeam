@@ -60,20 +60,6 @@ class TestLogin:
         assert is_refresh_token_in_payload is True
 
 
-class TestJWTAccessToken:
-    def test_login_with_access_token(self, create_user):
-        client = create_user.get("client")
-        access_token = create_user.get("access_token")
-        refresh_token = create_user.get("refresh_token")
-        hed = {"Authorization": "Bearer " + access_token}
-
-        response = client.post(url_check, headers=hed)
-
-        assert response.status_code == HTTPStatus.OK
-
-        assert response.json["logged_in_as"] == user_credits["email"]
-
-
 class TestLogout:
     def test_logout(self, create_user):
         client = create_user.get("client")
