@@ -71,6 +71,17 @@ access_history_service = AccessHistoryService(postgres_client)
 user_role_service = UserRoleService(postgres_client)
 
 
+def get_permissions(current_user):
+    result = (
+            db.session.query(Role.permissions)
+            .join(UserRole, Role.id == UserRole.role_id)
+            .join(User, User.id == UserRole.user_id)
+            .filter(User.email == current_user)
+            .one_or_none()
+        )
+    return result
+
+
 @app.route(f"{settings.base_api_url}/login", methods=["POST"])
 @spec.validate(
     resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ResponseForm), tags=["api"]
@@ -271,13 +282,7 @@ def catch_all(path):
         if not user:
             return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
-        result = (
-            db.session.query(Role.permissions)
-            .join(UserRole, Role.id == UserRole.role_id)
-            .join(User, User.id == UserRole.user_id)
-            .filter(User.email == current_user)
-            .one_or_none()
-        )
+        result = get_permissions(current_user)
 
     if path in result["permissions"]:
         url = f"http://{settings.backend_host}:{settings.backend_port}/" + path
@@ -303,6 +308,10 @@ def update_role(body: RoleForm):
 
     if not user:
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+    else:
+        result = get_permissions(current_user)
+        if "update-role" not in result["permissions"]:
+            return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     if body.id is None:
         role_service.insert(
@@ -333,6 +342,10 @@ def delete_role(body: RoleForm):
 
     if not user:
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+    else:
+        result = get_permissions(current_user)
+        if "delete-role" not in result["permissions"]:
+            return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     role = role_service.get({"id": body.id})
     role_service.delete(role)
@@ -351,6 +364,10 @@ def get_all_roles():
 
     if not user:
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+    else:
+        result = get_permissions(current_user)
+        if "get-all-roles" not in result["permissions"]:
+            return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     result = role_service.all()
     roles = [RoleRecord(**s.__dict__) for s in result]

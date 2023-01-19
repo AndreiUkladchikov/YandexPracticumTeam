@@ -40,7 +40,7 @@ success_delete_role = "You have successfully deleted role"
 
 class ResponseForm(BaseModel):
     msg: str = ...
-    result: Any = ...
+    result: Any = Field(default=None)
 
 
 class ResponseFormWithTokens(ResponseForm):
