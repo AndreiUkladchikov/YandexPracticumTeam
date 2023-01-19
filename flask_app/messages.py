@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import datetime
+from typing import Any
 from uuid import UUID
 from http import HTTPStatus
 
 from pydantic import BaseModel, Field, validator
 
 message = "msg"
+successful_response = "Result successed"
 
 already_registered = "Email is already registered"
 wrong_credits = "Wrong email or password"
@@ -38,6 +40,7 @@ success_delete_role = "You have successfully deleted role"
 
 class ResponseForm(BaseModel):
     msg: str = ...
+    result: Any = ...
 
 
 class ResponseFormWithTokens(ResponseForm):

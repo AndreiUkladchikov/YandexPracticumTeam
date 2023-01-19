@@ -256,32 +256,36 @@ def get_login_history():
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 @spec.validate(
-    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm, HTTP_403=ResponseForm),
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm, HTTP_403=ResponseForm, HTTP_500=ResponseForm),
     tags=["api"],
 )
-@jwt_required()
+@jwt_required(optional=True)
 def catch_all(path):
     current_user = get_jwt_identity()
 
-    user: User = user_service.get({"email": current_user})
+    if not current_user:
+        result = {"permissions": constants.ROLE_UNAUTHORIZED_USER.permissions}
+    else:
+        user: User = user_service.get({"email": current_user})
 
-    if not user:
-        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+        if not user:
+            return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
-    result = (
-        db.session.query(Role.permissions)
-        .join(UserRole, Role.id == UserRole.role_id)
-        .join(User, User.id == UserRole.user_id)
-        .filter(User.email == current_user)
-        .one_or_none()
-    )
+        result = (
+            db.session.query(Role.permissions)
+            .join(UserRole, Role.id == UserRole.role_id)
+            .join(User, User.id == UserRole.user_id)
+            .filter(User.email == current_user)
+            .one_or_none()
+        )
 
     if path in result["permissions"]:
         url = f"http://{settings.backend_host}:{settings.backend_port}/" + path
         req = requests.models.PreparedRequest()
         req.prepare_url(url, request.args.to_dict())
-        return requests.get(req.url).json()
+        return ResponseForm(msg=messages.successful_response, result=requests.get(req.url).json())
     else:
+        print("bad")
         return ResponseForm(msg=messages.not_allowed_resource), HTTPStatus.FORBIDDEN
 
 
@@ -289,18 +293,16 @@ def catch_all(path):
 
 # Update or Create
 @app.route(f"{settings.base_api_url}/update-role", methods=["POST"])
-@validate()
+@spec.validate(
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
 @jwt_required()
 def update_role(body: RoleForm):
     current_user = get_jwt_identity()
     user: User = user_service.get({"email": current_user})
 
     if not user:
-        return HTTPStatus.UNAUTHORIZED
-
-    access_history_service.insert(
-        UserAccessHistory(user_id=user.id, time=datetime.now())
-    )
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     if body.id is None:
         role_service.insert(
@@ -321,18 +323,16 @@ def update_role(body: RoleForm):
 
 # Delete
 @app.route(f"{settings.base_api_url}/delete-role", methods=["POST"])
-@validate()
+@spec.validate(
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
 @jwt_required()
 def delete_role(body: RoleForm):
     current_user = get_jwt_identity()
     user: User = user_service.get({"email": current_user})
 
     if not user:
-        return HTTPStatus.UNAUTHORIZED
-
-    access_history_service.insert(
-        UserAccessHistory(user_id=user.id, time=datetime.now())
-    )
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     role = role_service.get({"id": body.id})
     role_service.delete(role)
@@ -341,22 +341,23 @@ def delete_role(body: RoleForm):
 
 
 @app.route(f"{settings.base_api_url}/get-all-roles", methods=["GET"])
-@validate()
+@spec.validate(
+    resp=Response(HTTP_200=RolesResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
 @jwt_required()
 def get_all_roles():
     current_user = get_jwt_identity()
     user: User = user_service.get({"email": current_user})
 
     if not user:
-        return HTTPStatus.UNAUTHORIZED
-
-    access_history_service.insert(
-        UserAccessHistory(user_id=user.id, time=datetime.now())
-    )
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     result = role_service.all()
     roles = [RoleRecord(**s.__dict__) for s in result]
     return RolesResponseForm(msg=messages.roles_response, records=roles)
+
+
+# ToDo: Update User Role
 
 
 def create_test_roles():
