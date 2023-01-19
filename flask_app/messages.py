@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+from uuid import UUID
 from http import HTTPStatus
 
 from pydantic import BaseModel, Field, validator
@@ -18,7 +19,8 @@ success_change_credits = (
 bad_password = "Previous password does not match"
 success_refresh_tokens = "Success refreshing!"
 
-history_response = "Here is you history"
+history_response = "Here is your history"
+roles_response = "Here are your roles"
 
 logout_from = "Logout from "
 
@@ -28,6 +30,10 @@ def logout(user: str) -> str:
 
 
 not_allowed_resource = "This url is not allowed"
+
+success_update_role = "You have successfully updated role"
+success_create_role = "You have successfully created role"
+success_delete_role = "You have successfully deleted role"
 
 
 class ResponseForm(BaseModel):
@@ -48,3 +54,14 @@ class SingleAccessRecord(BaseModel):
 
 class HistoryResponseForm(ResponseForm):
     records: list[SingleAccessRecord] | None = Field(default=None)
+
+
+class RoleRecord(BaseModel):
+    id: UUID = ...
+    name: str = Field(min_length=3, max_length=20)
+    permissions: list[str] = ...
+    access_level: int = Field(default=0)
+
+
+class RolesResponseForm(ResponseForm):
+    records: list[RoleRecord] | None = Field(default=None)

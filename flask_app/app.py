@@ -17,9 +17,10 @@ from clients import postgres_client
 from config import settings
 from db import db, init_db
 from db_models import Role, User, UserAccessHistory, UserRole
-from forms import LoginForm, PasswordResetForm
+from forms import LoginForm, PasswordResetForm, RoleForm
 from messages import (HistoryResponseForm, ResponseForm,
-                      ResponseFormWithTokens, SingleAccessRecord)
+                      ResponseFormWithTokens, SingleAccessRecord,
+                      RoleRecord, RolesResponseForm)
 from services import (AccessHistoryService, RoleService, UserRoleService,
                       UserService)
 
@@ -235,7 +236,7 @@ def get_login_history():
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 @validate()
-@jwt_required()
+@jwt_required(optional=True)
 def catch_all(path):
     current_user = get_jwt_identity()
 
@@ -259,6 +260,80 @@ def catch_all(path):
         return requests.get(req.url).json()
     else:
         return ResponseForm(msg=messages.not_allowed_resource), HTTPStatus.FORBIDDEN
+
+
+# Roles CRUD:
+
+# Update or Create
+@app.route(f"{settings.base_api_url}/update-role", methods=["POST"])
+@validate()
+@jwt_required()
+def update_role(body: RoleForm):
+    current_user = get_jwt_identity()
+    user: User = user_service.get({"email": current_user})
+
+    if not user:
+        return HTTPStatus.UNAUTHORIZED
+
+    access_history_service.insert(
+        UserAccessHistory(user_id=user.id, time=datetime.now())
+    )
+
+    if body.id is None:
+        role_service.insert(
+            Role(
+                name=body.name,
+                permissions=body.permissions,
+                access_level=body.access_level
+            )
+        )
+        msg = messages.success_create_role
+    else:
+        role = role_service.get({"id": body.id})
+        role_service.update(role, body.__dict__)
+        msg = messages.success_update_role
+
+    return ResponseForm(msg=msg)
+
+
+# Delete
+@app.route(f"{settings.base_api_url}/delete-role", methods=["POST"])
+@validate()
+@jwt_required()
+def delete_role(body: RoleForm):
+    current_user = get_jwt_identity()
+    user: User = user_service.get({"email": current_user})
+
+    if not user:
+        return HTTPStatus.UNAUTHORIZED
+
+    access_history_service.insert(
+        UserAccessHistory(user_id=user.id, time=datetime.now())
+    )
+
+    role = role_service.get({"id": body.id})
+    role_service.delete(role)
+
+    return ResponseForm(msg=messages.success_delete_role)
+
+
+@app.route(f"{settings.base_api_url}/get-all-roles", methods=["GET"])
+@validate()
+@jwt_required()
+def get_all_roles():
+    current_user = get_jwt_identity()
+    user: User = user_service.get({"email": current_user})
+
+    if not user:
+        return HTTPStatus.UNAUTHORIZED
+
+    access_history_service.insert(
+        UserAccessHistory(user_id=user.id, time=datetime.now())
+    )
+
+    result = role_service.all()
+    roles = [RoleRecord(**s.__dict__) for s in result]
+    return RolesResponseForm(msg=messages.roles_response, records=roles)
 
 
 def create_test_roles():
