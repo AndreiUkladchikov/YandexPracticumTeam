@@ -1,9 +1,9 @@
-import uuid
 import datetime
+import uuid
 
-from sqlalchemy import Column, String, ARRAY, Integer, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import ARRAY, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from clients import postgres_client
@@ -23,7 +23,7 @@ class User(Base):
     )
     email: str = Column(String, unique=True, nullable=False)
     password: str = Column(String, nullable=False)
-    refresh: str = Column(String, nullable=True)
+    refresh_token: str = Column(String, nullable=True)
 
     fk = relationship("UserRole", back_populates="fk")
 
@@ -40,11 +40,17 @@ class User(Base):
 class UserRole(Base):
     __tablename__ = "user_roles"
 
-    id: int = Column(Integer, nullable=False, primary_key=True)
+    id: uuid.UUID = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        unique=True,
+        nullable=False,
+    )
 
     user_id: uuid.UUID = Column(
         UUID(as_uuid=True),
-        ForeignKey("users.id"),
+        ForeignKey("users.id", ondelete="CASCADE"),
         unique=True,
         primary_key=True,
         nullable=False,
@@ -52,7 +58,7 @@ class UserRole(Base):
 
     role_id: uuid.UUID = Column(
         UUID(as_uuid=True),
-        ForeignKey("roles.id"),
+        ForeignKey("roles.id", ondelete="CASCADE"),
         unique=True,
         nullable=False,
     )
@@ -98,7 +104,7 @@ class UserAccessHistory(Base):
     id: int = Column(Integer, nullable=False, primary_key=True)
     user_id: uuid.UUID = Column(
         UUID(as_uuid=True),
-        ForeignKey("users.id"),
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
 

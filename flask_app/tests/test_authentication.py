@@ -1,6 +1,8 @@
 from http import HTTPStatus
 
-from test_data import url_check, url_login, url_registration, user_credits
+from test_data import (fake_user_credits, new_user_credits, url_change_credits,
+                       url_login, url_login_history, url_logout,
+                       url_refresh_tokens, url_registration, user_credits)
 
 from clients import postgres_client
 from services import UserService
@@ -33,9 +35,8 @@ class TestLogin:
         assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_fake_credits(self, http_session):
-        response = http_session.post(
-            url_login, json={"email": "fake@user.ru", "password": "fake_password"}
-        )
+        response = http_session.post(url_login, json=fake_user_credits)
+
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     def test_valid_user(self, http_session):
@@ -48,15 +49,76 @@ class TestLogin:
         is_access_token_in_payload = "access_token" in response_login.json().keys()
         assert is_access_token_in_payload is True
 
+        is_refresh_token_in_payload = "refresh_token" in response_login.json().keys()
+        assert is_refresh_token_in_payload is True
 
-class TestJWTAccessToken:
-    def test_login_with_access_token(self, create_user):
-        client = create_user[0]
-        token = create_user[1]
-        hed = {"Authorization": "Bearer " + token}
 
-        response = client.post(url_check, headers=hed)
+class TestLogout:
+    def test_logout(self, create_user):
+        http_session = create_user.get("http_session")
+        access_token = create_user.get("access_token")
+        hed = {"Authorization": "Bearer " + access_token}
 
-        assert response.status_code == 200
+        response = http_session.post(url_logout, headers=hed)
 
-        assert response.json().get("logged_in_as") == user_credits["email"]
+        assert response.status_code == HTTPStatus.OK
+
+        response = http_session.post(url_logout, headers=hed)
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+        user = user_service.get({"email": user_credits.get("email")})
+
+        assert user.refresh_token is None
+
+
+class TestRefreshTokens:
+    def test_refresh(self, create_user):
+        http_session = create_user.get("http_session")
+        refresh_token = create_user.get("refresh_token")
+
+        hed = {"Authorization": "Bearer " + refresh_token}
+
+        response_refresh = http_session.post(url_refresh_tokens, headers=hed)
+
+        assert response_refresh.status_code == HTTPStatus.OK
+
+        is_access_token_in_payload = "access_token" in response_refresh.json().keys()
+        assert is_access_token_in_payload is True
+
+        is_refresh_token_in_payload = "refresh_token" in response_refresh.json().keys()
+        assert is_refresh_token_in_payload is True
+
+    def test_with_old_token(self, create_user):
+        http_session = create_user.get("http_session")
+        refresh_token = create_user.get("refresh_token")
+
+        hed = {"Authorization": "Bearer " + refresh_token}
+
+        http_session.post(url_refresh_tokens, headers=hed)
+
+        response_with_old_token = http_session.post(url_refresh_tokens, headers=hed)
+        assert response_with_old_token.status_code == HTTPStatus.UNAUTHORIZED
+
+
+class TestChangeCredits:
+    def test_change_credits(self, create_user):
+        http_session = create_user.get("http_session")
+        access_token = create_user.get("access_token")
+
+        hed = {"Authorization": "Bearer " + access_token}
+        response = http_session.post(
+            url_change_credits, json=new_user_credits, headers=hed
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
+
+class TestLoginHistory:
+    def test_login_history(self, create_user):
+        http_session = create_user.get("http_session")
+        access_token = create_user.get("access_token")
+
+        hed = {"Authorization": "Bearer " + access_token}
+        response = http_session.get(url_login_history, headers=hed)
+        assert response.status_code == HTTPStatus.OK

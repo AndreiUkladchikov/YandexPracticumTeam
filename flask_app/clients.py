@@ -40,7 +40,7 @@ class PostgresClient(BaseClient):
 
 class HttpClient(BaseClient):
     @contextmanager
-    def get_session(self):
+    def get_session(self) -> requests.Session:
         session = requests.Session()
         yield session
         session.close()
