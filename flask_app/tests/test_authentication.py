@@ -1,8 +1,16 @@
 from http import HTTPStatus
 
-from test_data import (fake_user_credits, new_user_credits, url_change_credits,
-                       url_login, url_login_history, url_logout,
-                       url_refresh_tokens, url_registration, user_credits)
+from test_data import (
+    fake_user_credits,
+    new_user_credits,
+    url_change_credits,
+    url_login,
+    url_login_history,
+    url_logout,
+    url_refresh_tokens,
+    url_registration,
+    user_credits,
+)
 
 from clients import postgres_client
 from services import UserService
@@ -26,13 +34,13 @@ class TestRegistration:
         response_registration = http_session.post(
             url_registration, json={"email": 123, "password": 123}
         )
-        assert response_registration.status_code == HTTPStatus.BAD_REQUEST
+        assert response_registration.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 class TestLogin:
     def test_without_params(self, http_session):
         response = http_session.post(url_login, json={})
-        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     def test_fake_credits(self, http_session):
         response = http_session.post(url_login, json=fake_user_credits)

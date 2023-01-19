@@ -5,10 +5,15 @@ from http import HTTPStatus
 import redis
 import requests
 from flask import Flask, request
-from flask_jwt_extended import (JWTManager, create_access_token,
-                                create_refresh_token, get_jwt,
-                                get_jwt_identity, jwt_required)
-from flask_pydantic import validate
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    create_refresh_token,
+    get_jwt,
+    get_jwt_identity,
+    jwt_required,
+)
+from spectree import SpecTree, Response
 from loguru import logger
 
 import constants
@@ -25,6 +30,8 @@ from services import (AccessHistoryService, RoleService, UserRoleService,
                       UserService)
 
 app = Flask(__name__)
+spec = SpecTree("flask", annotations=True)
+
 
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
@@ -65,11 +72,13 @@ user_role_service = UserRoleService(postgres_client)
 
 
 @app.route(f"{settings.base_api_url}/login", methods=["POST"])
-@validate()
-def check_login_password(body: LoginForm):
-    user = user_service.get({"email": body.email})
+@spec.validate(
+    resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ResponseForm), tags=["api"]
+)
+def check_login_password(json: LoginForm):
+    user = user_service.get({"email": json.email})
 
-    if not (user and user.check_password(body.password)):
+    if not (user and user.check_password(json.password)):
         return ResponseForm(msg=messages.wrong_credits), HTTPStatus.UNAUTHORIZED
 
     additional_claims = {"role": "subscriber"}
@@ -97,17 +106,19 @@ def check_login_password(body: LoginForm):
 
 
 @app.route(f"{settings.base_api_url}/registration", methods=["POST"])
-@validate()
-def registration(body: LoginForm):
+@spec.validate(
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
+def registration(json: LoginForm):
 
-    if user_service.get({"email": body.email}):
+    if user_service.get({"email": json.email}):
         return ResponseForm(msg=messages.already_registered), HTTPStatus.UNAUTHORIZED
 
-    user = User(email=body.email)
-    user.set_password(body.password)
+    user = User(email=json.email)
+    user.set_password(json.password)
     user_service.insert(user)
 
-    user = user_service.get({"email": body.email})
+    user = user_service.get({"email": json.email})
 
     role = role_service.get({"name": "subscriber"})
 
@@ -118,9 +129,12 @@ def registration(body: LoginForm):
 
 
 @app.route(f"{settings.base_api_url}/refresh-tokens", methods=["POST"])
-@validate()
+@spec.validate(
+    resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ResponseForm), tags=["api"]
+)
 @jwt_required(refresh=True)
 def refresh_tokens():
+
     refresh = request.headers.get("Authorization").split(" ")[-1]
 
     current_user = get_jwt_identity()
@@ -153,7 +167,9 @@ def refresh_tokens():
 
 
 @app.route(f"{settings.base_api_url}/logout", methods=["POST", "GET"])
-@validate()
+@spec.validate(
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
 @jwt_required()
 def logout():
     current_user = get_jwt_identity()
@@ -178,20 +194,22 @@ def logout():
 
 
 @app.route(f"{settings.base_api_url}/change-credits", methods=["POST"])
-@validate()
+@spec.validate(
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
 @jwt_required()
-def change_credits(body: PasswordResetForm):
+def change_credits(json: PasswordResetForm):
     current_user = get_jwt_identity()
     user: User = user_service.get({"email": current_user})
 
-    if not (user and user.check_password(body.previous_password)):
+    if not (user and user.check_password(json.previous_password)):
         return ResponseForm(msg=messages.wrong_credits), HTTPStatus.UNAUTHORIZED
 
     access_history_service.insert(
         UserAccessHistory(user_id=user.id, time=datetime.now())
     )
 
-    user.set_password(body.password)
+    user.set_password(json.password)
     user.refresh_token = None
     user_service.insert(user)
 
@@ -204,7 +222,9 @@ def change_credits(body: PasswordResetForm):
 
 
 @app.route(f"{settings.base_api_url}/login-history", methods=["GET"])
-@validate()
+@spec.validate(
+    resp=Response(HTTP_200=HistoryResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
 @jwt_required()
 def get_login_history():
     current_user = get_jwt_identity()
@@ -235,8 +255,11 @@ def get_login_history():
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
-@validate()
-@jwt_required(optional=True)
+@spec.validate(
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm, HTTP_403=ResponseForm),
+    tags=["api"],
+)
+@jwt_required()
 def catch_all(path):
     current_user = get_jwt_identity()
 
@@ -347,6 +370,7 @@ def create_test_roles():
 
 
 if __name__ == "__main__":
+    spec.register(app)
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     postgres_client.create_all_tables()
     create_test_roles()
