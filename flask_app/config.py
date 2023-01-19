@@ -1,4 +1,5 @@
 import os
+
 from pydantic import BaseSettings, Field
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,6 +15,8 @@ class Settings(BaseSettings):
     backend_host: str = ...
     backend_port: int = ...
 
+    base_api_url: str = Field(default="/api/v1/auth")
+
     jwt_secret_key: str = ...
 
     access_token_expires_in_hours: int = Field(default=1)
@@ -26,9 +29,7 @@ class Settings(BaseSettings):
     auth_server_port: str = ...
 
     class Config:
-        env_file = (
-            f"{base_dir}/.env"
-        )
+        env_file = f"{base_dir}/.env"
 
 
 settings = Settings()

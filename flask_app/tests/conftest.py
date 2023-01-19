@@ -1,38 +1,33 @@
+from typing import Generic
+
 import pytest
+from pydantic import BaseModel
+from test_data import url_login, url_registration, user_credits
 
-from app import app
-from db import db
-from db_models import User
+from clients import HttpClient, postgres_client
+from services import AccessHistoryService, UserService
 
-from test_data import user_credits, url_login, url_registration
+user_service = UserService(postgres_client)
+access_history_service = AccessHistoryService(postgres_client)
 
 
 @pytest.fixture(scope="class")
-def client():
-    with app.test_client() as client:
-        yield client
-
-    User.query.delete()
-    db.session.commit()
-
-
-@pytest.fixture
-def database():
-    yield User
-
-
-@pytest.fixture()
-def runner():
-    return app.test_cli_runner()
+def http_session():
+    with HttpClient().get_session() as session:
+        yield session
+    access_history_service.clear()
+    user_service.clear()
 
 
 @pytest.fixture
-def create_user(client):
-    client.post(url_registration, json=user_credits)
-    response_login = client.post(url_login, json=user_credits)
-    access_token: str = response_login.json["access_token"]
-    refresh_token: str = response_login.json["refresh_token"]
+def create_user(http_session) -> dict:
+    http_session.post(url_registration, json=user_credits)
+    response_login = http_session.post(url_login, json=user_credits)
+    access_token: str = response_login.json().get("access_token")
+    refresh_token: str = response_login.json().get("refresh_token")
 
-    res = {"client": client, "access_token": access_token,
-           "refresh_token": refresh_token}
-    yield res
+    yield {
+        "http_session": http_session,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    }

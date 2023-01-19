@@ -1,32 +1,29 @@
-# flask_app/app.py
-import http
 import os
+from datetime import datetime, timedelta
+from http import HTTPStatus
+
 import redis
 import requests
-from datetime import timedelta, datetime, timezone
-
-from loguru import logger
-from flask import Flask, jsonify, request
-from flask_jwt_extended import (
-    JWTManager,
-    create_access_token,
-    create_refresh_token,
-    get_jwt_identity,
-    jwt_required,
-    get_jwt,
-)
+from flask import Flask, request
+from flask_jwt_extended import (JWTManager, create_access_token,
+                                create_refresh_token, get_jwt,
+                                get_jwt_identity, jwt_required)
 from flask_pydantic import validate
+from loguru import logger
 
+import constants
 import messages
+from clients import postgres_client
 from config import settings
 from db import db, init_db
-from db_models import User, UserAccessHistory, UserRole, Role
+from db_models import Role, User, UserAccessHistory, UserRole
 from forms import LoginForm, PasswordResetForm
-from messages import SingleAccessRecord, HistoryResponseForm
-
+from messages import (HistoryResponseForm, ResponseForm,
+                      ResponseFormWithTokens, SingleAccessRecord)
+from services import (AccessHistoryService, RoleService, UserRoleService,
+                      UserService)
 
 app = Flask(__name__)
-
 
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
@@ -59,16 +56,20 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
 
 init_db(app)
 app.app_context().push()
-db.create_all()
+
+user_service = UserService(postgres_client)
+role_service = RoleService(postgres_client)
+access_history_service = AccessHistoryService(postgres_client)
+user_role_service = UserRoleService(postgres_client)
 
 
-@app.route("/api/v1/auth/login", methods=["POST"])
+@app.route(f"{settings.base_api_url}/login", methods=["POST"])
 @validate()
 def check_login_password(body: LoginForm):
-    user = User.query.filter_by(email=body.email).one_or_none()
+    user = user_service.get({"email": body.email})
 
     if not (user and user.check_password(body.password)):
-        return jsonify(messages.wrong_credits), http.HTTPStatus.UNAUTHORIZED
+        return ResponseForm(msg=messages.wrong_credits), HTTPStatus.UNAUTHORIZED
 
     additional_claims = {"role": "subscriber"}
 
@@ -81,127 +82,139 @@ def check_login_password(body: LoginForm):
 
     user.refresh_token = refresh_token
 
-    UserAccessHistory(user_id=user.id, time=datetime.now()).save_to_db()
+    access_history_service.insert(
+        UserAccessHistory(user_id=user.id, time=datetime.now())
+    )
 
-    user.save_to_db()
+    user_service.insert(user)
 
-    return (
-        jsonify(
-            msg="Success authorization!",
-            access_token=access_token,
-            refresh_token=refresh_token,
-        ),
-        http.HTTPStatus.OK,
+    return ResponseFormWithTokens(
+        msg=messages.success_login,
+        access_token=access_token,
+        refresh_token=refresh_token,
     )
 
 
-@app.route("/api/v1/auth/registration", methods=["POST"])
+@app.route(f"{settings.base_api_url}/registration", methods=["POST"])
 @validate()
 def registration(body: LoginForm):
 
-    if User.query.filter_by(email=body.email).one_or_none():
-        return (
-            jsonify(messages.already_registered),
-            http.HTTPStatus.UNAUTHORIZED,
-        )
+    if user_service.get({"email": body.email}):
+        return ResponseForm(msg=messages.already_registered), HTTPStatus.UNAUTHORIZED
 
     user = User(email=body.email)
     user.set_password(body.password)
+    user_service.insert(user)
 
-    user.save_to_db()
+    user = user_service.get({"email": body.email})
 
-    return jsonify(messages.success_registration), http.HTTPStatus.OK
+    role = role_service.get({"name": "subscriber"})
+
+    user_role = UserRole(user_id=user.id, role_id=role.id)
+    user_role_service.insert(user_role)
+
+    return ResponseForm(msg=messages.success_registration)
 
 
-@app.route("/api/v1/auth/refresh-tokens", methods=["POST"])
+@app.route(f"{settings.base_api_url}/refresh-tokens", methods=["POST"])
+@validate()
 @jwt_required(refresh=True)
 def refresh_tokens():
     refresh = request.headers.get("Authorization").split(" ")[-1]
 
     current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).one_or_none()
 
-    if user is None:
-        return jsonify(messages.bad_token), http.HTTPStatus.UNAUTHORIZED
+    user: User = user_service.get({"email": current_user})
+
+    if not user:
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     if refresh != user.refresh_token:
         user.refresh_token = None
-        user.save_to_db()
-        return (
-            jsonify(messages.bad_token),
-            http.HTTPStatus.UNAUTHORIZED,
-        )
+        user_service.insert(user)
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
-    identity = get_jwt_identity()
-    access_token = create_access_token(identity=identity)
-    refresh_token = create_refresh_token(identity=identity)
+    access_history_service.insert(
+        UserAccessHistory(user_id=user.id, time=datetime.now())
+    )
+
+    access_token = create_access_token(identity=current_user)
+    refresh_token = create_refresh_token(identity=current_user)
 
     user.refresh_token = refresh_token
-    user.save_to_db()
+    user_service.insert(user)
 
-    UserAccessHistory(user_id=user.id, time=datetime.now()).save_to_db()
-
-    return (
-        jsonify(access_token=access_token, refresh_token=refresh_token),
-        http.HTTPStatus.OK,
+    return ResponseFormWithTokens(
+        msg=messages.success_refresh_tokens,
+        access_token=access_token,
+        refresh_token=refresh_token,
     )
 
 
-@app.route("/api/v1/auth/logout", methods=["POST", "GET"])
+@app.route(f"{settings.base_api_url}/logout", methods=["POST", "GET"])
+@validate()
 @jwt_required()
 def logout():
     current_user = get_jwt_identity()
 
-    user = User.query.filter_by(email=current_user).one_or_none()
-    if user is None:
-        return jsonify(messages.bad_token), http.HTTPStatus.UNAUTHORIZED
+    user: User = user_service.get({"email": current_user})
+
+    if not user:
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+
+    access_history_service.insert(
+        UserAccessHistory(user_id=user.id, time=datetime.now())
+    )
 
     user.refresh_token = None
-    user.save_to_db()
-
-    UserAccessHistory(user_id=user.id, time=datetime.now()).save_to_db()
+    user_service.insert(user)
 
     jti = get_jwt()["jti"]
     jwt_redis_blocklist.set(
         jti, "", ex=timedelta(hours=settings.access_token_expires_in_hours)
     )
+    return ResponseForm(msg=messages.logout(current_user))
 
-    return jsonify(msg=f"Logout from {current_user}"), http.HTTPStatus.OK
 
-
-@app.route("/api/v1/auth/change-credits", methods=["POST"])
+@app.route(f"{settings.base_api_url}/change-credits", methods=["POST"])
 @validate()
 @jwt_required()
 def change_credits(body: PasswordResetForm):
     current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).one_or_none()
+    user: User = user_service.get({"email": current_user})
 
     if not (user and user.check_password(body.previous_password)):
-        return jsonify(messages.wrong_credits), http.HTTPStatus.UNAUTHORIZED
+        return ResponseForm(msg=messages.wrong_credits), HTTPStatus.UNAUTHORIZED
+
+    access_history_service.insert(
+        UserAccessHistory(user_id=user.id, time=datetime.now())
+    )
 
     user.set_password(body.password)
     user.refresh_token = None
-    user.save_to_db()
-
-    UserAccessHistory(user_id=user.id, time=datetime.now()).save_to_db()
+    user_service.insert(user)
 
     jti = get_jwt()["jti"]
     jwt_redis_blocklist.set(
         jti, "", ex=timedelta(hours=settings.access_token_expires_in_hours)
     )
 
-    return jsonify(messages.success_change_credits), http.HTTPStatus.OK
+    return ResponseForm(msg=messages.success_change_credits)
 
 
-@app.route("/api/v1/auth/login-history", methods=["GET"])
+@app.route(f"{settings.base_api_url}/login-history", methods=["GET"])
 @validate()
 @jwt_required()
 def get_login_history():
     current_user = get_jwt_identity()
-    user = User.query.filter_by(email=current_user).one_or_none()
+    user: User = user_service.get({"email": current_user})
 
     if not user:
-        return jsonify(messages.bad_token), http.HTTPStatus.UNAUTHORIZED
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+
+    access_history_service.insert(
+        UserAccessHistory(user_id=user.id, time=datetime.now())
+    )
 
     result = (
         db.session.query(
@@ -216,21 +229,20 @@ def get_login_history():
     )
 
     history = [SingleAccessRecord(**dict(s)) for s in result]
-    return HistoryResponseForm(
-        msg=messages.history_response.get("msg"), records=history
-    )
+    return HistoryResponseForm(msg=messages.history_response, records=history)
 
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
+@validate()
 @jwt_required()
 def catch_all(path):
     current_user = get_jwt_identity()
 
-    user = User.query.filter_by(email=current_user).one_or_none()
+    user: User = user_service.get({"email": current_user})
 
     if not user:
-        return jsonify(messages.bad_token), http.HTTPStatus.UNAUTHORIZED
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     result = (
         db.session.query(Role.permissions)
@@ -246,9 +258,21 @@ def catch_all(path):
         req.prepare_url(url, request.args.to_dict())
         return requests.get(req.url).json()
     else:
-        return jsonify(messages.not_allowed_resource), http.HTTPStatus.FORBIDDEN
+        return ResponseForm(msg=messages.not_allowed_resource), HTTPStatus.FORBIDDEN
+
+
+def create_test_roles():
+    try:
+        role_service.insert(constants.ROLE_USER)
+        role_service.insert(constants.ROLE_SUBSCRIBER)
+        role_service.insert(constants.ROLE_ADMIN)
+        role_service.insert(constants.ROLE_OWNER)
+    except Exception:
+        logger.info("Roles have been already created")
 
 
 if __name__ == "__main__":
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.config["TEMPLATES_AUTO_RELOAD"] = True
+    postgres_client.create_all_tables()
+    create_test_roles()
     app.run(host=settings.auth_server_host, port=settings.auth_server_port, debug=True)

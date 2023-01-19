@@ -22,3 +22,9 @@
 - Создать базу: python db_create/create_pgdb.py
 - Заполнить базу данными из sqlite: python db_create/main.py
 - перезапустить ETL container
+
+# Спринт 6
+Если есть старые контейнеры - удалить postgres и elastic и поднять их заново
+- db_create/create_pgdb.py - добавлена колонка access_level в Postgres
+- db_create/main.py - рандомно выставляет уровень доступа к фильмам (это же тестовые данные) - например только для пользователей с подпиской
+- postgres_to_es/create_etl.py - создать новые схемы (предварительно удалить movies - curl -X DELETE 'http://localhost:9200/movies')
