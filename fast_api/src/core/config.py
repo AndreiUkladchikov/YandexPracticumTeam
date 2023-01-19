@@ -8,6 +8,8 @@ from .logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
+base_dir: Path = os.path.dirname(os.path.abspath(__file__))
+
 
 class Settings(BaseSettings):
     """
@@ -22,9 +24,6 @@ class Settings(BaseSettings):
     redis_port: int = ...
     elastic_host: str = ...
     elastic_port: int = ...
-    base_dir: Path = Field(
-        default=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    )
 
     backend_host: str = ...
     backend_port: int = ...
@@ -36,7 +35,7 @@ class Settings(BaseSettings):
     max_page_number: int = 200
 
     class Config:
-        env_file = ".env"
+        env_file = f"{base_dir}/.env"
 
 
 settings = Settings()
