@@ -98,7 +98,7 @@ class UserAccessHistory(Base):
     id: int = Column(Integer, nullable=False, primary_key=True)
     user_id: uuid.UUID = Column(
         UUID(as_uuid=True),
-        ForeignKey("roles.id"),
+        ForeignKey("users.id"),
         nullable=False,
     )
 
