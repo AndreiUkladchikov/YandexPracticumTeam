@@ -1,172 +1,83 @@
+from flask_sqlalchemy.model import Model
 from sqlalchemy import select, update
 
 from base import BaseClient, BaseService
-from db_models import User, Role, UserAccessHistory, UserRole
+from db_models import Base, Role, User, UserAccessHistory, UserRole
 
 
-class UserService(BaseService):
-    def __init__(self, client: BaseClient):
+class CustomService(BaseService):
+    def __init__(self, client: BaseClient, model: Base = None):
         self.client = client
-        self.model = User
+        self.model = model
 
-    def all(self) -> list[User]:
+    def all(self) -> list[Base]:
         with self.client.get_session() as session:
-            users = session.scalars(select(self.model)).all()
+            objs = session.scalars(select(self.model)).all()
             session.expunge_all()
-            return users
+            return objs
 
-    def find(self, attrs: dict) -> list[User]:
+    def find(self, attrs: dict) -> list[Base]:
         with self.client.get_session() as session:
-            users = session.scalars(select(self.model).filter_by(**attrs)).all()
+            objs = session.scalars(select(self.model).filter_by(**attrs)).all()
             session.expunge_all()
-            return users
+            return objs
 
-    def get(self, attr: dict) -> User:
+    def get(self, attr: dict) -> Base:
         with self.client.get_session() as session:
-            user = session.scalars(select(self.model).filter_by(**attr)).first()
+            obj = session.scalars(select(self.model).filter_by(**attr)).first()
             session.expunge_all()
-            return user
+            return obj
 
-    def update(self, user: User, attrs: dict):
+    def update(self, obj: Base, attrs: dict):
         with self.client.get_session() as session:
             session.execute(
-                update(self.model).where(self.model.id == user.id).values(**attrs)
+                update(self.model).where(self.model.id == obj.id).values(**attrs)
             )
 
-    def insert(self, user: User):
+    def insert(self, obj: Base):
         with self.client.get_session() as session:
-            session.add(user)
+            session.add(obj)
 
-    def delete(self, user: User):
+    def delete(self, obj: Base):
         with self.client.get_session() as session:
-            session.delete(user)
+            session.delete(obj)
 
     def clear(self):
         with self.client.get_session() as session:
-            session.query(User).delete()
+            session.query(self.model).delete()
 
 
-class AccessHistoryService(BaseService):
-    def __init__(self, client: BaseClient):
-        self.client = client
-        self.model = UserAccessHistory
+class AccessHistoryService(CustomService):
+    model = UserAccessHistory
 
-    def all(self) -> list[UserAccessHistory]:
+    def get_detailed_info_about(self, user: User):
         with self.client.get_session() as session:
-            users = session.scalars(select(self.model)).all()
-            session.expunge_all()
-            return users
-
-    def find(self, attrs: dict) -> list[UserAccessHistory]:
-        with self.client.get_session() as session:
-            users = session.scalars(select(self.model).filter_by(**attrs)).all()
-            session.expunge_all()
-            return users
-
-    def get(self, attr: dict) -> UserAccessHistory:
-        with self.client.get_session() as session:
-            user_access_history = session.scalars(select(self.model).filter_by(**attr)).first()
-            session.expunge_all()
-            return user_access_history
-
-    def update(self, user_access_history: UserAccessHistory, attrs: dict):
-        with self.client.get_session() as session:
-            session.execute(
-                update(self.model).where(self.model.id == user_access_history.id).values(**attrs)
+            result = (
+                session.query(
+                    User.email,
+                    self.model.location,
+                    self.model.device,
+                    self.model.time,
+                )
+                .join(self.model, User.id == self.model.user_id)
+                .filter(User.email == user)
+                .all()
             )
-
-    def insert(self, user_access_history: UserAccessHistory):
-        with self.client.get_session() as session:
-            session.add(user_access_history)
-
-    def delete(self, user_access_history: UserAccessHistory):
-        with self.client.get_session() as session:
-            session.delete(user_access_history)
-
-    def clear(self):
-        with self.client.get_session() as session:
-            session.query(UserAccessHistory).delete()
-
-
-class RoleService(BaseService):
-    def __init__(self, client: BaseClient):
-        self.client = client
-        self.model = Role
-
-    def all(self) -> list[Role]:
-        with self.client.get_session() as session:
-            roles = session.scalars(select(self.model)).all()
             session.expunge_all()
-            return roles
+            return result
 
-    def find(self, attrs: dict) -> list[Role]:
-        with self.client.get_session() as session:
-            roles = session.scalars(select(self.model).filter_by(**attrs)).all()
-            session.expunge_all()
-            return roles
 
-    def get(self, attr: dict) -> Role:
-        with self.client.get_session() as session:
-            role = session.scalars(select(self.model).filter_by(**attr)).first()
-            session.expunge_all()
-            return role
+class UserRoleService(CustomService):
+    model = UserRole
 
-    def update(self, user: Role, attrs: dict):
+    def get_permissions_of(self, user: User):
         with self.client.get_session() as session:
-            session.execute(
-                update(self.model).where(self.model.id == user.id).values(**attrs)
+            permissions = (
+                session.query(Role.permissions)
+                .join(self.model, Role.id == self.model.role_id)
+                .join(User, User.id == self.model.user_id)
+                .filter(User.email == user)
+                .one_or_none()
             )
-
-    def insert(self, roles: Role):
-        with self.client.get_session() as session:
-            session.add(roles)
-
-    def delete(self, roles: Role):
-        with self.client.get_session() as session:
-            session.delete(roles)
-
-    def clear(self):
-        with self.client.get_session() as session:
-            session.query(Role).delete()
-
-
-class UserRoleService(BaseService):
-    def __init__(self, client: BaseClient):
-        self.client = client
-        self.model = UserRole
-
-    def all(self) -> list[UserRole]:
-        with self.client.get_session() as session:
-            user_role = session.scalars(select(self.model)).all()
             session.expunge_all()
-            return user_role
-
-    def find(self, attrs: dict) -> list[UserRole]:
-        with self.client.get_session() as session:
-            user_role = session.scalars(select(self.model).filter_by(**attrs)).all()
-            session.expunge_all()
-            return user_role
-
-    def get(self, attr: dict) -> UserRole:
-        with self.client.get_session() as session:
-            user_role = session.scalars(select(self.model).filter_by(**attr)).first()
-            session.expunge_all()
-            return user_role
-
-    def update(self, user_role: UserRole, attrs: dict):
-        with self.client.get_session() as session:
-            session.execute(
-                update(self.model).where(self.model.id == user_role.id).values(**attrs)
-            )
-
-    def insert(self, user_role: UserRole):
-        with self.client.get_session() as session:
-            session.add(user_role)
-
-    def delete(self, user_role: UserRole):
-        with self.client.get_session() as session:
-            session.delete(user_role)
-
-    def clear(self):
-        with self.client.get_session() as session:
-            session.query(UserRole).delete()
+            return permissions
