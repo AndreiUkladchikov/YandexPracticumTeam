@@ -32,7 +32,7 @@ ROLE_ADMIN = Role(
         "api/v1/films/search",
         "api/v1/genres/search",
         "api/v1/persons/search",
-        "/admin"
+        "/admin",
     ],
     access_level=100,
 )
@@ -46,7 +46,7 @@ ROLE_OWNER = Role(
         "api/v1/films/search",
         "api/v1/genres/search",
         "api/v1/persons/search",
-        "/admin"
+        "/admin",
     ],
     access_level=1000,
 )
