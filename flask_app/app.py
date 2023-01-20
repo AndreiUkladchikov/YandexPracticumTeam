@@ -5,16 +5,11 @@ from http import HTTPStatus
 import redis
 import requests
 from flask import Flask, request
-from flask_jwt_extended import (
-    JWTManager,
-    create_access_token,
-    create_refresh_token,
-    get_jwt,
-    get_jwt_identity,
-    jwt_required,
-)
-from spectree import SpecTree, Response
+from flask_jwt_extended import (JWTManager, create_access_token,
+                                create_refresh_token, get_jwt,
+                                get_jwt_identity, jwt_required)
 from loguru import logger
+from spectree import Response, SpecTree
 
 import constants
 import messages
@@ -23,17 +18,14 @@ from config import settings
 from db import db, init_db
 from db_models import Role, User, UserAccessHistory, UserRole
 from forms import LoginForm, PasswordResetForm
-from messages import (
-    HistoryResponseForm,
-    ResponseForm,
-    ResponseFormWithTokens,
-    SingleAccessRecord,
-)
-from services import AccessHistoryService, RoleService, UserRoleService, UserService
+from messages import (HistoryResponseForm, ResponseForm,
+                      ResponseFormWithTokens, SingleAccessRecord)
+from services import (AccessHistoryService, RoleService, UserRoleService,
+                      UserService)
 
 app = Flask(__name__)
 spec = SpecTree("flask", annotations=True)
-
+spec.register(app)
 
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
@@ -130,7 +122,7 @@ def registration(json: LoginForm):
     return ResponseForm(msg=messages.success_registration)
 
 
-@app.route(f"{settings.base_api_url}/refresh-tokens", methods=["POST"])
+@app.route(f"{settings.base_api_url}/refresh-tokens", methods=["GET"])
 @spec.validate(
     resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ResponseForm), tags=["api"]
 )
@@ -168,7 +160,7 @@ def refresh_tokens():
     )
 
 
-@app.route(f"{settings.base_api_url}/logout", methods=["POST", "GET"])
+@app.route(f"{settings.base_api_url}/logout", methods=["GET"])
 @spec.validate(
     resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
 )
@@ -258,7 +250,7 @@ def get_login_history():
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 @spec.validate(
-    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm, HTTP_403=ResponseForm),
+    resp=Response(HTTP_401=ResponseForm, HTTP_403=ResponseForm),
     tags=["api"],
 )
 @jwt_required()
@@ -278,7 +270,13 @@ def catch_all(path):
         .one_or_none()
     )
 
-    if path in result["permissions"]:
+    def check_path(permission: list[str], url_path: str) -> bool:
+        for p in permission:
+            if url_path.startswith(p):
+                return True
+        return False
+
+    if check_path(result["permissions"], path):
         url = f"http://{settings.backend_host}:{settings.backend_port}/" + path
         req = requests.models.PreparedRequest()
         req.prepare_url(url, request.args.to_dict())
@@ -298,7 +296,6 @@ def create_test_roles():
 
 
 if __name__ == "__main__":
-    spec.register(app)
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     postgres_client.create_all_tables()
     create_test_roles()
