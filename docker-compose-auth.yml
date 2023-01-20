@@ -5,8 +5,8 @@ services:
     container_name: auth_database
     env_file:
       - "./flask_app/.env"
-    ports:
-      - '${DB_PORT}:${DB_PORT}'
+    expose:
+      - '${DB_PORT}'
     volumes:
       - auth_database:/var/lib/postgresql/data/
     
@@ -15,15 +15,13 @@ services:
     container_name: auth_redis
     env_file:
       - "./flask_app/.env"
-    ports:
-      - '${REDIS_PORT}:${REDIS_PORT}'
     expose:
       - '${REDIS_PORT}'
         
   auth_service:
     build: ./flask_app
     container_name: auth_server
-    command: gunicorn --bind 0.0.0.0:5000 wsgi_app:app
+    command: gunicorn --bind '${AUTH_SERVER_HOST}:${AUTH_SERVER_PORT}' wsgi_app:app
     env_file:
       - "./flask_app/.env"
     ports:

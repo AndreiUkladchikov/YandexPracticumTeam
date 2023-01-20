@@ -1,4 +1,4 @@
-FROM python:3.10.7-slim-buster
+FROM --platform=linux/amd64 python:3.10.2-buster
 
 WORKDIR /usr/src/app
 
@@ -7,7 +7,6 @@ ENV PYTHONUNBUFFERED 1
 
 RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/app/requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --no-cache-dir
 
-# copy project
 COPY . /usr/src/app/

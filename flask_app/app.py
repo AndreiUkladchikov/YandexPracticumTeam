@@ -295,8 +295,9 @@ def create_test_roles():
         logger.info("Roles have been already created")
 
 
+postgres_client.create_all_tables()
+create_test_roles()
+
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True
-    postgres_client.create_all_tables()
-    create_test_roles()
     app.run(host=settings.auth_server_host, port=settings.auth_server_port, debug=True)
