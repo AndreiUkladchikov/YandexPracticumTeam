@@ -36,6 +36,7 @@ not_allowed_resource = "This url is not allowed"
 success_update_role = "You have successfully updated role"
 success_create_role = "You have successfully created role"
 success_delete_role = "You have successfully deleted role"
+success_update_user_role = "You have successfully updated User role"
 
 
 class ResponseForm(BaseModel):

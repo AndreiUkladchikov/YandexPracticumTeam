@@ -22,7 +22,7 @@ from clients import postgres_client
 from config import settings
 from db import db, init_db
 from db_models import Role, User, UserAccessHistory, UserRole
-from forms import LoginForm, PasswordResetForm, RoleForm
+from forms import LoginForm, PasswordResetForm, RoleForm, UserRoleForm
 from messages import (HistoryResponseForm, ResponseForm,
                       ResponseFormWithTokens, SingleAccessRecord,
                       RoleRecord, RolesResponseForm)
@@ -80,6 +80,13 @@ def get_permissions(current_user):
             .one_or_none()
         )
     return result
+
+
+def check_path(permission: list[str], url_path: str) -> bool:
+    for p in permission:
+        if url_path.startswith(p):
+            return True
+    return False
 
 
 @app.route(f"{settings.base_api_url}/login", methods=["POST"])
@@ -284,7 +291,7 @@ def catch_all(path):
 
         result = get_permissions(current_user)
 
-    if path in result["permissions"]:
+    if check_path(result["permissions"], path):
         url = f"http://{settings.backend_host}:{settings.backend_port}/" + path
         req = requests.models.PreparedRequest()
         req.prepare_url(url, request.args.to_dict())
@@ -374,7 +381,34 @@ def get_all_roles():
     return RolesResponseForm(msg=messages.roles_response, records=roles)
 
 
-# ToDo: Update User Role
+@app.route(f"{settings.base_api_url}/update-user-role", methods=["POST"])
+@spec.validate(
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
+@jwt_required()
+def update_user_role(body: UserRoleForm):
+    current_user = get_jwt_identity()
+    user: User = user_service.get({"email": current_user})
+
+    if not user:
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+    else:
+        result = get_permissions(current_user)
+        if "update-role" not in result["permissions"]:
+            return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+
+    if body.id is None:
+        role_service.insert(
+            UserRole(
+                user_id=body.user_id,
+                role_id=body.role_id
+            )
+        )
+    else:
+        role = role_service.get({"id": body.id})
+        role_service.update(role, body.__dict__)
+
+    return ResponseForm(msg=messages.success_update_user_role)
 
 
 def create_test_roles():

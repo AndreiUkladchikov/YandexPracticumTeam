@@ -117,9 +117,9 @@ class RoleService(BaseService):
                 update(self.model).where(self.model.id == user.id).values(**attrs)
             )
 
-    def insert(self, roles: Role):
+    def insert(self, role: Role):
         with self.client.get_session() as session:
-            session.add(roles)
+            session.add(role)
 
     def delete(self, roles: Role):
         with self.client.get_session() as session:

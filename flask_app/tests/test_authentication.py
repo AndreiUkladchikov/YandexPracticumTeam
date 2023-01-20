@@ -3,6 +3,7 @@ from http import HTTPStatus
 from test_data import (
     fake_user_credits,
     new_user_credits,
+    role_credits,
     url_change_credits,
     url_login,
     url_login_history,
@@ -10,6 +11,9 @@ from test_data import (
     url_refresh_tokens,
     url_registration,
     user_credits,
+    url_update_role,
+    url_delete_role,
+    url_get_all_roles
 )
 
 from clients import postgres_client
@@ -130,3 +134,38 @@ class TestLoginHistory:
         hed = {"Authorization": "Bearer " + access_token}
         response = http_session.get(url_login_history, headers=hed)
         assert response.status_code == HTTPStatus.OK
+
+
+class TestChangeRole:
+    def test_update_role(self, create_user):
+        http_session = create_user.get("http_session")
+        access_token = create_user.get("access_token")
+
+        hed = {"Authorization": "Bearer " + access_token}
+        response = http_session.post(
+            url_update_role, json=role_credits, headers=hed
+        )
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_delete_role(self, create_user):
+        http_session = create_user.get("http_session")
+        access_token = create_user.get("access_token")
+
+        hed = {"Authorization": "Bearer " + access_token}
+        response = http_session.post(
+            url_delete_role, headers=hed
+        )
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    def test_get_all_roles(self, create_user):
+        http_session = create_user.get("http_session")
+        access_token = create_user.get("access_token")
+
+        hed = {"Authorization": "Bearer " + access_token}
+        response = http_session.get(
+            url_get_all_roles, headers=hed
+        )
+
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
