@@ -5,14 +5,9 @@ from http import HTTPStatus
 import redis
 import requests
 from flask import Flask, request
-from flask_jwt_extended import (
-    JWTManager,
-    create_access_token,
-    create_refresh_token,
-    get_jwt,
-    get_jwt_identity,
-    jwt_required,
-)
+from flask_jwt_extended import (JWTManager, create_access_token,
+                                create_refresh_token, get_jwt,
+                                get_jwt_identity, jwt_required)
 from loguru import logger
 from spectree import Response, SpecTree
 
@@ -23,12 +18,8 @@ from config import settings
 from db import db, init_db
 from db_models import Role, User, UserAccessHistory, UserRole
 from forms import LoginForm, PasswordResetForm
-from messages import (
-    HistoryResponseForm,
-    ResponseForm,
-    ResponseFormWithTokens,
-    SingleAccessRecord,
-)
+from messages import (HistoryResponseForm, ResponseForm,
+                      ResponseFormWithTokens, SingleAccessRecord)
 from services import AccessHistoryService, CustomService, UserRoleService
 
 app = Flask(__name__)
