@@ -15,13 +15,12 @@ import constants
 import messages
 from clients import postgres_client
 from config import settings
-from db import db, init_db
+from db import init_db
 from db_models import Role, User, UserAccessHistory, UserRole
 from forms import LoginForm, PasswordResetForm
 from messages import (HistoryResponseForm, ResponseForm,
                       ResponseFormWithTokens, SingleAccessRecord)
-from services import (AccessHistoryService, RoleService, UserRoleService,
-                      UserService)
+from services import AccessHistoryService, CustomService, UserRoleService
 
 app = Flask(__name__)
 spec = SpecTree("flask", annotations=True)
@@ -59,10 +58,10 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
 init_db(app)
 app.app_context().push()
 
-user_service = UserService(postgres_client)
-role_service = RoleService(postgres_client)
-access_history_service = AccessHistoryService(postgres_client)
-user_role_service = UserRoleService(postgres_client)
+user_service = CustomService(client=postgres_client, model=User)
+role_service = CustomService(client=postgres_client, model=Role)
+access_history_service = AccessHistoryService(client=postgres_client)
+user_role_service = UserRoleService(client=postgres_client)
 
 
 @app.route(f"{settings.base_api_url}/login", methods=["POST"])
@@ -104,7 +103,6 @@ def check_login_password(json: LoginForm):
     resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
 )
 def registration(json: LoginForm):
-
     if user_service.get({"email": json.email}):
         return ResponseForm(msg=messages.already_registered), HTTPStatus.UNAUTHORIZED
 
@@ -128,7 +126,6 @@ def registration(json: LoginForm):
 )
 @jwt_required(refresh=True)
 def refresh_tokens():
-
     refresh = request.headers.get("Authorization").split(" ")[-1]
 
     current_user = get_jwt_identity()
@@ -231,17 +228,7 @@ def get_login_history():
         UserAccessHistory(user_id=user.id, time=datetime.now())
     )
 
-    result = (
-        db.session.query(
-            User.email,
-            UserAccessHistory.location,
-            UserAccessHistory.device,
-            UserAccessHistory.time,
-        )
-        .join(UserAccessHistory, User.id == UserAccessHistory.user_id)
-        .filter(User.email == current_user)
-        .all()
-    )
+    result = access_history_service.get_detailed_info_about(current_user)
 
     history = [SingleAccessRecord(**dict(s)) for s in result]
     return HistoryResponseForm(msg=messages.history_response, records=history)
@@ -262,21 +249,13 @@ def catch_all(path):
     if not user:
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
-    result = (
-        db.session.query(Role.permissions)
-        .join(UserRole, Role.id == UserRole.role_id)
-        .join(User, User.id == UserRole.user_id)
-        .filter(User.email == current_user)
-        .one_or_none()
-    )
-
     def check_path(permission: list[str], url_path: str) -> bool:
         for p in permission:
             if url_path.startswith(p):
                 return True
         return False
 
-    if check_path(result["permissions"], path):
+    if check_path(user_role_service.get_permissions_of(current_user)["permissions"], path):
         url = f"http://{settings.backend_host}:{settings.backend_port}/" + path
         req = requests.models.PreparedRequest()
         req.prepare_url(url, request.args.to_dict())

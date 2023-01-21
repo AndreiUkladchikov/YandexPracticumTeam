@@ -1,13 +1,11 @@
-from typing import Generic
-
 import pytest
-from pydantic import BaseModel
 from test_data import url_login, url_registration, user_credits
 
 from clients import HttpClient, postgres_client
-from services import AccessHistoryService, UserService
+from db_models import User
+from services import AccessHistoryService, CustomService
 
-user_service = UserService(postgres_client)
+user_service = CustomService(client=postgres_client, model=User)
 access_history_service = AccessHistoryService(postgres_client)
 
 

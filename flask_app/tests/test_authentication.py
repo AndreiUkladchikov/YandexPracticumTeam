@@ -5,9 +5,10 @@ from test_data import (fake_user_credits, new_user_credits, url_change_credits,
                        url_refresh_tokens, url_registration, user_credits)
 
 from clients import postgres_client
-from services import UserService
+from db_models import User
+from services import CustomService
 
-user_service = UserService(postgres_client)
+user_service = CustomService(client=postgres_client, model=User)
 
 
 # TODO: tests depend on each other
