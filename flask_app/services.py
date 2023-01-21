@@ -1,4 +1,3 @@
-from flask_sqlalchemy.model import Model
 from sqlalchemy import select, update
 
 from base import BaseClient, BaseService
@@ -8,7 +7,8 @@ from db_models import Base, Role, User, UserAccessHistory, UserRole
 class CustomService(BaseService):
     def __init__(self, client: BaseClient, model: Base = None):
         self.client = client
-        self.model = model
+        if model:
+            self.model = model
 
     def all(self) -> list[Base]:
         with self.client.get_session() as session:

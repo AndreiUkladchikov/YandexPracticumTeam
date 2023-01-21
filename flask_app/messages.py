@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import datetime
-from http import HTTPStatus
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 message = "msg"
 

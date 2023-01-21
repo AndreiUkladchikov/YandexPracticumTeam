@@ -15,7 +15,7 @@ import constants
 import messages
 from clients import postgres_client
 from config import settings
-from db import db, init_db
+from db import init_db
 from db_models import Role, User, UserAccessHistory, UserRole
 from forms import LoginForm, PasswordResetForm
 from messages import (HistoryResponseForm, ResponseForm,
