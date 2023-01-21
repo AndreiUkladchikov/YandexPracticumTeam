@@ -1,7 +1,7 @@
 import time
 from typing import Any
 
-import logging
+from loguru import logger
 import etl.etl_save as etl_save
 import psycopg2
 import elasticsearch
@@ -34,7 +34,7 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, exception: Exc
                     repeat = False
                     return result
                 except exception:
-                    logging.exception(func.__name__)
+                    logger.exception(func.__name__)
                     if sleep_time < border_sleep_time:
                         sleep_time = sleep_time * factor
                     time.sleep(sleep_time)
@@ -45,7 +45,7 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, exception: Exc
 def main():
     # Create indexes
     create_indexes()
-    logging.info('Service started')
+    logger.info('Service started')
     state = state_worker.get_state(db_config.STATE_CON)
     if state.is_finished is True:
         state = state_worker.refresh_state(db_config.STATE_CON, state)
@@ -63,7 +63,7 @@ def etl_worker(state: State) -> State:
             save(data, state.index)
             state.last_row = state.last_row + len(data)
             msg = str(len(data)) + ' items updated in ' + state.index
-            logging.info(msg)
+            logger.info(msg)
         else:
             state = state_worker.get_next_state(state)
         state_worker.save_state(db_config.STATE_CON, state)
