@@ -136,37 +136,50 @@ class TestLoginHistory:
         assert response.status_code == HTTPStatus.OK
 
 
-# Integration tests (need Admin user and Role)
 class TestChangeRole:
-    def test_update_role(self, create_admin):
-        http_session = create_admin.get("http_session")
-        access_token = create_admin.get("access_token")
+    def test_update_role(self, create_user):
+        http_session = create_user.get("http_session")
+        access_token = create_user.get("access_token")
 
         hed = {"Authorization": "Bearer " + access_token}
         response = http_session.post(
             url_update_role, json=role_credits, headers=hed
         )
 
-        assert response.status_code == HTTPStatus.OK
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
 
-    def test_delete_role(self, create_admin):
-        http_session = create_admin.get("http_session")
-        access_token = create_admin.get("access_token")
+    def test_delete_role(self, create_user):
+        http_session = create_user.get("http_session")
+        access_token = create_user.get("access_token")
 
         hed = {"Authorization": "Bearer " + access_token}
         response = http_session.post(
             url_delete_role, headers=hed
         )
 
-        assert response.status_code == HTTPStatus.OK
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
 
-    def test_get_all_roles(self, create_admin):
-        http_session = create_admin.get("http_session")
-        access_token = create_admin.get("access_token")
+    def test_get_all_roles(self, create_user):
+        http_session = create_user.get("http_session")
+        access_token = create_user.get("access_token")
 
         hed = {"Authorization": "Bearer " + access_token}
         response = http_session.get(
             url_get_all_roles, headers=hed
         )
 
-        assert response.status_code == HTTPStatus.OK
+        assert response.status_code == HTTPStatus.UNAUTHORIZED
+
+    # Integration tests (need Admin user and Role)
+    # Test with Admin role
+
+    # def test_get_all_roles(self, create_admin):
+    #     http_session = create_admin.get("http_session")
+    #     access_token = create_admin.get("access_token")
+
+    #     hed = {"Authorization": "Bearer " + access_token}
+    #     response = http_session.get(
+    #         url_get_all_roles, headers=hed
+    #     )
+
+    #     assert response.status_code == HTTPStatus.OK

@@ -9,3 +9,4 @@ uvloop==0.17.0
 fastapi-pagination==0.11.0
 requests==2.28.1
 loguru==0.6.0
+python-dotenv==0.21.1
