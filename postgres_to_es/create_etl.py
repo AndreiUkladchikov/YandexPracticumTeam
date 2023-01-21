@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 
 from elasticsearch import Elasticsearch, exceptions
 
@@ -24,7 +24,7 @@ def create_movies() -> None:
         movies.update(etl_schemas.movies)
         es.indices.create(index='movies', body=movies)
     except exceptions.RequestError:
-        logging.exception('Cannot create MOVIES schema')
+        logger.exception('Cannot create MOVIES schema')
 
 
 def create_genres() -> None:
@@ -33,7 +33,7 @@ def create_genres() -> None:
         genres.update(etl_schemas.genres)
         es.indices.create(index='genres', body=genres)
     except exceptions.RequestError:
-        logging.exception('Cannot create GENRES schema')
+        logger.exception('Cannot create GENRES schema')
 
 
 def create_persons() -> None:
@@ -42,7 +42,7 @@ def create_persons() -> None:
         persons.update(etl_schemas.persons)
         es.indices.create(index='persons', body=persons)
     except exceptions.RequestError:
-        logging.exception('Cannot create PERSONS schema')
+        logger.exception('Cannot create PERSONS schema')
 
 
 if __name__ == '__main__':

@@ -24,6 +24,7 @@ from services import AccessHistoryService, CustomService, UserRoleService
 
 app = Flask(__name__)
 spec = SpecTree("flask", annotations=True)
+spec.register(app)
 
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
@@ -119,7 +120,7 @@ def registration(json: LoginForm):
     return ResponseForm(msg=messages.success_registration)
 
 
-@app.route(f"{settings.base_api_url}/refresh-tokens", methods=["POST"])
+@app.route(f"{settings.base_api_url}/refresh-tokens", methods=["GET"])
 @spec.validate(
     resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ResponseForm), tags=["api"]
 )
@@ -156,7 +157,7 @@ def refresh_tokens():
     )
 
 
-@app.route(f"{settings.base_api_url}/logout", methods=["POST", "GET"])
+@app.route(f"{settings.base_api_url}/logout", methods=["GET"])
 @spec.validate(
     resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
 )
@@ -236,7 +237,7 @@ def get_login_history():
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 @spec.validate(
-    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm, HTTP_403=ResponseForm),
+    resp=Response(HTTP_401=ResponseForm, HTTP_403=ResponseForm),
     tags=["api"],
 )
 @jwt_required()
@@ -267,9 +268,9 @@ def create_test_roles():
         logger.info("Roles have been already created")
 
 
+postgres_client.create_all_tables()
+create_test_roles()
+
 if __name__ == "__main__":
-    spec.register(app)
     app.config["TEMPLATES_AUTO_RELOAD"] = True
-    postgres_client.create_all_tables()
-    create_test_roles()
     app.run(host=settings.auth_server_host, port=settings.auth_server_port, debug=True)
