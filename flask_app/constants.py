@@ -1,4 +1,4 @@
-from db_models import Role
+from db_models import Role, User
 
 # Роли - access level с шагом 10
 # При появлении новой роли (например Subscriber+) будет проще добавить в текущую реализацию
@@ -33,6 +33,10 @@ ROLE_ADMIN = Role(
         "api/v1/genres/search",
         "api/v1/persons/search",
         "/admin",
+        "update-role",
+        "delete-role",
+        "get-all-roles",
+        "update-user-role"
     ],
     access_level=100,
 )
@@ -47,6 +51,16 @@ ROLE_OWNER = Role(
         "api/v1/genres/search",
         "api/v1/persons/search",
         "/admin",
+        "update-role",
+        "delete-role",
+        "get-all-roles",
+        "update-user-role"
     ],
     access_level=1000,
+)
+
+
+TEST_ADMIN = User(
+    email="admin@adm.com",
+    password="admin123"
 )

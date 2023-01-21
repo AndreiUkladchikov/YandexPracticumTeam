@@ -17,10 +17,11 @@ from clients import postgres_client
 from config import settings
 from db import init_db
 from db_models import Role, User, UserAccessHistory, UserRole
-from forms import LoginForm, PasswordResetForm
+from forms import LoginForm, PasswordResetForm, RoleForm, UserRoleForm
 from messages import (HistoryResponseForm, ResponseForm,
-                      ResponseFormWithTokens, SingleAccessRecord)
-from services import AccessHistoryService, CustomService, UserRoleService
+                      ResponseFormWithTokens, SingleAccessRecord,
+                      RoleRecord, RolesResponseForm)
+from services import (AccessHistoryService, CustomService, UserRoleService)
 
 app = Flask(__name__)
 spec = SpecTree("flask", annotations=True)
@@ -60,8 +61,15 @@ app.app_context().push()
 
 user_service = CustomService(client=postgres_client, model=User)
 role_service = CustomService(client=postgres_client, model=Role)
-access_history_service = AccessHistoryService(client=postgres_client)
-user_role_service = UserRoleService(client=postgres_client)
+access_history_service = AccessHistoryService(postgres_client)
+user_role_service = UserRoleService(postgres_client)
+
+
+def check_path(permission: list[str], url_path: str) -> bool:
+    for p in permission:
+        if url_path.startswith(p):
+            return True
+    return False
 
 
 @app.route(f"{settings.base_api_url}/login", methods=["POST"])
@@ -237,31 +245,143 @@ def get_login_history():
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 @spec.validate(
-    resp=Response(HTTP_401=ResponseForm, HTTP_403=ResponseForm),
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm, HTTP_403=ResponseForm, HTTP_500=ResponseForm),
     tags=["api"],
 )
-@jwt_required()
+@jwt_required(optional=True)
 def catch_all(path):
     current_user = get_jwt_identity()
 
+    if not current_user:
+        result = {"permissions": constants.ROLE_UNAUTHORIZED_USER.permissions}
+    else:
+        user: User = user_service.get({"email": current_user})
+
+        if not user:
+            return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+
+        result = get_permissions(current_user)
+
+    if check_path(result["permissions"], path):
+        url = f"http://{settings.backend_host}:{settings.backend_port}/" + path
+        req = requests.models.PreparedRequest()
+        req.prepare_url(url, request.args.to_dict())
+        return ResponseForm(msg=messages.successful_response, result=requests.get(req.url).json())
+    else:
+        print("bad")
+        return ResponseForm(msg=messages.not_allowed_resource), HTTPStatus.FORBIDDEN
+
+
+# Roles CRUD:
+
+# Update or Create
+@app.route(f"{settings.base_api_url}/update-role", methods=["POST"])
+@spec.validate(
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
+@jwt_required()
+def update_role(body: RoleForm):
+    current_user = get_jwt_identity()
+    user: User = user_service.get({"email": current_user})
+
+    if not user:
+        print("unathorized")
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+    else:
+        print(user.id)
+        result = user_role_service.get_permissions_of(user)
+        if check_path(result["permissions"], "update-role"):
+            return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+
+    if body.id is None:
+        role_service.insert(
+            Role(
+                name=body.name,
+                permissions=body.permissions,
+                access_level=body.access_level
+            )
+        )
+        msg = messages.success_create_role
+    else:
+        role = role_service.get({"id": body.id})
+        role_service.update(role, body.__dict__)
+        msg = messages.success_update_role
+
+    return ResponseForm(msg=msg)
+
+
+# Delete
+@app.route(f"{settings.base_api_url}/delete-role", methods=["POST"])
+@spec.validate(
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
+@jwt_required()
+def delete_role(body: RoleForm):
+    current_user = get_jwt_identity()
     user: User = user_service.get({"email": current_user})
 
     if not user:
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
-
-    def check_path(permission: list[str], url_path: str) -> bool:
-        for p in permission:
-            if url_path.startswith(p):
-                return True
-        return False
-
-    if check_path(user_role_service.get_permissions_of(current_user)["permissions"], path):
-        url = f"http://{settings.backend_host}:{settings.backend_port}/" + path
-        req = requests.models.PreparedRequest()
-        req.prepare_url(url, request.args.to_dict())
-        return requests.get(req.url).json()
     else:
-        return ResponseForm(msg=messages.not_allowed_resource), HTTPStatus.FORBIDDEN
+        result = user_role_service.get_permissions_of(user)
+        if check_path(result["permissions"], "delete-role"):
+            return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+
+    role = role_service.get({"id": body.id})
+    role_service.delete(role)
+
+    return ResponseForm(msg=messages.success_delete_role)
+
+
+@app.route(f"{settings.base_api_url}/get-all-roles", methods=["GET"])
+@spec.validate(
+    resp=Response(HTTP_200=RolesResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
+@jwt_required()
+def get_all_roles():
+    current_user = get_jwt_identity()
+    user: User = user_service.get({"email": current_user})
+
+    if not user:
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+    else:
+        result = user_role_service.get_permissions_of(user)
+        if check_path(result["permissions"], "get-all-roles"):
+            return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+
+    result = role_service.all()
+    roles = [RoleRecord(**s.__dict__) for s in result]
+    return RolesResponseForm(msg=messages.roles_response, records=roles)
+
+
+@app.route(f"{settings.base_api_url}/update-user-role", methods=["POST"])
+@spec.validate(
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+)
+@jwt_required()
+def update_user_role(body: UserRoleForm):
+    current_user = get_jwt_identity()
+    user: User = user_service.get({"email": current_user})
+
+    if not user:
+        return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+    else:
+        result = user_role_service.get_permissions_of(user)
+        if "update-role" not in result["permissions"]:
+            return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
+
+    if body.id is None:
+        role_service.insert(
+            UserRole(
+                user_id=body.user_id,
+                role_id=body.role_id
+            )
+        )
+    else:
+        role = role_service.get({"id": body.id})
+        role_service.update(role, body.__dict__)
+
+    return ResponseForm(msg=messages.success_update_user_role)
 
 
 def create_test_roles():
@@ -274,9 +394,29 @@ def create_test_roles():
         logger.info("Roles have been already created")
 
 
-postgres_client.create_all_tables()
-create_test_roles()
+def create_test_admin():
+    try:
+        user_service.insert(constants.TEST_ADMIN)
+        user = user_service.get({"email": constants.TEST_ADMIN.email})
+        role = role_service.get({"access_level": 100})
+        user_role_service.insert(UserRole(user_id=user.id, role_id=role.id))
+    except Exception:
+        logger.info("Admin has been already created")
+
+
+def grant_test_admin_role():
+    try:
+        user = user_service.get({"email": constants.TEST_ADMIN.email})
+        role = role_service.get({"access_level": 100})
+        user_role_service.insert(UserRole(user_id=user.id, role_id=role.id))
+    except Exception:
+        logger.info("Admin already has access")
+
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True
+    postgres_client.create_all_tables()
+    create_test_roles()
+    create_test_admin()
+    grant_test_admin_role()
     app.run(host=settings.auth_server_host, port=settings.auth_server_port, debug=True)
