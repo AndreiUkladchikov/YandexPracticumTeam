@@ -21,8 +21,7 @@ from forms import LoginForm, PasswordResetForm, RoleForm, UserRoleForm
 from messages import (HistoryResponseForm, ResponseForm,
                       ResponseFormWithTokens, SingleAccessRecord,
                       RoleRecord, RolesResponseForm)
-from services import (AccessHistoryService, RoleService, UserRoleService,
-                      UserService)
+from services import (AccessHistoryService, CustomService, UserRoleService)
 
 app = Flask(__name__)
 spec = SpecTree("flask", annotations=True)
@@ -60,21 +59,10 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
 init_db(app)
 app.app_context().push()
 
-user_service = UserService(postgres_client)
-role_service = RoleService(postgres_client)
+user_service = CustomService(client=postgres_client, model=User)
+role_service = CustomService(client=postgres_client, model=Role)
 access_history_service = AccessHistoryService(postgres_client)
 user_role_service = UserRoleService(postgres_client)
-
-
-def get_permissions(current_user):
-    result = (
-            db.session.query(Role.permissions)
-            .join(UserRole, Role.id == UserRole.role_id)
-            .join(User, User.id == UserRole.user_id)
-            .filter(User.email == current_user)
-            .one_or_none()
-        )
-    return result
 
 
 def check_path(permission: list[str], url_path: str) -> bool:
@@ -301,8 +289,8 @@ def update_role(body: RoleForm):
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
     else:
         print(user.id)
-        result = get_permissions(current_user)
-        if "update-role" not in result["permissions"]:
+        result = user_role_service.get_permissions_of(user)
+        if check_path(result["permissions"], "update-role"):
             return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     if body.id is None:
@@ -335,8 +323,8 @@ def delete_role(body: RoleForm):
     if not user:
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
     else:
-        result = get_permissions(current_user)
-        if "delete-role" not in result["permissions"]:
+        result = user_role_service.get_permissions_of(user)
+        if check_path(result["permissions"], "delete-role"):
             return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     role = role_service.get({"id": body.id})
@@ -357,8 +345,8 @@ def get_all_roles():
     if not user:
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
     else:
-        result = get_permissions(current_user)
-        if "get-all-roles" not in result["permissions"]:
+        result = user_role_service.get_permissions_of(user)
+        if check_path(result["permissions"], "get-all-roles"):
             return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     result = role_service.all()
@@ -378,7 +366,7 @@ def update_user_role(body: UserRoleForm):
     if not user:
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
     else:
-        result = get_permissions(current_user)
+        result = user_role_service.get_permissions_of(user)
         if "update-role" not in result["permissions"]:
             return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 

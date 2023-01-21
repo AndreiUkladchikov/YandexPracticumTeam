@@ -1,5 +1,4 @@
 import pytest
-from pydantic import BaseModel
 from test_data import url_login, url_registration, user_credits, admin_credits
 
 from clients import HttpClient, postgres_client
