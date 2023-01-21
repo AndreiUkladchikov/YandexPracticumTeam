@@ -5,7 +5,7 @@ from typing import Any
 from uuid import UUID
 from http import HTTPStatus
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 message = "msg"
 successful_response = "Result successed"

@@ -5,22 +5,17 @@ from http import HTTPStatus
 import redis
 import requests
 from flask import Flask, request
-from flask_jwt_extended import (
-    JWTManager,
-    create_access_token,
-    create_refresh_token,
-    get_jwt,
-    get_jwt_identity,
-    jwt_required,
-)
-from spectree import SpecTree, Response
+from flask_jwt_extended import (JWTManager, create_access_token,
+                                create_refresh_token, get_jwt,
+                                get_jwt_identity, jwt_required)
 from loguru import logger
+from spectree import Response, SpecTree
 
 import constants
 import messages
 from clients import postgres_client
 from config import settings
-from db import db, init_db
+from db import init_db
 from db_models import Role, User, UserAccessHistory, UserRole
 from forms import LoginForm, PasswordResetForm, RoleForm, UserRoleForm
 from messages import (HistoryResponseForm, ResponseForm,
@@ -31,7 +26,7 @@ from services import (AccessHistoryService, RoleService, UserRoleService,
 
 app = Flask(__name__)
 spec = SpecTree("flask", annotations=True)
-
+spec.register(app)
 
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
@@ -128,7 +123,6 @@ def check_login_password(json: LoginForm):
     resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
 )
 def registration(json: LoginForm):
-
     if user_service.get({"email": json.email}):
         return ResponseForm(msg=messages.already_registered), HTTPStatus.UNAUTHORIZED
 
@@ -146,13 +140,12 @@ def registration(json: LoginForm):
     return ResponseForm(msg=messages.success_registration)
 
 
-@app.route(f"{settings.base_api_url}/refresh-tokens", methods=["POST"])
+@app.route(f"{settings.base_api_url}/refresh-tokens", methods=["GET"])
 @spec.validate(
     resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ResponseForm), tags=["api"]
 )
 @jwt_required(refresh=True)
 def refresh_tokens():
-
     refresh = request.headers.get("Authorization").split(" ")[-1]
 
     current_user = get_jwt_identity()
@@ -184,7 +177,7 @@ def refresh_tokens():
     )
 
 
-@app.route(f"{settings.base_api_url}/logout", methods=["POST", "GET"])
+@app.route(f"{settings.base_api_url}/logout", methods=["GET"])
 @spec.validate(
     resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
 )
@@ -255,17 +248,7 @@ def get_login_history():
         UserAccessHistory(user_id=user.id, time=datetime.now())
     )
 
-    result = (
-        db.session.query(
-            User.email,
-            UserAccessHistory.location,
-            UserAccessHistory.device,
-            UserAccessHistory.time,
-        )
-        .join(UserAccessHistory, User.id == UserAccessHistory.user_id)
-        .filter(User.email == current_user)
-        .all()
-    )
+    result = access_history_service.get_detailed_info_about(current_user)
 
     history = [SingleAccessRecord(**dict(s)) for s in result]
     return HistoryResponseForm(msg=messages.history_response, records=history)
@@ -443,7 +426,6 @@ def grant_test_admin_role():
 
 
 if __name__ == "__main__":
-    spec.register(app)
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     postgres_client.create_all_tables()
     create_test_roles()

@@ -17,9 +17,10 @@ from test_data import (
 )
 
 from clients import postgres_client
-from services import UserService
+from db_models import User
+from services import CustomService
 
-user_service = UserService(postgres_client)
+user_service = CustomService(client=postgres_client, model=User)
 
 
 # TODO: tests depend on each other
@@ -71,11 +72,11 @@ class TestLogout:
         access_token = create_user.get("access_token")
         hed = {"Authorization": "Bearer " + access_token}
 
-        response = http_session.post(url_logout, headers=hed)
+        response = http_session.get(url_logout, headers=hed)
 
         assert response.status_code == HTTPStatus.OK
 
-        response = http_session.post(url_logout, headers=hed)
+        response = http_session.get(url_logout, headers=hed)
 
         assert response.status_code == HTTPStatus.UNAUTHORIZED
 
@@ -91,7 +92,7 @@ class TestRefreshTokens:
 
         hed = {"Authorization": "Bearer " + refresh_token}
 
-        response_refresh = http_session.post(url_refresh_tokens, headers=hed)
+        response_refresh = http_session.get(url_refresh_tokens, headers=hed)
 
         assert response_refresh.status_code == HTTPStatus.OK
 
@@ -107,9 +108,9 @@ class TestRefreshTokens:
 
         hed = {"Authorization": "Bearer " + refresh_token}
 
-        http_session.post(url_refresh_tokens, headers=hed)
+        http_session.get(url_refresh_tokens, headers=hed)
 
-        response_with_old_token = http_session.post(url_refresh_tokens, headers=hed)
+        response_with_old_token = http_session.get(url_refresh_tokens, headers=hed)
         assert response_with_old_token.status_code == HTTPStatus.UNAUTHORIZED
 
 
