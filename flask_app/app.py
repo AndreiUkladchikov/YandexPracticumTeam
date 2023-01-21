@@ -260,7 +260,7 @@ def catch_all(path):
         if not user:
             return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
-        result = get_permissions(current_user)
+        result = user_role_service.get_permissions_of(current_user)
 
     if check_path(result["permissions"], path):
         url = f"http://{settings.backend_host}:{settings.backend_port}/" + path
@@ -268,7 +268,6 @@ def catch_all(path):
         req.prepare_url(url, request.args.to_dict())
         return ResponseForm(msg=messages.successful_response, result=requests.get(req.url).json())
     else:
-        print("bad")
         return ResponseForm(msg=messages.not_allowed_resource), HTTPStatus.FORBIDDEN
 
 
@@ -285,10 +284,8 @@ def update_role(body: RoleForm):
     user: User = user_service.get({"email": current_user})
 
     if not user:
-        print("unathorized")
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
     else:
-        print(user.id)
         result = user_role_service.get_permissions_of(user)
         if check_path(result["permissions"], "update-role"):
             return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
