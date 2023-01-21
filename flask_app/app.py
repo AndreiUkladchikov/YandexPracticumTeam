@@ -249,7 +249,13 @@ def catch_all(path):
     if not user:
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
-    if path in user_role_service.get_permissions_of(current_user)["permissions"]:
+    def check_path(permission: list[str], url_path: str) -> bool:
+        for p in permission:
+            if url_path.startswith(p):
+                return True
+        return False
+
+    if check_path(user_role_service.get_permissions_of(current_user)["permissions"], path):
         url = f"http://{settings.backend_host}:{settings.backend_port}/" + path
         req = requests.models.PreparedRequest()
         req.prepare_url(url, request.args.to_dict())
