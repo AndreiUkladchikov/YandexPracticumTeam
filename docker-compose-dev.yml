@@ -24,8 +24,8 @@ services:
     image: redis:7.0.5
     env_file:
       - .env
-    expose:
-      - '${REDIS_PORT}'
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
 
   fast_api:
     build: fast_api

@@ -2,7 +2,7 @@ from typing import Generic
 
 import pytest
 from pydantic import BaseModel
-from test_data import url_login, url_registration, user_credits
+from test_data import url_login, url_registration, user_credits, admin_credits
 
 from clients import HttpClient, postgres_client
 from services import AccessHistoryService, UserService
@@ -23,6 +23,20 @@ def http_session():
 def create_user(http_session) -> dict:
     http_session.post(url_registration, json=user_credits)
     response_login = http_session.post(url_login, json=user_credits)
+    access_token: str = response_login.json().get("access_token")
+    refresh_token: str = response_login.json().get("refresh_token")
+
+    yield {
+        "http_session": http_session,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+    }
+
+
+@pytest.fixture
+def create_admin(http_session) -> dict:
+    # http_session.post(url_registration, json=admin_credits)
+    response_login = http_session.post(url_login, json=admin_credits)
     access_token: str = response_login.json().get("access_token")
     refresh_token: str = response_login.json().get("refresh_token")
 

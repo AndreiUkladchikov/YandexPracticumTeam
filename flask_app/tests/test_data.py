@@ -14,6 +14,8 @@ fake_user_credits: dict = {"email": "fake@user.ru", "password": "fake_password"}
 
 role_credits: dict = {"name": "test_role", "access_level": 5}
 
+admin_credits: dict = {"email": "admin@adm.com", "password": "admin123"}
+
 url_logout: str = address + base_api_url + "/logout"
 url_refresh_tokens: str = address + base_api_url + "/refresh-tokens"
 url_login: str = address + base_api_url + "/login"

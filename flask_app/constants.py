@@ -1,4 +1,4 @@
-from db_models import Role
+from db_models import Role, User
 
 # Роли - access level с шагом 10
 # При появлении новой роли (например Subscriber+) будет проще добавить в текущую реализацию
@@ -57,4 +57,10 @@ ROLE_OWNER = Role(
         "update-user-role"
     ],
     access_level=1000,
+)
+
+
+TEST_ADMIN = User(
+    email="admin@adm.com",
+    password="admin123"
 )
