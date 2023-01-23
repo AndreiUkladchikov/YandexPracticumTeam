@@ -1,16 +1,23 @@
 import pytest
-from test_data import url_login, url_registration, user_credits, admin_credits
+from test_data import admin_credits, url_login, url_registration, user_credits
 
 from clients import HttpClient, postgres_client
 from db_models import User
+from helpers import create_test_roles
 from services import AccessHistoryService, CustomService
 
 user_service = CustomService(client=postgres_client, model=User)
 access_history_service = AccessHistoryService(postgres_client)
 
 
+@pytest.fixture(scope="session")
+def create_roles():
+    create_test_roles()
+    yield
+
+
 @pytest.fixture(scope="class")
-def http_session():
+def http_session(create_roles):
     with HttpClient().get_session() as session:
         yield session
     access_history_service.clear()

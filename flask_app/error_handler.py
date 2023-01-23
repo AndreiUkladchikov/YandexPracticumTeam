@@ -3,8 +3,8 @@ from http import HTTPStatus
 
 from werkzeug.exceptions import HTTPException
 
-from flask_app import app
-from errors import SERVER_ERROR, ERROR_BASE_CODE
+from app import app
+from errors import ERROR_BASE_CODE, SERVER_ERROR
 
 
 @app.errorhandler(Exception)
@@ -12,12 +12,12 @@ def handle_exception(e):
 
     if isinstance(e, HTTPException):
         return {
-            'code': ERROR_BASE_CODE,
-            'msg': re.sub(
-                pattern=re.compile('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});'),
-                repl='',
-                string=e.get_description()
-            )
+            "code": ERROR_BASE_CODE,
+            "msg": re.sub(
+                pattern=re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});"),
+                repl="",
+                string=e.get_description(),
+            ),
         }, e.code
 
     elif isinstance(e, Exception):

@@ -1,7 +1,8 @@
 import datetime
 import uuid
 
-from sqlalchemy import ARRAY, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import (ARRAY, Column, DateTime, ForeignKey, Integer, MetaData,
+                        String)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -43,8 +44,8 @@ class UserRole(Base):
     user_id: uuid.UUID = Column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
-        unique=True,
         primary_key=True,
+        unique=True,
         nullable=False,
     )
 
@@ -93,7 +94,13 @@ class Role(Base):
 class UserAccessHistory(Base):
     __tablename__ = "user_access_history"
 
-    id: int = Column(Integer, nullable=False, primary_key=True)
+    id: uuid.UUID = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        unique=True,
+        nullable=False,
+    )
     user_id: uuid.UUID = Column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
