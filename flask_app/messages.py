@@ -58,6 +58,8 @@ class SingleAccessRecord(BaseModel):
 
 class HistoryResponseForm(ResponseForm):
     records: list[SingleAccessRecord] | None = Field(default=None)
+    total_items: int = ...
+    total_pages: int = ...
 
 
 class RoleRecord(BaseModel):
