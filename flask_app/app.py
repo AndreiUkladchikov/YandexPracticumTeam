@@ -380,7 +380,7 @@ def update_user_role(body: UserRoleForm):
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
     else:
         result = user_role_service.get_permissions_of(user)
-        if "update-role" not in result["permissions"]:
+        if check_path(result["permissions"], "update-user-role"):
             return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     if body.id is None:
@@ -397,39 +397,7 @@ def update_user_role(body: UserRoleForm):
     return ResponseForm(msg=messages.success_update_user_role)
 
 
-def create_test_roles():
-    try:
-        role_service.insert(constants.ROLE_USER)
-        role_service.insert(constants.ROLE_SUBSCRIBER)
-        role_service.insert(constants.ROLE_ADMIN)
-        role_service.insert(constants.ROLE_OWNER)
-    except Exception:
-        logger.info("Roles have been already created")
-
-
-def create_test_admin():
-    try:
-        user_service.insert(constants.TEST_ADMIN)
-        user = user_service.get({"email": constants.TEST_ADMIN.email})
-        role = role_service.get({"access_level": 100})
-        user_role_service.insert(UserRole(user_id=user.id, role_id=role.id))
-    except Exception:
-        logger.info("Admin has been already created")
-
-
-def grant_test_admin_role():
-    try:
-        user = user_service.get({"email": constants.TEST_ADMIN.email})
-        role = role_service.get({"access_level": 100})
-        user_role_service.insert(UserRole(user_id=user.id, role_id=role.id))
-    except Exception:
-        logger.info("Admin already has access")
-
-
 if __name__ == "__main__":
     postgres_client.create_all_tables()
-    create_test_roles()
-    create_test_admin()
-    grant_test_admin_role()
     app.run(host=settings.auth_server_host, port=settings.auth_server_port, debug=True)
 
