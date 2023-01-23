@@ -14,3 +14,4 @@ gevent~=22.10.2
 gunicorn==20.1.0
 psycopg2-binary==2.9.5
 alembic==1.9.2
+werkzeug==2.2.2

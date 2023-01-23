@@ -41,14 +41,6 @@ class User(Base):
 class UserRole(Base):
     __tablename__ = "user_roles"
 
-    id: uuid.UUID = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        unique=True,
-        nullable=False,
-    )
-
     user_id: uuid.UUID = Column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
@@ -60,7 +52,7 @@ class UserRole(Base):
     role_id: uuid.UUID = Column(
         UUID(as_uuid=True),
         ForeignKey("roles.id", ondelete="CASCADE"),
-        unique=True,
+        unique=False,
         nullable=False,
     )
 

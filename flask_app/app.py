@@ -29,6 +29,7 @@ app.register_blueprint(auth_blueprint, url_prefix=f"{settings.base_api_url}")
 
 spec.register(app)
 
+
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
 
@@ -39,6 +40,8 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(
     days=settings.refresh_token_expires_in_days
 )
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
 
 jwt = JWTManager(app)
 

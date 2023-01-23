@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from http import HTTPStatus
+from math import ceil
 
 from flask import Blueprint, request
 from flask_jwt_extended import (create_access_token, create_refresh_token,
@@ -174,6 +175,10 @@ def change_credits(json: PasswordResetForm):
 )
 @jwt_required()
 def get_login_history():
+    args = request.args
+    page_num = int(args.get("page_num", 1))
+    page_size = int(args.get("page_size", 20))
+
     current_user = get_jwt_identity()
     user: User = user_service.get({"email": current_user})
 
@@ -184,7 +189,15 @@ def get_login_history():
         UserAccessHistory(user_id=user.id, time=datetime.now())
     )
 
-    result = access_history_service.get_detailed_info_about(current_user)
+    result, total = access_history_service.get_detailed_info_about(
+        user=user, page_size=page_size, page_num=page_num
+    )
 
     history = [SingleAccessRecord(**dict(s)) for s in result]
-    return HistoryResponseForm(msg=messages.history_response, records=history)
+
+    return HistoryResponseForm(
+        msg=messages.history_response,
+        records=history,
+        total_pages=ceil(total / page_size),
+        total_items=total,
+    )
