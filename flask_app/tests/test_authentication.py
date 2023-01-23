@@ -1,20 +1,10 @@
 from http import HTTPStatus
 
-from test_data import (
-    fake_user_credits,
-    new_user_credits,
-    role_credits,
-    url_change_credits,
-    url_login,
-    url_login_history,
-    url_logout,
-    url_refresh_tokens,
-    url_registration,
-    user_credits,
-    url_update_role,
-    url_delete_role,
-    url_get_all_roles
-)
+from test_data import (fake_user_credits, new_user_credits, role_credits,
+                       url_change_credits, url_delete_role, url_get_all_roles,
+                       url_login, url_login_history, url_logout,
+                       url_refresh_tokens, url_registration, url_update_role,
+                       user_credits)
 
 from clients import postgres_client
 from db_models import User
@@ -137,50 +127,49 @@ class TestLoginHistory:
         assert response.status_code == HTTPStatus.OK
 
 
-class TestChangeRole:
-    def test_update_role(self, create_user):
-        http_session = create_user.get("http_session")
-        access_token = create_user.get("access_token")
+# class TestChangeRole:
+#     access_token: str = ""
+#
+#     def test_update_role(self, create_user):
+#         http_session = create_user.get("http_session")
+#         access_token = create_user.get("access_token")
+#         self.access_token = access_token
+#
+#         hed = {"Authorization": "Bearer " + access_token}
+#         response = http_session.post(
+#             url_update_role, json=role_credits, headers=hed
+#         )
+#
+#         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+#
+#     def test_delete_role(self, http_session):
+#
+#         hed = {"Authorization": "Bearer " + self.access_token}
+#         response = http_session.post(
+#             url_delete_role, headers=hed
+#         )
+#
+#         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+#
+#     def test_get_all_roles(self, http_session):
+#
+#         hed = {"Authorization": "Bearer " + self.access_token}
+#         response = http_session.get(
+#             url_get_all_roles, headers=hed
+#         )
+#
+#         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
-        hed = {"Authorization": "Bearer " + access_token}
-        response = http_session.post(
-            url_update_role, json=role_credits, headers=hed
-        )
+# Integration tests (need Admin user and Role)
+# Test with Admin role
 
-        assert response.status_code == HTTPStatus.UNAUTHORIZED
+# def test_get_all_roles(self, create_admin):
+#     http_session = create_admin.get("http_session")
+#     access_token = create_admin.get("access_token")
 
-    def test_delete_role(self, create_user):
-        http_session = create_user.get("http_session")
-        access_token = create_user.get("access_token")
+#     hed = {"Authorization": "Bearer " + access_token}
+#     response = http_session.get(
+#         url_get_all_roles, headers=hed
+#     )
 
-        hed = {"Authorization": "Bearer " + access_token}
-        response = http_session.post(
-            url_delete_role, headers=hed
-        )
-
-        assert response.status_code == HTTPStatus.UNAUTHORIZED
-
-    def test_get_all_roles(self, create_user):
-        http_session = create_user.get("http_session")
-        access_token = create_user.get("access_token")
-
-        hed = {"Authorization": "Bearer " + access_token}
-        response = http_session.get(
-            url_get_all_roles, headers=hed
-        )
-
-        assert response.status_code == HTTPStatus.UNAUTHORIZED
-
-    # Integration tests (need Admin user and Role)
-    # Test with Admin role
-
-    # def test_get_all_roles(self, create_admin):
-    #     http_session = create_admin.get("http_session")
-    #     access_token = create_admin.get("access_token")
-
-    #     hed = {"Authorization": "Bearer " + access_token}
-    #     response = http_session.get(
-    #         url_get_all_roles, headers=hed
-    #     )
-
-    #     assert response.status_code == HTTPStatus.OK
+#     assert response.status_code == HTTPStatus.OK

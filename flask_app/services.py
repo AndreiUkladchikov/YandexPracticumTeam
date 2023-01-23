@@ -1,5 +1,5 @@
 from sqlalchemy import select, update
-
+from clients import postgres_client
 from base import BaseClient, BaseService
 from db_models import Base, Role, User, UserAccessHistory, UserRole
 
@@ -81,3 +81,9 @@ class UserRoleService(CustomService):
             )
             session.expunge_all()
             return permissions
+
+
+user_service = CustomService(client=postgres_client, model=User)
+role_service = CustomService(client=postgres_client, model=Role)
+access_history_service = AccessHistoryService(postgres_client)
+user_role_service = UserRoleService(postgres_client)

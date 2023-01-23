@@ -1,5 +1,5 @@
 import pytest
-from test_data import url_login, url_registration, user_credits, admin_credits
+from test_data import admin_credits, url_login, url_registration, user_credits
 
 from clients import HttpClient, postgres_client
 from db_models import User
