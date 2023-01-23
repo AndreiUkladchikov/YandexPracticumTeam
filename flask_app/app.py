@@ -1,10 +1,12 @@
 import os
 from datetime import datetime, timedelta
 from http import HTTPStatus
+from math import ceil
 
+from flask_app import app
 import redis
 import requests
-from flask import Flask, request
+from flask import request
 from flask_jwt_extended import (JWTManager, create_access_token,
                                 create_refresh_token, get_jwt,
                                 get_jwt_identity, jwt_required)
@@ -23,9 +25,6 @@ from messages import (HistoryResponseForm, ResponseForm,
                       RoleRecord, RolesResponseForm)
 from services import (AccessHistoryService, CustomService, UserRoleService)
 
-app = Flask(__name__)
-spec = SpecTree("flask", annotations=True)
-spec.register(app)
 
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
@@ -37,8 +36,13 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(
     days=settings.refresh_token_expires_in_days
 )
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 
+
+spec = SpecTree("flask", annotations=True)
 jwt = JWTManager(app)
+
+spec.register(app)
 
 jwt_redis_blocklist = redis.StrictRedis(
     host=settings.redis_host, port=settings.redis_port, db=0, decode_responses=True
@@ -90,7 +94,6 @@ def check_login_password(json: LoginForm):
     refresh_token = create_refresh_token(
         identity=user.email, additional_claims=additional_claims
     )
-
     user.refresh_token = refresh_token
 
     access_history_service.insert(
@@ -226,6 +229,10 @@ def change_credits(json: PasswordResetForm):
 )
 @jwt_required()
 def get_login_history():
+    args = request.args
+    page_num = int(args.get('page_num', 1))
+    page_size = int(args.get('page_size', 20))
+
     current_user = get_jwt_identity()
     user: User = user_service.get({"email": current_user})
 
@@ -236,10 +243,19 @@ def get_login_history():
         UserAccessHistory(user_id=user.id, time=datetime.now())
     )
 
-    result = access_history_service.get_detailed_info_about(current_user)
+    result, total = access_history_service.get_detailed_info_about(
+        user=user,
+        page_size=page_size,
+        page_num=page_num
+    )
 
     history = [SingleAccessRecord(**dict(s)) for s in result]
-    return HistoryResponseForm(msg=messages.history_response, records=history)
+    return HistoryResponseForm(
+        msg=messages.history_response,
+        records=history,
+        total_pages=ceil(total / page_size),
+        total_items=total
+    )
 
 
 @app.route("/", defaults={"path": ""})
@@ -411,9 +427,9 @@ def grant_test_admin_role():
 
 
 if __name__ == "__main__":
-    app.config["TEMPLATES_AUTO_RELOAD"] = True
     postgres_client.create_all_tables()
     create_test_roles()
     create_test_admin()
     grant_test_admin_role()
     app.run(host=settings.auth_server_host, port=settings.auth_server_port, debug=True)
+
