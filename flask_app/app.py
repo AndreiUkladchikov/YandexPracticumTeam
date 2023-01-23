@@ -12,7 +12,6 @@ from spectree import Response
 import constants
 import messages
 from black_list import jwt_redis_blocklist
-from clients import postgres_client
 from config import settings
 from db import init_db
 from db_models import User
@@ -98,8 +97,4 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True
-    postgres_client.create_all_tables()
-    # create_test_roles()
-    # create_test_admin()
-    # grant_test_admin_role()
     app.run(host=settings.auth_server_host, port=settings.auth_server_port, debug=True)
