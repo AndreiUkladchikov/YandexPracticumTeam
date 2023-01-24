@@ -14,10 +14,10 @@ class LoginForm(BaseModel):
 
     @validator("email")
     def email_valid(cls, v):
-        email = v.lower()
+        email = v
         if (
             re.match(
-                "^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$",
+                "[^@]+@[^@]+\.[^@]+",
                 email,
             )
             is None

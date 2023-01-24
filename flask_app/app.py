@@ -16,16 +16,19 @@ from config import settings
 from db import init_db
 from db_models import User
 from documentation import spec
-from helpers import check_path
+from helpers import check_path, create_test_roles
 from messages import ResponseForm
 from services import user_role_service, user_service
 from v1.auth.auth import auth_blueprint
+from v1.auth.oauth import oauth_blueprint
 from v1.roles.roles import roles_blueprint
 
 app = Flask(__name__)
 
 app.register_blueprint(roles_blueprint, url_prefix=f"{settings.base_api_url}")
 app.register_blueprint(auth_blueprint, url_prefix=f"{settings.base_api_url}")
+app.register_blueprint(oauth_blueprint, url_prefix=f"{settings.base_api_url}")
+
 
 spec.register(app)
 
@@ -71,7 +74,7 @@ app.app_context().push()
         HTTP_403=ResponseForm,
         HTTP_500=ResponseForm,
     ),
-    tags=["api"],
+    tags=["Gateway to movie service"],
 )
 @jwt_required(optional=True)
 def catch_all(path):
@@ -100,4 +103,5 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True
+    create_test_roles()
     app.run(host=settings.auth_server_host, port=settings.auth_server_port, debug=True)
