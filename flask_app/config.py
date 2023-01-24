@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     oauth_client_id: str = ...
     oauth_client_secret: str = ...
 
+    baseurl: str = Field(default="https://oauth.yandex.ru/")
+    login_url_yandex: str = Field(default="https://login.yandex.ru/info/")
+
+    rate_limit: str = Field(default="20/minute")
+
     class Config:
         env_file = f"{base_dir}/.env"
 

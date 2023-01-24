@@ -4,7 +4,7 @@ from http import HTTPStatus
 
 import redis
 import requests
-from flask import Flask, request
+from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, get_jwt_identity, jwt_required
 from loguru import logger
 from spectree import Response
@@ -17,6 +17,7 @@ from db import init_db
 from db_models import User
 from documentation import spec
 from helpers import check_path, create_test_roles
+from limiter import limiter
 from messages import ResponseForm
 from services import user_role_service, user_service
 from v1.auth.auth import auth_blueprint
@@ -32,6 +33,7 @@ app.register_blueprint(oauth_blueprint, url_prefix=f"{settings.base_api_url}")
 
 spec.register(app)
 
+limiter.init_app(app)
 
 SECRET_KEY = os.urandom(32)
 app.config["SECRET_KEY"] = SECRET_KEY
@@ -47,6 +49,11 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 
 jwt = JWTManager(app)
+
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify(error=f"ratelimit exceeded {e.description}"), 429
 
 
 @jwt.token_in_blocklist_loader
@@ -67,6 +74,7 @@ app.app_context().push()
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
+@limiter.limit("10/minute")
 @spec.validate(
     resp=Response(
         HTTP_200=ResponseForm,
