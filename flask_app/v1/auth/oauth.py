@@ -25,7 +25,7 @@ oauth_blueprint = Blueprint("oauth", __name__)
 @oauth_blueprint.route("/oauth-login", methods=["GET"])
 @limiter.limit(settings.rate_limit)
 @spec.validate(
-    resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ErrorYandexResponseForm),
+    resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_400=ErrorYandexResponseForm),
     tags=["OAuth2"],
 )
 def oauth_login():
@@ -87,7 +87,7 @@ def oauth_login():
                 refresh_token=refresh_token,
             )
         logger.error(result.json())
-        return ErrorYandexResponseForm(**result.json())
+        return ErrorYandexResponseForm(**result.json()), result.status_code
 
     else:
         # Если скрипт был вызван без указания параметра "code",
