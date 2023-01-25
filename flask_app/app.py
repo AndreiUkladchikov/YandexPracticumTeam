@@ -6,10 +6,12 @@ import redis
 import requests
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, get_jwt_identity, jwt_required
+from flask_opentracing import FlaskTracer
 from loguru import logger
 from spectree import Response
 
 import constants
+import jaeger
 import messages
 from black_list import jwt_redis_blocklist
 from config import settings
@@ -49,6 +51,8 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 
 jwt = JWTManager(app)
+
+jaeger.tracer = FlaskTracer(jaeger.setup_jaeger, app=app)
 
 
 @app.errorhandler(429)
