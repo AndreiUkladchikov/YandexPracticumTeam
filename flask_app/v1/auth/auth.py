@@ -13,6 +13,7 @@ from config import settings
 from db_models import User, UserAccessHistory, UserRole
 from documentation import spec
 from forms import LoginForm, PasswordResetForm
+from limiter import limiter
 from messages import (HistoryResponseForm, ResponseForm,
                       ResponseFormWithTokens, SingleAccessRecord)
 from services import (access_history_service, role_service, user_role_service,
@@ -22,8 +23,9 @@ auth_blueprint = Blueprint("auth", __name__)
 
 
 @auth_blueprint.route("/login", methods=["POST"])
+@limiter.limit(settings.rate_limit)
 @spec.validate(
-    resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ResponseForm), tags=["api"]
+    resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ResponseForm), tags=["Auth"]
 )
 def check_login_password(json: LoginForm):
     user = user_service.get({"email": json.email})
@@ -56,12 +58,15 @@ def check_login_password(json: LoginForm):
 
 
 @auth_blueprint.route("/registration", methods=["POST"])
+@limiter.limit(settings.rate_limit)
 @spec.validate(
-    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["Auth"]
 )
 def registration(json: LoginForm):
     if user_service.get({"email": json.email}):
         return ResponseForm(msg=messages.already_registered), HTTPStatus.UNAUTHORIZED
+
+    print(json.email)
 
     user = User(email=json.email)
     user.set_password(json.password)
@@ -78,8 +83,9 @@ def registration(json: LoginForm):
 
 
 @auth_blueprint.route("/refresh-tokens", methods=["GET"])
+@limiter.limit(settings.rate_limit)
 @spec.validate(
-    resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ResponseForm), tags=["api"]
+    resp=Response(HTTP_200=ResponseFormWithTokens, HTTP_401=ResponseForm), tags=["Auth"]
 )
 @jwt_required(refresh=True)
 def refresh_tokens():
@@ -115,8 +121,9 @@ def refresh_tokens():
 
 
 @auth_blueprint.route(f"/logout", methods=["GET"])
+@limiter.limit(settings.rate_limit)
 @spec.validate(
-    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["Auth"]
 )
 @jwt_required()
 def logout():
@@ -142,8 +149,9 @@ def logout():
 
 
 @auth_blueprint.route("/change-credits", methods=["POST"])
+@limiter.limit(settings.rate_limit)
 @spec.validate(
-    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["Auth"]
 )
 @jwt_required()
 def change_credits(json: PasswordResetForm):
@@ -170,8 +178,9 @@ def change_credits(json: PasswordResetForm):
 
 
 @auth_blueprint.route("/login-history", methods=["GET"])
+@limiter.limit(settings.rate_limit)
 @spec.validate(
-    resp=Response(HTTP_200=HistoryResponseForm, HTTP_401=ResponseForm), tags=["api"]
+    resp=Response(HTTP_200=HistoryResponseForm, HTTP_401=ResponseForm), tags=["Auth"]
 )
 @jwt_required()
 def get_login_history():

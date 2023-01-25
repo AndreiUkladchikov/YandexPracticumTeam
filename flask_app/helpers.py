@@ -1,8 +1,12 @@
-import constants
-from services import (user_service, role_service, user_role_service)
-from db_models import UserRole
+import secrets
+import string
+
 from loguru import logger
 from sqlalchemy.exc import IntegrityError
+
+import constants
+from db_models import UserRole
+from services import role_service, user_role_service, user_service
 
 
 def check_path(permission: list[str], url_path: str) -> bool:
@@ -39,3 +43,9 @@ def grant_test_admin_role():
         user_role_service.insert(UserRole(user_id=user.id, role_id=role.id))
     except IntegrityError as e:
         logger.info("Admin already has access", e)
+
+
+def generate_password() -> str:
+    alphabet = string.ascii_letters + string.digits
+    password = "".join(secrets.choice(alphabet) for i in range(10))
+    return password

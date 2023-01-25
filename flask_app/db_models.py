@@ -25,6 +25,7 @@ class User(Base):
     email: str = Column(String, unique=True, nullable=False)
     password: str = Column(String, nullable=False)
     refresh_token: str = Column(String, nullable=True)
+    third_party_id: str = Column(String, nullable=True)
 
     fk = relationship("UserRole", back_populates="fk")
 

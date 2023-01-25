@@ -5,10 +5,12 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from spectree import Response
 
 import messages
+from config import settings
 from db_models import Role, User, UserRole
 from documentation import spec
 from forms import RoleForm, UserRoleForm
 from helpers import check_path
+from limiter import limiter
 from messages import ResponseForm, RoleRecord, RolesResponseForm
 from services import role_service, user_role_service, user_service
 
@@ -18,9 +20,10 @@ roles_blueprint = Blueprint("roles", __name__)
 # Update or Create
 @roles_blueprint.route("/update-role", methods=["POST"])
 @spec.validate(
-    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["Roles"]
 )
 @jwt_required()
+@limiter.limit(settings.rate_limit)
 def update_role(json: RoleForm):
     current_user = get_jwt_identity()
     user: User = user_service.get({"email": current_user})
@@ -51,8 +54,9 @@ def update_role(json: RoleForm):
 
 # Delete
 @roles_blueprint.route("/delete-role", methods=["POST"])
+@limiter.limit(settings.rate_limit)
 @spec.validate(
-    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["Roles"]
 )
 @jwt_required()
 def delete_role(json: RoleForm):
@@ -73,8 +77,9 @@ def delete_role(json: RoleForm):
 
 
 @roles_blueprint.route("/get-all-roles", methods=["GET"])
+@limiter.limit(settings.rate_limit)
 @spec.validate(
-    resp=Response(HTTP_200=RolesResponseForm, HTTP_401=ResponseForm), tags=["api"]
+    resp=Response(HTTP_200=RolesResponseForm, HTTP_401=ResponseForm), tags=["Roles"]
 )
 @jwt_required()
 def get_all_roles():
@@ -94,8 +99,9 @@ def get_all_roles():
 
 
 @roles_blueprint.route("/update-user-role", methods=["POST"])
+@limiter.limit(settings.rate_limit)
 @spec.validate(
-    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["api"]
+    resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["Roles"]
 )
 @jwt_required()
 def update_user_role(json: UserRoleForm):

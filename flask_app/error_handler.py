@@ -1,6 +1,7 @@
 import re
 from http import HTTPStatus
 
+from flask import jsonify
 from werkzeug.exceptions import HTTPException
 
 from app import app

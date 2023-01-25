@@ -64,7 +64,7 @@ def upgrade() -> None:
             "role_id",
             UUID(as_uuid=True),
             sa.ForeignKey("roles.id", ondelete="CASCADE"),
-            unique=True,
+            unique=False,
             nullable=False,
         ),
     )

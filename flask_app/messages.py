@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Any
+from typing import Any, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -37,6 +37,8 @@ success_create_role = "You have successfully created role"
 success_delete_role = "You have successfully deleted role"
 success_update_user_role = "You have successfully updated User role"
 
+wrong_oauth_transaction = "You have not provided all the data for correct authorization"
+
 
 class ResponseForm(BaseModel):
     msg: str = ...
@@ -70,3 +72,8 @@ class RoleRecord(BaseModel):
 
 class RolesResponseForm(ResponseForm):
     records: list[RoleRecord] | None = Field(default=None)
+
+
+class ErrorYandexResponseForm(BaseModel):
+    error_description: Optional[str]
+    error: Optional[str]
