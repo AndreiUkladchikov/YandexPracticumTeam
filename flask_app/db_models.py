@@ -2,7 +2,7 @@ import datetime
 import uuid
 
 from sqlalchemy import (ARRAY, Column, DateTime, ForeignKey, Integer, MetaData,
-                        String)
+                        String, UniqueConstraint)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -10,6 +10,19 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from clients import postgres_client
 
 Base = postgres_client.get_base()
+
+
+def create_partition(target, connection, **kw) -> None:
+    """ creating partition by user_sign_in """
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "user_access_in_smart" PARTITION OF "user_access_history" FOR VALUES IN ('smart')"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "user_access_in_mobile" PARTITION OF "user_access_history" FOR VALUES IN ('mobile')"""
+    )
+    connection.execute(
+        """CREATE TABLE IF NOT EXISTS "user_access_in_web" PARTITION OF "user_access_history" FOR VALUES IN ('web')"""
+    )
 
 
 class User(Base):
@@ -94,6 +107,13 @@ class Role(Base):
 
 class UserAccessHistory(Base):
     __tablename__ = "user_access_history"
+    __table_args__ = (
+        UniqueConstraint('id', 'device'),
+        {
+            'postgresql_partition_by': 'LIST (device)',
+            'listeners': [('after_create', create_partition)],
+        }
+    )
 
     id: uuid.UUID = Column(
         UUID(as_uuid=True),
@@ -109,5 +129,5 @@ class UserAccessHistory(Base):
     )
 
     location: str = Column(String, nullable=True)
-    device: str = Column(String, nullable=True)
+    device: str = Column(String, primary_key=True)
     time: datetime.datetime = Column(DateTime, nullable=False)
