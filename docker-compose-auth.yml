@@ -3,7 +3,7 @@ services:
   auth_nginx:
     image: nginx:1.23
     env_file:
-      - .env-sample
+      - "./flask_app/.env"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./configs/auth_service:/etc/nginx/conf.d:ro
