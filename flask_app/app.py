@@ -1,21 +1,25 @@
 import os
+import re
 from datetime import timedelta
 from http import HTTPStatus
 
 import redis
 import requests
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from flask_jwt_extended import JWTManager, get_jwt_identity, jwt_required
+from flask_opentracing import FlaskTracer
 from loguru import logger
 from spectree import Response
+from werkzeug.exceptions import HTTPException
 
 import constants
+import jaeger
 import messages
 from black_list import jwt_redis_blocklist
 from config import settings
-from db import init_db
 from db_models import User
 from documentation import spec
+from errors import ERROR_BASE_CODE, SERVER_ERROR
 from helpers import check_path, create_test_roles
 from limiter import limiter
 from messages import ResponseForm
@@ -50,10 +54,24 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 jwt = JWTManager(app)
 
+jaeger.tracer = FlaskTracer(jaeger.setup_jaeger, app=app)
 
-@app.errorhandler(429)
-def ratelimit_handler(e):
-    return jsonify(error=f"ratelimit exceeded {e.description}"), 429
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+
+    if isinstance(e, HTTPException):
+        return {
+            "code": ERROR_BASE_CODE,
+            "msg": re.sub(
+                pattern=re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});"),
+                repl="",
+                string=e.get_description(),
+            ),
+        }, e.code
+
+    elif isinstance(e, Exception):
+        return SERVER_ERROR, HTTPStatus.INTERNAL_SERVER_ERROR
 
 
 @jwt.token_in_blocklist_loader
@@ -68,7 +86,6 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
     return token_in_redis is not None
 
 
-init_db(app)
 app.app_context().push()
 
 

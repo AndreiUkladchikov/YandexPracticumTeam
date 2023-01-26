@@ -36,6 +36,10 @@ class Settings(BaseSettings):
 
     rate_limit: str = Field(default="20/minute")
 
+    jaeger_tracing: bool = Field(default=False)
+    jaeger_agent_host: str = Field(default="localhost")
+    jaeger_logging: str = Field(default=False)
+
     class Config:
         env_file = f"{base_dir}/.env"
 
