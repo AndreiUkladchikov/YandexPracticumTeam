@@ -13,6 +13,7 @@ from config import settings
 from db_models import Action, User, UserAccessHistory, UserRole
 from documentation import spec
 from forms import LoginForm, PasswordResetForm
+from helpers import check_device
 from limiter import limiter
 from messages import (HistoryResponseForm, ResponseForm,
                       ResponseFormWithTokens, SingleAccessRecord)
@@ -46,7 +47,11 @@ def check_login_password(json: LoginForm):
 
     access_history_service.insert(
         UserAccessHistory(
-            user_id=user.id, time=datetime.now(), action=Action.LOGIN.value
+            user_id=user.id,
+            time=datetime.now(),
+            action=Action.LOGIN.value,
+            location=request.environ.get("HTTP_X_FORWARDED_FOR", request.remote_addr),
+            device=check_device(request.user_agent.string),
         )
     )
 
@@ -105,7 +110,11 @@ def refresh_tokens():
 
     access_history_service.insert(
         UserAccessHistory(
-            user_id=user.id, time=datetime.now(), action=Action.REFRESH_TOKEN.value
+            user_id=user.id,
+            time=datetime.now(),
+            action=Action.REFRESH_TOKEN.value,
+            location=request.environ.get("HTTP_X_FORWARDED_FOR", request.remote_addr),
+            device=check_device(request.user_agent.string),
         )
     )
 
@@ -138,7 +147,10 @@ def logout():
 
     access_history_service.insert(
         UserAccessHistory(
-            user_id=user.id, time=datetime.now(), action=Action.LOGOUT.value
+            user_id=user.id,
+            time=datetime.now(),
+            action=Action.LOGOUT.value,
+            location=request.environ.get("HTTP_X_FORWARDED_FOR", request.remote_addr),
         )
     )
 
@@ -167,7 +179,11 @@ def change_credits(json: PasswordResetForm):
 
     access_history_service.insert(
         UserAccessHistory(
-            user_id=user.id, time=datetime.now(), action=Action.CHANGE_CREDITS.value
+            user_id=user.id,
+            time=datetime.now(),
+            action=Action.CHANGE_CREDITS.value,
+            location=request.environ.get("HTTP_X_FORWARDED_FOR", request.remote_addr),
+            device=check_device(request.user_agent.string),
         )
     )
 
@@ -202,7 +218,11 @@ def get_login_history():
 
     access_history_service.insert(
         UserAccessHistory(
-            user_id=user.id, time=datetime.now(), action=Action.LOGIN_HISTORY.value
+            user_id=user.id,
+            time=datetime.now(),
+            action=Action.LOGIN_HISTORY.value,
+            location=request.environ.get("HTTP_X_FORWARDED_FOR", request.remote_addr),
+            device=check_device(request.user_agent.string),
         )
     )
 
