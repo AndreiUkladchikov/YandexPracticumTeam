@@ -61,7 +61,8 @@ class AccessHistoryService(CustomService):
                     User.email,
                     self.model.location,
                     self.model.device,
-                    self.model.time
+                    self.model.time,
+                    self.model.action
                 )
                 .join(self.model, User.id == self.model.user_id)
                 .filter(User.email == user.email)

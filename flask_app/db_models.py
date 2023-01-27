@@ -137,7 +137,7 @@ class UserAccessHistory(Base):
         nullable=False,
     )
 
-    action: str = Column(Enum(Action), nullable=False)
+    action: str = Column(String, nullable=True)
     location: str = Column(String, nullable=True)
     device: str = Column(String, primary_key=True)
     time: datetime.datetime = Column(DateTime, nullable=False)

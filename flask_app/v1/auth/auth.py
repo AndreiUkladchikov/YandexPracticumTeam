@@ -48,7 +48,7 @@ def check_login_password(json: LoginForm):
         UserAccessHistory(
             user_id=user.id,
             time=datetime.now(),
-            action=Action.LOGIN
+            action=Action.LOGIN.value
         )
     )
 
@@ -109,7 +109,7 @@ def refresh_tokens():
         UserAccessHistory(
             user_id=user.id,
             time=datetime.now(),
-            action=Action.REFRESH_TOKEN
+            action=Action.REFRESH_TOKEN.value
         )
     )
 
@@ -144,7 +144,7 @@ def logout():
         UserAccessHistory(
             user_id=user.id,
             time=datetime.now(),
-            action=Action.LOGOUT
+            action=Action.LOGOUT.value
         )
     )
 
@@ -175,7 +175,7 @@ def change_credits(json: PasswordResetForm):
         UserAccessHistory(
             user_id=user.id,
             time=datetime.now(),
-            action=Action.CHANGE_CREDITS
+            action=Action.CHANGE_CREDITS.value
         )
     )
 
@@ -212,7 +212,7 @@ def get_login_history():
         UserAccessHistory(
             user_id=user.id,
             time=datetime.now(),
-            action=Action.LOGIN_HISTORY
+            action=Action.LOGIN_HISTORY.value
         )
     )
 
