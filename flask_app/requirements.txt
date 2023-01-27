@@ -3,7 +3,6 @@ Flask_JWT_Extended==4.4.4
 flask_sqlalchemy==3.0.2
 pydantic==1.10.2
 SQLAlchemy==1.4.45
-Werkzeug==2.2.2
 pytest~=7.2.0
 redis==4.4.1
 loguru==0.6.0
@@ -18,3 +17,4 @@ werkzeug==2.2.2
 jaeger_client==4.8.0
 flask_opentracing==1.1.0
 flask_limiter==3.1.0
+device_detector==5.0.1

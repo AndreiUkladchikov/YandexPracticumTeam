@@ -6,22 +6,25 @@ from sqlalchemy import (ARRAY, Column, DateTime, ForeignKey, Integer, MetaData,
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
+from device_detector import DeviceDetector
+import socket
 
 from clients import postgres_client
 
 Base = postgres_client.get_base()
+ua = 'Mozilla/5.0 (Linux; Android 4.3; C5502 Build/10.4.1.B.0.101) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.136 Mobile Safari/537.36'
 
 
 def create_partition(target, connection, **kw) -> None:
     """ creating partition by user_sign_in """
     connection.execute(
-        """CREATE TABLE IF NOT EXISTS "user_access_in_smart" PARTITION OF "user_access_history" FOR VALUES IN ('smart')"""
+        """CREATE TABLE IF NOT EXISTS "user_access_in_smart" PARTITION OF "user_access_history" FOR VALUES IN ('tv')"""
     )
     connection.execute(
-        """CREATE TABLE IF NOT EXISTS "user_access_in_mobile" PARTITION OF "user_access_history" FOR VALUES IN ('mobile')"""
+        """CREATE TABLE IF NOT EXISTS "user_access_in_mobile" PARTITION OF "user_access_history" FOR VALUES IN ('smartphone')"""
     )
     connection.execute(
-        """CREATE TABLE IF NOT EXISTS "user_access_in_web" PARTITION OF "user_access_history" FOR VALUES IN ('web')"""
+        """CREATE TABLE IF NOT EXISTS "user_access_in_web" PARTITION OF "user_access_history" FOR VALUES IN ('desktop')"""
     )
 
 
@@ -131,3 +134,10 @@ class UserAccessHistory(Base):
     location: str = Column(String, nullable=True)
     device: str = Column(String, primary_key=True)
     time: datetime.datetime = Column(DateTime, nullable=False)
+
+    def __init__(self) -> None:
+        current_device = DeviceDetector(ua).parse()
+        self.device = current_device.device_type()
+
+        hostname = socket.gethostname()
+        self.location = socket.gethostbyname(hostname)
