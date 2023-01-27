@@ -10,7 +10,7 @@ from spectree import Response
 import messages
 from black_list import jwt_redis_blocklist
 from config import settings
-from db_models import User, UserAccessHistory, UserRole
+from db_models import User, UserAccessHistory, UserRole, Action
 from documentation import spec
 from forms import LoginForm, PasswordResetForm
 from limiter import limiter
@@ -45,7 +45,11 @@ def check_login_password(json: LoginForm):
     user.refresh_token = refresh_token
 
     access_history_service.insert(
-        UserAccessHistory(user_id=user.id, time=datetime.now())
+        UserAccessHistory(
+            user_id=user.id,
+            time=datetime.now(),
+            action=Action.LOGIN
+        )
     )
 
     user_service.insert(user)
@@ -65,8 +69,6 @@ def check_login_password(json: LoginForm):
 def registration(json: LoginForm):
     if user_service.get({"email": json.email}):
         return ResponseForm(msg=messages.already_registered), HTTPStatus.UNAUTHORIZED
-
-    print(json.email)
 
     user = User(email=json.email)
     user.set_password(json.password)
@@ -104,7 +106,11 @@ def refresh_tokens():
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     access_history_service.insert(
-        UserAccessHistory(user_id=user.id, time=datetime.now())
+        UserAccessHistory(
+            user_id=user.id,
+            time=datetime.now(),
+            action=Action.REFRESH_TOKEN
+        )
     )
 
     access_token = create_access_token(identity=current_user)
@@ -135,7 +141,11 @@ def logout():
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     access_history_service.insert(
-        UserAccessHistory(user_id=user.id, time=datetime.now())
+        UserAccessHistory(
+            user_id=user.id,
+            time=datetime.now(),
+            action=Action.LOGOUT
+        )
     )
 
     user.refresh_token = None
@@ -162,7 +172,11 @@ def change_credits(json: PasswordResetForm):
         return ResponseForm(msg=messages.wrong_credits), HTTPStatus.UNAUTHORIZED
 
     access_history_service.insert(
-        UserAccessHistory(user_id=user.id, time=datetime.now())
+        UserAccessHistory(
+            user_id=user.id,
+            time=datetime.now(),
+            action=Action.CHANGE_CREDITS
+        )
     )
 
     user.set_password(json.password)
@@ -195,7 +209,11 @@ def get_login_history():
         return ResponseForm(msg=messages.bad_token), HTTPStatus.UNAUTHORIZED
 
     access_history_service.insert(
-        UserAccessHistory(user_id=user.id, time=datetime.now())
+        UserAccessHistory(
+            user_id=user.id,
+            time=datetime.now(),
+            action=Action.LOGIN_HISTORY
+        )
     )
 
     result, total = access_history_service.get_detailed_info_about(

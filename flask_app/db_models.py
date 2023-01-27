@@ -1,8 +1,9 @@
 import datetime
+import enum
 import uuid
 
 from sqlalchemy import (ARRAY, Column, DateTime, ForeignKey, Integer, MetaData,
-                        String, UniqueConstraint)
+                        String, UniqueConstraint, Enum)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -105,6 +106,14 @@ class Role(Base):
         self.access_level = access_level
 
 
+class Action(enum.Enum):
+    LOGIN = 'login'
+    LOGOUT = 'logout'
+    REFRESH_TOKEN = 'refresh_token'
+    LOGIN_HISTORY = 'login_history'
+    CHANGE_CREDITS = 'change_credits'
+
+
 class UserAccessHistory(Base):
     __tablename__ = "user_access_history"
     __table_args__ = (
@@ -128,6 +137,7 @@ class UserAccessHistory(Base):
         nullable=False,
     )
 
-    location: str = Column(String, nullable=True)
+    action: str = Column(String, nullable=False)
+    location: str = Column(Enum(Action), nullable=True)
     device: str = Column(String, primary_key=True)
     time: datetime.datetime = Column(DateTime, nullable=False)
