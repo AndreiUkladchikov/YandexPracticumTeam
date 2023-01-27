@@ -1,9 +1,7 @@
 import datetime
 import enum
-import socket
 import uuid
 
-from device_detector import DeviceDetector
 from sqlalchemy import (ARRAY, Column, DateTime, ForeignKey, Integer, String,
                         UniqueConstraint)
 from sqlalchemy.dialects.postgresql import UUID
