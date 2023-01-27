@@ -136,29 +136,24 @@ class TestChangeRole:
         self.access_token = access_token
 
         hed = {"Authorization": "Bearer " + access_token}
-        response = http_session.post(
-            url_update_role, json=role_credits, headers=hed
-        )
+        response = http_session.post(url_update_role, json=role_credits, headers=hed)
 
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     def test_delete_role(self, http_session):
 
         hed = {"Authorization": "Bearer " + self.access_token}
-        response = http_session.post(
-            url_delete_role, headers=hed
-        )
+        response = http_session.post(url_delete_role, headers=hed)
 
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     def test_get_all_roles(self, http_session):
 
         hed = {"Authorization": "Bearer " + self.access_token}
-        response = http_session.get(
-            url_get_all_roles, headers=hed
-        )
+        response = http_session.get(url_get_all_roles, headers=hed)
 
         assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
 
 # Integration tests (need Admin user and Role)
 # Test with Admin role

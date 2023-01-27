@@ -36,7 +36,7 @@ ROLE_ADMIN = Role(
         "update-role",
         "delete-role",
         "get-all-roles",
-        "update-user-role"
+        "update-user-role",
     ],
     access_level=100,
 )
@@ -54,13 +54,10 @@ ROLE_OWNER = Role(
         "update-role",
         "delete-role",
         "get-all-roles",
-        "update-user-role"
+        "update-user-role",
     ],
     access_level=1000,
 )
 
 
-TEST_ADMIN = User(
-    email="admin@adm.com",
-    password="admin123"
-)
+TEST_ADMIN = User(email="admin@adm.com", password="admin123")
