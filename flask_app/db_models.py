@@ -1,20 +1,18 @@
 import datetime
 import enum
+import socket
 import uuid
 
+from device_detector import DeviceDetector
 from sqlalchemy import (ARRAY, Column, DateTime, ForeignKey, Integer, String,
                         UniqueConstraint)
-                        
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
-from device_detector import DeviceDetector
-import socket
 
 from clients import postgres_client
 
 Base = postgres_client.get_base()
-ua = 'Mozilla/5.0 (Linux; Android 4.3; C5502 Build/10.4.1.B.0.101) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.136 Mobile Safari/537.36'
 
 
 def create_partition(target, connection, **kw) -> None:
@@ -143,12 +141,5 @@ class UserAccessHistory(Base):
 
     action: str = Column(String, nullable=True)
     location: str = Column(String, nullable=True)
-    device: str = Column(String, primary_key=True)
+    device: str = Column(String, primary_key=True, nullable=True)
     time: datetime.datetime = Column(DateTime, nullable=False)
-
-    def __init__(self) -> None:
-        current_device = DeviceDetector(ua).parse()
-        self.device = current_device.device_type()
-
-        hostname = socket.gethostname()
-        self.location = socket.gethostbyname(hostname)

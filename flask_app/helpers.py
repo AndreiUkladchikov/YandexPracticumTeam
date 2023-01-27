@@ -1,6 +1,7 @@
 import secrets
 import string
 
+from device_detector import DeviceDetector
 from loguru import logger
 from sqlalchemy.exc import IntegrityError
 
@@ -49,3 +50,11 @@ def generate_password() -> str:
     alphabet = string.ascii_letters + string.digits
     password = "".join(secrets.choice(alphabet) for i in range(10))
     return password
+
+
+def check_device(user_agent: str) -> str:
+    dd = DeviceDetector(user_agent)
+    if not dd.device_type():
+        return "desktop"
+
+    return dd.device_type()
