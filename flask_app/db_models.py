@@ -2,8 +2,8 @@ import datetime
 import enum
 import uuid
 
-from sqlalchemy import (ARRAY, Column, DateTime, ForeignKey, Integer,
-                        String, UniqueConstraint)
+from sqlalchemy import (ARRAY, Column, DateTime, ForeignKey, Integer, String,
+                        UniqueConstraint)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -14,7 +14,7 @@ Base = postgres_client.get_base()
 
 
 def create_partition(target, connection, **kw) -> None:
-    """ creating partition by user_sign_in """
+    """creating partition by user_sign_in"""
     connection.execute(
         """CREATE TABLE IF NOT EXISTS "user_access_in_smart" PARTITION OF "user_access_history" FOR VALUES IN ('smart')"""
     )
@@ -107,21 +107,21 @@ class Role(Base):
 
 
 class Action(enum.Enum):
-    LOGIN = 'login'
-    LOGOUT = 'logout'
-    REFRESH_TOKEN = 'refresh_token'
-    LOGIN_HISTORY = 'login_history'
-    CHANGE_CREDITS = 'change_credits'
+    LOGIN = "login"
+    LOGOUT = "logout"
+    REFRESH_TOKEN = "refresh_token"
+    LOGIN_HISTORY = "login_history"
+    CHANGE_CREDITS = "change_credits"
 
 
 class UserAccessHistory(Base):
     __tablename__ = "user_access_history"
     __table_args__ = (
-        UniqueConstraint('id', 'device'),
+        UniqueConstraint("id", "device"),
         {
-            'postgresql_partition_by': 'LIST (device)',
-            'listeners': [('after_create', create_partition)],
-        }
+            "postgresql_partition_by": "LIST (device)",
+            "listeners": [("after_create", create_partition)],
+        },
     )
 
     id: uuid.UUID = Column(

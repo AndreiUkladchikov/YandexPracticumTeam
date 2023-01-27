@@ -1,10 +1,7 @@
-from sqlalchemy import select, update
-
-from clients import postgres_client
-
-from sqlalchemy import func
+from sqlalchemy import func, select, update
 
 from base import BaseClient, BaseService
+from clients import postgres_client
 from db_models import Base, Role, User, UserAccessHistory, UserRole
 
 
@@ -62,14 +59,18 @@ class AccessHistoryService(CustomService):
                     self.model.location,
                     self.model.device,
                     self.model.time,
-                    self.model.action
+                    self.model.action,
                 )
                 .join(self.model, User.id == self.model.user_id)
                 .filter(User.email == user.email)
                 .slice((page_num - 1) * page_size, page_num * page_size)
                 .all()
             )
-            total = session.query(func.count(self.model.id)).filter(self.model.user_id == user.id).scalar()
+            total = (
+                session.query(func.count(self.model.id))
+                .filter(self.model.user_id == user.id)
+                .scalar()
+            )
             session.expunge_all()
             return result, total
 

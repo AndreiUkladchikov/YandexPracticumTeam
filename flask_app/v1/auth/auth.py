@@ -10,7 +10,7 @@ from spectree import Response
 import messages
 from black_list import jwt_redis_blocklist
 from config import settings
-from db_models import User, UserAccessHistory, UserRole, Action
+from db_models import Action, User, UserAccessHistory, UserRole
 from documentation import spec
 from forms import LoginForm, PasswordResetForm
 from limiter import limiter
@@ -46,9 +46,7 @@ def check_login_password(json: LoginForm):
 
     access_history_service.insert(
         UserAccessHistory(
-            user_id=user.id,
-            time=datetime.now(),
-            action=Action.LOGIN.value
+            user_id=user.id, time=datetime.now(), action=Action.LOGIN.value
         )
     )
 
@@ -107,9 +105,7 @@ def refresh_tokens():
 
     access_history_service.insert(
         UserAccessHistory(
-            user_id=user.id,
-            time=datetime.now(),
-            action=Action.REFRESH_TOKEN.value
+            user_id=user.id, time=datetime.now(), action=Action.REFRESH_TOKEN.value
         )
     )
 
@@ -142,9 +138,7 @@ def logout():
 
     access_history_service.insert(
         UserAccessHistory(
-            user_id=user.id,
-            time=datetime.now(),
-            action=Action.LOGOUT.value
+            user_id=user.id, time=datetime.now(), action=Action.LOGOUT.value
         )
     )
 
@@ -173,9 +167,7 @@ def change_credits(json: PasswordResetForm):
 
     access_history_service.insert(
         UserAccessHistory(
-            user_id=user.id,
-            time=datetime.now(),
-            action=Action.CHANGE_CREDITS.value
+            user_id=user.id, time=datetime.now(), action=Action.CHANGE_CREDITS.value
         )
     )
 
@@ -210,9 +202,7 @@ def get_login_history():
 
     access_history_service.insert(
         UserAccessHistory(
-            user_id=user.id,
-            time=datetime.now(),
-            action=Action.LOGIN_HISTORY.value
+            user_id=user.id, time=datetime.now(), action=Action.LOGIN_HISTORY.value
         )
     )
 
