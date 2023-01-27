@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     login_url_yandex: str = Field(default="https://login.yandex.ru/info/")
 
     rate_limit: str = Field(default="20/minute")
+    rate_limit_enabled: bool = Field(default=True)
 
     jaeger_tracing: bool = Field(default=False)
     jaeger_agent_host: str = Field(default="localhost")
