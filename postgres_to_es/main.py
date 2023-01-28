@@ -43,8 +43,8 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, exception: Exc
 
 
 def main():
-    # Create indexes
-    create_indexes()
+    # Create indexes (For Dev env)
+    # create_indexes()
     logger.info('Service started')
     state = state_worker.get_state(db_config.STATE_CON)
     if state.is_finished is True:

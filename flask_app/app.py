@@ -11,6 +11,11 @@ from flask_opentracing import FlaskTracer
 from loguru import logger
 from spectree import Response
 from werkzeug.exceptions import HTTPException
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+# from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 
 import constants
 import jaeger
@@ -28,7 +33,26 @@ from v1.auth.auth import auth_blueprint
 from v1.auth.oauth import oauth_blueprint
 from v1.roles.roles import roles_blueprint
 
+
+def configure_tracer() -> None:
+    trace.set_tracer_provider(TracerProvider())
+    # trace.get_tracer_provider().add_span_processor(
+    #     BatchSpanProcessor(
+    #         JaegerExporter(
+    #             agent_host_name='localhost',
+    #             agent_port=6831,
+    #         )
+    #     )
+    # )
+    trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+
+
+configure_tracer()
+
 app = Flask(__name__)
+
+FlaskInstrumentor().instrument_app(app)
+
 
 app.register_blueprint(roles_blueprint, url_prefix=f"{settings.base_api_url}")
 app.register_blueprint(auth_blueprint, url_prefix=f"{settings.base_api_url}")
@@ -55,6 +79,13 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 jwt = JWTManager(app)
 
 jaeger.tracer = FlaskTracer(jaeger.setup_jaeger, app=app)
+
+
+@app.before_request
+def before_request():
+    request_id = request.headers.get('X-Request-Id')
+    if not request_id:
+        raise RuntimeError('request id is required')
 
 
 @app.errorhandler(Exception)
