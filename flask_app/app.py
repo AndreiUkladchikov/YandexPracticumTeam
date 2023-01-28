@@ -44,11 +44,9 @@ app = Flask(__name__)
 
 FlaskInstrumentor().instrument_app(app)
 
-
 app.register_blueprint(roles_blueprint, url_prefix=f"{settings.base_api_url}")
 app.register_blueprint(auth_blueprint, url_prefix=f"{settings.base_api_url}")
 app.register_blueprint(oauth_blueprint, url_prefix=f"{settings.base_api_url}")
-
 
 spec.register(app)
 
@@ -66,7 +64,6 @@ app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(
 )
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-
 jwt = JWTManager(app)
 
 jaeger.tracer = FlaskTracer(jaeger.setup_jaeger, app=app)
@@ -76,24 +73,24 @@ jaeger.tracer = FlaskTracer(jaeger.setup_jaeger, app=app)
 def before_request():
     request_id = request.headers.get('X-Request-Id')
     if not request_id:
-        raise RuntimeError('request id is required')
+        logger.info('request id is required')
 
 
-@app.errorhandler(Exception)
-def handle_exception(e):
-
-    if isinstance(e, HTTPException):
-        return {
-            "code": ERROR_BASE_CODE,
-            "msg": re.sub(
-                pattern=re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});"),
-                repl="",
-                string=e.get_description(),
-            ),
-        }, e.code
-
-    elif isinstance(e, Exception):
-        return SERVER_ERROR, HTTPStatus.INTERNAL_SERVER_ERROR
+# @app.errorhandler(Exception)
+# def handle_exception(e):
+#
+#     if isinstance(e, HTTPException):
+#         return {
+#             "code": ERROR_BASE_CODE,
+#             "msg": re.sub(
+#                 pattern=re.compile("<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});"),
+#                 repl="",
+#                 string=e.get_description(),
+#             ),
+#         }, e.code
+#
+#     elif isinstance(e, Exception):
+#         return SERVER_ERROR, HTTPStatus.INTERNAL_SERVER_ERROR
 
 
 @jwt.token_in_blocklist_loader
@@ -150,5 +147,4 @@ def catch_all(path):
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True
-    create_test_roles()
     app.run(host=settings.auth_server_host, port=settings.auth_server_port, debug=True)
