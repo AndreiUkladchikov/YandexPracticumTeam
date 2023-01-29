@@ -7,6 +7,7 @@ ENV PYTHONUNBUFFERED 1
 
 RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/app/requirements.txt
+COPY ./create_roles.py /usr/src/app/create_roles.py
 RUN pip install -r requirements.txt --no-cache-dir
 
 COPY . /usr/src/app/
