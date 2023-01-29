@@ -29,7 +29,7 @@ class Movie(BaseModel):
     imdb_rating: float | None = 0.0
     type: str
     title: str
-    description: str | None = ''
+    description: str | None = ""
     director: str
     actors_names: list
     writers_names: list
@@ -42,6 +42,6 @@ class Movie(BaseModel):
 
 
 class PersonTypes(str, Enum):
-    ACTOR = 'actor'
-    DIRECTOR = 'director'
-    WRITER = 'writer'
+    ACTOR = "actor"
+    DIRECTOR = "director"
+    WRITER = "writer"

@@ -2,10 +2,9 @@ import functools
 import os
 
 import jaeger_client
+from config import settings
 from flask_opentracing import FlaskTracer
 from jaeger_client import Config
-
-from config import settings
 
 
 def setup_jaeger():
@@ -13,7 +12,7 @@ def setup_jaeger():
         config={
             "sampler": {"type": "const", "param": 1},
             "enabled": settings.jaeger_tracing,
-            "local_agent": {                
+            "local_agent": {
                 "reporting_port": os.environ.get(
                     "JAEGER_AGENT_PORT", jaeger_client.config.DEFAULT_REPORTING_PORT
                 ),
@@ -33,7 +32,7 @@ tracer: FlaskTracer = None
 def trace(fn):
     @functools.wraps(fn)
     def decorated(*args, **kwargs):
-        with tracer.start_span(operation_name=fn.__name__) as span:
+        with tracer.start_span(operation_name=fn.__name__):
             return fn(*args, **kwargs)
 
     return decorated

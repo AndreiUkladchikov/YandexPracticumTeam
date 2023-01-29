@@ -1,3 +1,4 @@
+[![Build Status](https://github.com/AndreiUkladchikov/YandexPracticumTeam/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/AndreiUkladchikov/YandexPracticumTeam/actions/workflows/checks.yml)
 # YandexPracticumTeam
 For Production:
 - prod_env/docker-compose-prod

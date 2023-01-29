@@ -1,22 +1,20 @@
 import http
 from urllib.parse import urlencode
 
-import requests
-from flask import Blueprint, redirect, request
-from flask_jwt_extended import create_access_token, create_refresh_token
-from loguru import logger
-from pydantic import ValidationError
-from spectree import Response
-
 import messages
+import requests
 from config import settings
 from db_models import User, UserRole
 from documentation import spec
+from flask import Blueprint, redirect, request
+from flask_jwt_extended import create_access_token, create_refresh_token
 from helpers import generate_password
 from limiter import limiter
-from messages import (ErrorYandexResponseForm, ResponseForm,
-                      ResponseFormWithTokens)
+from loguru import logger
+from messages import ErrorYandexResponseForm, ResponseForm, ResponseFormWithTokens
+from pydantic import ValidationError
 from services import role_service, user_role_service, user_service
+from spectree import Response
 from v1.auth.models import UserInformation
 
 oauth_blueprint = Blueprint("oauth", __name__)
@@ -44,7 +42,6 @@ def oauth_login():
 
         if result.status_code == http.HTTPStatus.OK:
             access_token_oauth = result.json()["access_token"]
-            refresh_token_oauth = result.json()["refresh_token"]
 
             headers = {"Authorization": f"Bearer {access_token_oauth}"}
             data = {"format": "json"}

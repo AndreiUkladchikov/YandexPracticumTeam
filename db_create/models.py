@@ -20,27 +20,29 @@ class Filmwork:
     def __eq__(self, other):
         is_equal = False
         if (
-            self.id == other.id and
-            self.title == other.title and
-            self.description == other.description and
-            self.creation_date == other.creation_date and
-            self.type == other.type and
-            self.file_path == other.file_path and
-            self.rating == other.rating
+            self.id == other.id
+            and self.title == other.title
+            and self.description == other.description
+            and self.creation_date == other.creation_date
+            and self.type == other.type
+            and self.file_path == other.file_path
+            and self.rating == other.rating
         ):
             is_equal = True
         return is_equal
 
     def __hash__(self):
-        return hash((
-            self.id,
-            self.title,
-            self.description,
-            self.creation_date,
-            self.type,
-            self.file_path,
-            self.rating
-        ))
+        return hash(
+            (
+                self.id,
+                self.title,
+                self.description,
+                self.creation_date,
+                self.type,
+                self.file_path,
+                self.rating,
+            )
+        )
 
 
 @dataclass
@@ -56,9 +58,9 @@ class Genre:
     def __eq__(self, other):
         is_equal = False
         if (
-            self.id == other.id and
-            self.name == other.name and
-            self.description == other.description
+            self.id == other.id
+            and self.name == other.name
+            and self.description == other.description
         ):
             is_equal = True
         return is_equal
@@ -78,10 +80,7 @@ class Person:
 
     def __eq__(self, other):
         is_equal = False
-        if (
-            self.id == other.id and
-            self.full_name == other.full_name
-        ):
+        if self.id == other.id and self.full_name == other.full_name:
             is_equal = True
         return is_equal
 
@@ -100,9 +99,9 @@ class GenreFilmwork:
     def __eq__(self, other):
         is_equal = False
         if (
-            self.id == other.id and
-            self.genre_id == other.genre_id and
-            self.film_work_id == other.film_work_id
+            self.id == other.id
+            and self.genre_id == other.genre_id
+            and self.film_work_id == other.film_work_id
         ):
             is_equal = True
         return is_equal
@@ -123,10 +122,10 @@ class PersonFilmwork:
     def __eq__(self, other):
         is_equal = False
         if (
-            self.id == other.id and
-            self.person_id == other.person_id and
-            self.film_work_id == other.film_work_id and
-            self.role == other.role
+            self.id == other.id
+            and self.person_id == other.person_id
+            and self.film_work_id == other.film_work_id
+            and self.role == other.role
         ):
             is_equal = True
         return is_equal

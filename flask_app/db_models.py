@@ -2,13 +2,19 @@ import datetime
 import enum
 import uuid
 
-from sqlalchemy import (ARRAY, Column, DateTime, ForeignKey, Integer, String,
-                        UniqueConstraint)
+from clients import postgres_client
+from sqlalchemy import (
+    ARRAY,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from werkzeug.security import check_password_hash, generate_password_hash
-
-from clients import postgres_client
 
 Base = postgres_client.get_base()
 

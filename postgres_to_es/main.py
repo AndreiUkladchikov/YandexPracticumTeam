@@ -1,18 +1,16 @@
 import time
 from typing import Any
 
-from loguru import logger
-import etl.etl_save as etl_save
-import psycopg2
+import config.db_config as db_config
 import elasticsearch
-
+import etl.etl_save as etl_save
 import postgres.load_data as load_data
 import postgres.pg_context as pg_context
+import psycopg2
 import services.state_worker as state_worker
-from config.config_models import State, Indexes
-import config.db_config as db_config
+from config.config_models import Indexes, State
 from create_etl import create_indexes
-
+from loguru import logger
 
 """
 etl_update_frequency - частота обновления данных (сек)
@@ -23,7 +21,9 @@ etl_update_frequency = 60
 limit = 50
 
 
-def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, exception: Exception = None):
+def backoff(
+    start_sleep_time=0.1, factor=2, border_sleep_time=10, exception: Exception = None
+):
     def func_wrapper(func):
         def inner(*args, **kwargs):
             sleep_time = start_sleep_time
@@ -38,14 +38,16 @@ def backoff(start_sleep_time=0.1, factor=2, border_sleep_time=10, exception: Exc
                     if sleep_time < border_sleep_time:
                         sleep_time = sleep_time * factor
                     time.sleep(sleep_time)
+
         return inner
+
     return func_wrapper
 
 
 def main():
     # Create indexes (For Dev env)
     # create_indexes()
-    logger.info('Service started')
+    logger.info("Service started")
     state = state_worker.get_state(db_config.STATE_CON)
     if state.is_finished is True:
         state = state_worker.refresh_state(db_config.STATE_CON, state)
@@ -62,7 +64,7 @@ def etl_worker(state: State) -> State:
         if len(data) > 0:
             save(data, state.index)
             state.last_row = state.last_row + len(data)
-            msg = str(len(data)) + ' items updated in ' + state.index
+            msg = str(len(data)) + " items updated in " + state.index
             logger.info(msg)
         else:
             state = state_worker.get_next_state(state)
@@ -74,11 +76,15 @@ def etl_worker(state: State) -> State:
 def load(state: State) -> list[Any]:
     with pg_context.conn_context(str(db_config.PostgresSettings())) as conn:
         if state.index == Indexes.MOVIE.value:
-            data = load_data.load_film_works(conn, state.last_update, state.last_row, limit)
+            data = load_data.load_film_works(
+                conn, state.last_update, state.last_row, limit
+            )
         elif state.index == Indexes.GENRE.value:
             data = load_data.load_genres(conn, state.last_update, state.last_row, limit)
         else:
-            data = load_data.load_persons(conn, state.last_update, state.last_row, limit)
+            data = load_data.load_persons(
+                conn, state.last_update, state.last_row, limit
+            )
         return data
 
 
@@ -87,13 +93,9 @@ def save(source: list[Any], index: str) -> None:
     data = []
     for item in source:
         json = item.json()
-        data.append({
-            "_id": item.id,
-            "_index": index,
-            "_source": json
-        })
+        data.append({"_id": item.id, "_index": index, "_source": json})
     etl_save.put_data(db_config.ELASTIC_CON, data)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

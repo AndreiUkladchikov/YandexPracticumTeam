@@ -16,7 +16,7 @@ class LoginForm(BaseModel):
         email = v
         if (
             re.match(
-                "[^@]+@[^@]+\.[^@]+",
+                r"[^@]+@[^@]+\.[^@]+",
                 email,
             )
             is None

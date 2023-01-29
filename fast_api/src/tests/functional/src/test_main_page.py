@@ -1,8 +1,12 @@
-import pytest
 import http
+
+import pytest
 from functional.config import test_settings
 from functional.models.models import Film
-from functional.testdata.data_main_page import cache_films_main_page, test_films_main_page
+from functional.testdata.data_main_page import (
+    cache_films_main_page,
+    test_films_main_page,
+)
 from functional.utils.helpers import make_get_request
 
 

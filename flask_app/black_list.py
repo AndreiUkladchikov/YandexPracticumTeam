@@ -1,5 +1,4 @@
 import redis
-
 from config import settings
 
 jwt_redis_blocklist = redis.StrictRedis(

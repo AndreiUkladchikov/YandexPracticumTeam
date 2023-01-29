@@ -14,17 +14,19 @@ def load_film_works(conn: _connection) -> list[Filmwork]:
         filmworks = []
         for film in result:
             filmworks.extend(
-                [Filmwork(
-                    id=film.id,
-                    title=film.title,
-                    description=film.description,
-                    creation_date=film.creation_date,
-                    file_path=film.file_path,
-                    rating=film.rating,
-                    type=film.type,
-                    created=film.created,
-                    modified=film.modified
-                )]
+                [
+                    Filmwork(
+                        id=film.id,
+                        title=film.title,
+                        description=film.description,
+                        creation_date=film.creation_date,
+                        file_path=film.file_path,
+                        rating=film.rating,
+                        type=film.type,
+                        created=film.created,
+                        modified=film.modified,
+                    )
+                ]
             )
         return filmworks
     except (psycopg2.Error) as error:
@@ -39,13 +41,15 @@ def load_genres(conn: _connection) -> list[Genre]:
         genres = []
         for genre in result:
             genres.extend(
-                [Genre(
-                    id=genre.id,
-                    name=genre.name,
-                    description=genre.description,
-                    created=genre.created,
-                    modified=genre.modified
-                )]
+                [
+                    Genre(
+                        id=genre.id,
+                        name=genre.name,
+                        description=genre.description,
+                        created=genre.created,
+                        modified=genre.modified,
+                    )
+                ]
             )
         return genres
     except (psycopg2.Error) as error:
@@ -60,12 +64,14 @@ def load_people(conn: _connection) -> list[Person]:
         people = []
         for person in result:
             people.extend(
-                [Person(
-                    id=person.id,
-                    full_name=person.full_name,
-                    created=person.created,
-                    modified=person.modified
-                )]
+                [
+                    Person(
+                        id=person.id,
+                        full_name=person.full_name,
+                        created=person.created,
+                        modified=person.modified,
+                    )
+                ]
             )
         return people
     except (psycopg2.Error) as error:
@@ -80,12 +86,14 @@ def load_genre_film_work(conn: _connection) -> list[GenreFilmwork]:
         genre_film_works = []
         for genre in result:
             genre_film_works.extend(
-                [GenreFilmwork(
-                    id=genre.id,
-                    genre_id=genre.genre_id,
-                    film_work_id=genre.film_work_id,
-                    created=genre.created,
-                )]
+                [
+                    GenreFilmwork(
+                        id=genre.id,
+                        genre_id=genre.genre_id,
+                        film_work_id=genre.film_work_id,
+                        created=genre.created,
+                    )
+                ]
             )
         return genre_film_works
     except (psycopg2.Error) as error:
@@ -100,13 +108,15 @@ def load_person_film_work(conn: _connection) -> list[PersonFilmwork]:
         person_film_works = []
         for person in result:
             person_film_works.extend(
-                [PersonFilmwork(
-                    id=person.id,
-                    person_id=person.person_id,
-                    film_work_id=person.film_work_id,
-                    role=person.role,
-                    created=person.created,
-                )]
+                [
+                    PersonFilmwork(
+                        id=person.id,
+                        person_id=person.person_id,
+                        film_work_id=person.film_work_id,
+                        role=person.role,
+                        created=person.created,
+                    )
+                ]
             )
         return person_film_works
     except (psycopg2.Error) as error:

@@ -1,5 +1,6 @@
-import pytest
 import http
+
+import pytest
 from functional.config import test_settings
 from functional.testdata.data_main_page import cache_films_main_page
 from functional.testdata.data_search import test_data_films

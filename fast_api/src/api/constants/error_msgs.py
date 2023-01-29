@@ -1,5 +1,6 @@
 # This classes in future can be extended with localization, etc.
 
+
 class PersonMsg:
     __slots__ = ()
     not_found_by_id = "Person not found"
@@ -21,5 +22,7 @@ class GenreMsg:
 
 class ElasticMsg:
     __slots__ = ()
-    elasticsearch_is_not_available = "Something went wrong :( Everything will be working soon! We apologize for the " \
-                                     "inconvenience"
+    elasticsearch_is_not_available = (
+        "Something went wrong :( Everything will be working soon! We apologize for the "
+        "inconvenience"
+    )

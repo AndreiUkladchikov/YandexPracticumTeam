@@ -1,5 +1,6 @@
-import pytest
 import http
+
+import pytest
 from functional.config import test_settings
 from functional.models.models import Genre
 from functional.testdata.data_genres import test_genres

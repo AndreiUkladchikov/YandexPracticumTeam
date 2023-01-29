@@ -1,14 +1,23 @@
 from http import HTTPStatus
 
-from test_data import (fake_user_credits, new_user_credits, role_credits,
-                       url_change_credits, url_delete_role, url_get_all_roles,
-                       url_login, url_login_history, url_logout,
-                       url_refresh_tokens, url_registration, url_update_role,
-                       user_credits)
-
 from clients import postgres_client
 from db_models import User
 from services import CustomService
+from test_data import (
+    fake_user_credits,
+    new_user_credits,
+    role_credits,
+    url_change_credits,
+    url_delete_role,
+    url_get_all_roles,
+    url_login,
+    url_login_history,
+    url_logout,
+    url_refresh_tokens,
+    url_registration,
+    url_update_role,
+    user_credits,
+)
 
 user_service = CustomService(client=postgres_client, model=User)
 

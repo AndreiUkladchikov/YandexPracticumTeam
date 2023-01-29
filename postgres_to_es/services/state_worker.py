@@ -1,7 +1,8 @@
+import datetime
 import json
 import logging
-import datetime
-from config.config_models import State, Indexes
+
+from config.config_models import Indexes, State
 
 
 def get_state(conn: str) -> State:
@@ -11,22 +12,22 @@ def get_state(conn: str) -> State:
             state = State.parse_raw(data)
             return state
         except FileNotFoundError:
-            logging.error('Json state file not found')
+            logging.error("Json state file not found")
         except json.decoder.JSONDecodeError:
             return State(
                 last_update=datetime.datetime(2000, 1, 1),
                 last_row=0,
                 is_finished=False,
-                index=Indexes.MOVIE.value
+                index=Indexes.MOVIE.value,
             )
 
 
 def save_state(conn: str, state: State) -> None:
-    with open(conn, 'w') as file:
+    with open(conn, "w") as file:
         try:
             json.dump(state.json(), file)
         except FileNotFoundError:
-            logging.error('Json state file not found')
+            logging.error("Json state file not found")
 
 
 # В начале нового цикла загрузки в ETL - обновляем state

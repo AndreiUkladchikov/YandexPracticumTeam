@@ -8,9 +8,8 @@ Create Date: 2023-01-23 19:34:10.504357
 import uuid
 
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID
-
 from alembic import op
+from sqlalchemy.dialects.postgresql import UUID
 
 # revision identifiers, used by Alembic.
 revision = "d997da871fed"

@@ -1,4 +1,5 @@
 import os
+
 from pydantic import BaseSettings, Field
 
 # For local debug
@@ -6,9 +7,9 @@ from pydantic import BaseSettings, Field
 # load_dotenv()
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-STATE_CON = os.environ.get('STATE_CON')
+STATE_CON = os.environ.get("STATE_CON")
 
-ELASTIC_CON = os.environ.get('ELASTIC_CON')
+ELASTIC_CON = os.environ.get("ELASTIC_CON")
 
 
 class PostgresSettings(BaseSettings):

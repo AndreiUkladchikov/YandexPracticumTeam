@@ -1,13 +1,12 @@
 import secrets
 import string
 
-from device_detector import DeviceDetector
-from loguru import logger
-from sqlalchemy.exc import IntegrityError
-
 import constants
 from db_models import UserRole
+from device_detector import DeviceDetector
+from loguru import logger
 from services import role_service, user_role_service, user_service
+from sqlalchemy.exc import IntegrityError
 
 
 def check_path(permission: list[str], url_path: str) -> bool:
@@ -23,7 +22,7 @@ def create_test_roles():
         role_service.insert(constants.ROLE_SUBSCRIBER)
         role_service.insert(constants.ROLE_ADMIN)
         role_service.insert(constants.ROLE_OWNER)
-    except IntegrityError as e:
+    except IntegrityError:
         logger.info("Roles have been already created")
 
 
@@ -33,7 +32,7 @@ def create_test_admin():
         user = user_service.get({"email": constants.TEST_ADMIN.email})
         role = role_service.get({"access_level": 100})
         user_role_service.insert(UserRole(user_id=user.id, role_id=role.id))
-    except IntegrityError as e:
+    except IntegrityError:
         logger.info("Admin has been already created")
 
 

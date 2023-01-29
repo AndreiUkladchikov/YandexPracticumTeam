@@ -3,13 +3,13 @@ import asyncio
 import pytest
 from elasticsearch import AsyncElasticsearch, helpers
 from functional.config import test_settings
-from functional.testdata.data_search import test_data_films
-from functional.testdata.data_main_page import (
-    test_main_page_genres,
-    test_films_main_page,
-)
 from functional.testdata.data_genres import test_genres
+from functional.testdata.data_main_page import (
+    test_films_main_page,
+    test_main_page_genres,
+)
 from functional.testdata.data_persons import test_film_by_person, test_persons
+from functional.testdata.data_search import test_data_films
 
 
 @pytest.fixture(scope="session")
@@ -31,9 +31,7 @@ def es_write_data(es_client: AsyncElasticsearch):
 @pytest.fixture(scope="class")
 def es_delete_data(es_client: AsyncElasticsearch):
     async def inner(index):
-        response = await es_client.delete_by_query(
-            index=index, body={"query": {"match_all": {}}}
-        )
+        await es_client.delete_by_query(index=index, body={"query": {"match_all": {}}})
 
     return inner
 
