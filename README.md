@@ -44,6 +44,12 @@ http://localhost:5001/apidoc/redoc/
 
 - С помощью access_token у Яндекс.OAuth мы будем иметь доступ к данным пользователя
 
+Для запуска воспользуемся командой: docker-compose -f docker-compose-auth.yml --env-file=flask_app/.env up -d 
+
+После запуска контейнеров необходимо:
+
+1) осуществить миграции:  docker exec -it auth_server alembic upgrade head
+2) сгенерировать основные роли: docker exec -it auth_server python create_roles.py
 
 
 

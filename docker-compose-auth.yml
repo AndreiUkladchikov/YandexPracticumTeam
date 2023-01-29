@@ -42,3 +42,11 @@ services:
       - '14268:14268'
       - '9411:9411'
     restart: unless-stopped
+
+  auth_db:
+    image: postgres:14
+    container_name: auth_database
+    env_file:
+      - "./flask_app/.env"
+    expose:
+      - '${DB_PORT}'
