@@ -1,5 +1,6 @@
-import pytest
 import http
+
+import pytest
 from functional.config import test_settings
 from functional.models.models import Film
 from functional.testdata.data_persons import test_film_by_person, test_persons

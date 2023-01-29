@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import ast
 from typing import Any
-from aioredis import Redis
-from loguru import logger
+
 import elasticsearch
+from aioredis import Redis
 from elasticsearch import AsyncElasticsearch, NotFoundError
+from loguru import logger
 from repository.custom_exceptions import ElasticSearchIsNotAvailable
 
 
@@ -51,11 +52,16 @@ class DbContext:
         try:
             if body is None:
                 doc = await self.elastic.search(
-                    index=self.index, from_=(page_number - 1) * page_size, size=page_size
+                    index=self.index,
+                    from_=(page_number - 1) * page_size,
+                    size=page_size,
                 )
             else:
                 doc = await self.elastic.search(
-                    index=self.index, body=body, from_=(page_number - 1) * page_size, size=page_size
+                    index=self.index,
+                    body=body,
+                    from_=(page_number - 1) * page_size,
+                    size=page_size,
                 )
         except elasticsearch.ConnectionError as ce:
             logger.critical("Enable get data from ElasticSearch", ce)

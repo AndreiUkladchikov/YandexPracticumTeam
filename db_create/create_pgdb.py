@@ -7,5 +7,5 @@ def main():
         save_data.create_db(conn)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

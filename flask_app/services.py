@@ -1,8 +1,7 @@
-from sqlalchemy import func, select, update
-
 from base import BaseClient, BaseService
 from clients import postgres_client
 from db_models import Base, Role, User, UserAccessHistory, UserRole
+from sqlalchemy import func, select, update
 
 
 class CustomService(BaseService):

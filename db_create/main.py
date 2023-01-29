@@ -25,5 +25,5 @@ def main():
                 do_work = False
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -92,7 +92,9 @@ def load_genre_film_work(curs: sqlite3.Cursor) -> list[GenreFilmwork]:
             genre_filmworks = []
             for row in result:
                 genre_filmwork = GenreFilmwork(**row)
-                genre_filmwork.created = parse_sqlite_datetime(genre_filmwork.created_at)
+                genre_filmwork.created = parse_sqlite_datetime(
+                    genre_filmwork.created_at
+                )
                 genre_filmworks.extend([genre_filmwork])
             yield genre_filmworks
         except StopIteration:
@@ -107,7 +109,9 @@ def load_person_film_work(curs: sqlite3.Cursor) -> list[PersonFilmwork]:
             person_filmworks = []
             for row in result:
                 person_filmwork = PersonFilmwork(**row)
-                person_filmwork.created = parse_sqlite_datetime(person_filmwork.created_at)
+                person_filmwork.created = parse_sqlite_datetime(
+                    person_filmwork.created_at
+                )
                 person_filmworks.extend([person_filmwork])
             yield person_filmworks
         except StopIteration:
@@ -115,7 +119,11 @@ def load_person_film_work(curs: sqlite3.Cursor) -> list[PersonFilmwork]:
 
 
 def parse_sqlite_datetime(string: str) -> datetime:
-    return datetime.strptime(string[0:19], '%Y-%m-%d %H:%M:%S') if string != 'None' else None
+    return (
+        datetime.strptime(string[0:19], "%Y-%m-%d %H:%M:%S")
+        if string != "None"
+        else None
+    )
 
 
 def dict_factory(curs: sqlite3.Cursor, row: tuple) -> dict:

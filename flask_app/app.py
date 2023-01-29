@@ -3,39 +3,40 @@ import re
 from datetime import timedelta
 from http import HTTPStatus
 
-import redis
-import requests
-from flask import Flask, request
-from flask_jwt_extended import JWTManager, get_jwt_identity, jwt_required
-from flask_opentracing import FlaskTracer
-from loguru import logger
-from spectree import Response
-from werkzeug.exceptions import HTTPException
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-
 import constants
 import jaeger
 import messages
+import redis
+import requests
 from black_list import jwt_redis_blocklist
 from config import settings
 from db_models import User
 from documentation import spec
 from errors import ERROR_BASE_CODE, SERVER_ERROR
+from flask import Flask, request
+from flask_jwt_extended import JWTManager, get_jwt_identity, jwt_required
+from flask_opentracing import FlaskTracer
 from helpers import check_path, create_test_roles
 from limiter import limiter
+from loguru import logger
 from messages import ResponseForm
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 from services import user_role_service, user_service
+from spectree import Response
 from v1.auth.auth import auth_blueprint
 from v1.auth.oauth import oauth_blueprint
 from v1.roles.roles import roles_blueprint
+from werkzeug.exceptions import HTTPException
 
 
 def configure_tracer() -> None:
     trace.set_tracer_provider(TracerProvider())
-    trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
+    trace.get_tracer_provider().add_span_processor(
+        BatchSpanProcessor(ConsoleSpanExporter())
+    )
 
 
 configure_tracer()
@@ -71,9 +72,9 @@ jaeger.tracer = FlaskTracer(jaeger.setup_jaeger, app=app)
 
 @app.before_request
 def before_request():
-    request_id = request.headers.get('X-Request-Id')
+    request_id = request.headers.get("X-Request-Id")
     if not request_id:
-        logger.info('request id is required')
+        logger.info("request id is required")
 
 
 @app.errorhandler(Exception)

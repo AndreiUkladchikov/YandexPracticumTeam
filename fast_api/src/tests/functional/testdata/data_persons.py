@@ -1,29 +1,25 @@
 test_persons = [
     {
-       "actor_in": [],
-       "director_in": [],
-       "full_name": "Kenneth Biller",
-       "id": "264e7c46-e658-4725-8cc3-21c02c9a0721",
-       "writer_in": [
-          "d38bced9-f39d-47b5-ad4c-5052d76c0246"
-       ]
+        "actor_in": [],
+        "director_in": [],
+        "full_name": "Kenneth Biller",
+        "id": "264e7c46-e658-4725-8cc3-21c02c9a0721",
+        "writer_in": ["d38bced9-f39d-47b5-ad4c-5052d76c0246"],
     },
     {
-       "actor_in": [],
-       "director_in": [],
-       "full_name": "Joe Lo Truglio",
-       "id": "12ad8c57-60c3-4b4a-b776-5cd657c30789",
-       "writer_in": [
-          "a166f73e-944b-4815-b252-3ac6d47635e1"
-       ]
+        "actor_in": [],
+        "director_in": [],
+        "full_name": "Joe Lo Truglio",
+        "id": "12ad8c57-60c3-4b4a-b776-5cd657c30789",
+        "writer_in": ["a166f73e-944b-4815-b252-3ac6d47635e1"],
     },
     {
-       "actor_in": ["a166f73e-944b-4815-b252-3ac6d47635e1"],
-       "director_in": [],
-       "full_name": "Makenzie Moss",
-       "id": "097b78cb-8dda-4f80-a450-252229987085",
-       "writer_in": []
-    }
+        "actor_in": ["a166f73e-944b-4815-b252-3ac6d47635e1"],
+        "director_in": [],
+        "full_name": "Makenzie Moss",
+        "id": "097b78cb-8dda-4f80-a450-252229987085",
+        "writer_in": [],
+    },
 ]
 
 test_film_by_person = [
@@ -43,8 +39,11 @@ test_film_by_person = [
         "actors_names": ["Makenzie Moss"],
         "writers_names": [],
         "actors": [
-            {"id": "097b78cb-8dda-4f80-a450-252229987085", "full_name": "Makenzie Moss"},
+            {
+                "id": "097b78cb-8dda-4f80-a450-252229987085",
+                "full_name": "Makenzie Moss",
+            },
         ],
-        "writers": []
+        "writers": [],
     }
 ]

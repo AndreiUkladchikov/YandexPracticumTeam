@@ -1,13 +1,12 @@
 import secrets
 import string
 
-from device_detector import DeviceDetector
-from loguru import logger
-from sqlalchemy.exc import IntegrityError
-
 import constants
 from db_models import UserRole
+from device_detector import DeviceDetector
+from loguru import logger
 from services import role_service, user_role_service, user_service
+from sqlalchemy.exc import IntegrityError
 
 
 def check_path(permission: list[str], url_path: str) -> bool:

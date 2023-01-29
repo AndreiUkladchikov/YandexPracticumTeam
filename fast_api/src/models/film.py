@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from models.genre import Genre
-from models.person import Person
 from models.parent_model import BaseOrjsonModel
+from models.person import Person
 
 
 class Film(BaseOrjsonModel):

@@ -1,8 +1,7 @@
-from loguru import logger
-from sqlalchemy.exc import IntegrityError
-
 import constants
+from loguru import logger
 from services import role_service
+from sqlalchemy.exc import IntegrityError
 
 
 def create_test_roles():

@@ -1,16 +1,17 @@
 from __future__ import annotations
+
 import aiohttp
 from functional.config import test_settings
 from functional.models.models import Response
 
 
 async def make_get_request(
-        end_of_url,
-        query: str | None = None,
-        page_number: int | str | None = None,
-        page_size: int | str | None = None,
-        sort: str | None = None,
-        genre: str | None = None
+    end_of_url,
+    query: str | None = None,
+    page_number: int | str | None = None,
+    page_size: int | str | None = None,
+    sort: str | None = None,
+    genre: str | None = None,
 ) -> Response:
     session = aiohttp.ClientSession()
     url = test_settings.service_url + "/api/v1/" + str(end_of_url)

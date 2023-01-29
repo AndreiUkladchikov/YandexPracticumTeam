@@ -1,7 +1,6 @@
 import unittest
 
 import requests
-
 from core.config import settings
 
 
@@ -129,7 +128,9 @@ class TestFilms(unittest.TestCase):
 
     def test_films_sort_rating_desc(self):
         response = requests.get(self.baseurl + f"/?sort=-imdb_rating")
-        if response.json()["films"][0].get("imdb_rating") and response.json()["films"][-1].get("imdb_rating"):
+        if response.json()["films"][0].get("imdb_rating") and response.json()["films"][
+            -1
+        ].get("imdb_rating"):
             self.assertLessEqual(
                 response.json()["films"][-1]["imdb_rating"],
                 response.json()["films"][0]["imdb_rating"],
@@ -137,7 +138,9 @@ class TestFilms(unittest.TestCase):
 
     def test_films_sort_rating_asc(self):
         response = requests.get(self.baseurl + f"/?sort=imdb_rating")
-        if response.json()["films"][0].get("imdb_rating") and response.json()["films"][-1].get("imdb_rating"):
+        if response.json()["films"][0].get("imdb_rating") and response.json()["films"][
+            -1
+        ].get("imdb_rating"):
             self.assertLessEqual(
                 response.json()["films"][0]["imdb_rating"],
                 response.json()["films"][-1]["imdb_rating"],

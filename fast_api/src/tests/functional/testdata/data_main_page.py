@@ -1,11 +1,11 @@
 test_main_page_genres = [
     {"id": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff", "name": "Action"},
-    {"id": "6c162475-c7ed-4461-9184-001ef3d9f26e", "name": "Sci-Fi"}
+    {"id": "6c162475-c7ed-4461-9184-001ef3d9f26e", "name": "Sci-Fi"},
 ]
 
 test_films_main_page = [
     {
-        "id": '5ff2a59d-495d-40fe-826d-ec41ba7943c7',
+        "id": "5ff2a59d-495d-40fe-826d-ec41ba7943c7",
         "type": "movie",
         "imdb_rating": 99.9,
         "genre": ["Action"],
@@ -28,7 +28,7 @@ test_films_main_page = [
         ],
     },
     {
-        "id": '6c77d125-1dc3-4407-9281-a43ea687b139',
+        "id": "6c77d125-1dc3-4407-9281-a43ea687b139",
         "type": "movie",
         "imdb_rating": 6.0,
         "genre": ["Sci-Fi"],
@@ -49,12 +49,12 @@ test_films_main_page = [
             {"id": "333", "full_name": "Ben"},
             {"id": "444", "full_name": "Howard"},
         ],
-    }
+    },
 ]
 
 cache_films_main_page = [
     {
-        "id": 'a38e738e-ac45-40ff-9f98-ab7a0ff45054',
+        "id": "a38e738e-ac45-40ff-9f98-ab7a0ff45054",
         "type": "movie",
         "imdb_rating": 77.7,
         "genre": ["Action"],

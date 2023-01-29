@@ -1,12 +1,11 @@
 from contextlib import contextmanager
 
 import requests
+from base import BaseClient
+from config import settings
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
-
-from base import BaseClient
-from config import settings
 
 convention = {
     "ix": "ix_%(column_0_label)s",

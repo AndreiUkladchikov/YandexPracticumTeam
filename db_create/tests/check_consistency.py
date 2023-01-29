@@ -39,5 +39,5 @@ def test_two_tables(pg_data: list, sqlite_data: list):
     assert pg_data == sqlite_data
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     check()

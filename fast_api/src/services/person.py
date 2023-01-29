@@ -1,19 +1,20 @@
 from __future__ import annotations
 
 from aioredis import Redis
-from elasticsearch import AsyncElasticsearch
-from fastapi import Depends
-
 from core.config import settings
 from db.elastic import get_elastic
 from db.redis import get_redis
+from elasticsearch import AsyncElasticsearch
+from fastapi import Depends
 from models.person import PersonDetailed
 from repository.db_context import DbContext
 
 
 class PersonService:
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.db_context = DbContext(redis, elastic, "persons", settings.cache_expire_in_seconds)
+        self.db_context = DbContext(
+            redis, elastic, "persons", settings.cache_expire_in_seconds
+        )
 
     async def get_by_id(self, url: str, person_id: str) -> PersonDetailed | None:
         data = await self.db_context.get_by_id(url, person_id)
