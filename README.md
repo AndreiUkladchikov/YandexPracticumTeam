@@ -1,11 +1,15 @@
 # YandexPracticumTeam
-docker-compose-dev (или prod) - апи для фильмов:
-- FastApi
-- Postgre
-- Elastic
-- Redis
-- ETL
-- Tests
+For Production:
+- prod_env/docker-compose-prod
+- prod_env/docker-compose-auth
+
+For Develop (in root folder):
+- docker-compose
+- docker-compose-auth
+
+For Run with Tests:
+- Советуем запускать в отдельном compose, т.к. часть тестов - это очистка эластика и проверка кэша
+- docker-compose-with-tests
 
 Как запустить:
 - docker-compose build
@@ -14,6 +18,7 @@ docker-compose-dev (или prod) - апи для фильмов:
 Запустить в виртуальном окружении (requirements.txt внутри папки):
 - Создать базу: python db_create/create_pgdb.py
 - Заполнить базу данными из sqlite: python db_create/main.py
+- создать схемы в Elastic - postgres_to_es/create_etl.py
 - перезапустить ETL container
 
 Документация по Fast Api:

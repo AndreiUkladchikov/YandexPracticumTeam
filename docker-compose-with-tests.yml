@@ -1,5 +1,11 @@
 version: '3.8'
 services:
+  test_service:
+    build: fast_api/src/tests/functional
+    depends_on:
+      - nginx
+      - redis
+      - elastic
   nginx:
     image: nginx:1.23
     env_file:

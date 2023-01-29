@@ -12,8 +12,8 @@ def setup_jaeger():
     return Config(
         config={
             "sampler": {"type": "const", "param": 1},
-            "local_agent": {
-                "enabled": settings.jaeger_tracing,
+            "enabled": settings.jaeger_tracing,
+            "local_agent": {                
                 "reporting_port": os.environ.get(
                     "JAEGER_AGENT_PORT", jaeger_client.config.DEFAULT_REPORTING_PORT
                 ),
