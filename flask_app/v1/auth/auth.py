@@ -143,7 +143,7 @@ def refresh_tokens():
     )
 
 
-@auth_blueprint.route(f"/logout", methods=["GET"])
+@auth_blueprint.route("/logout", methods=["GET"])
 @limiter.limit(settings.rate_limit)
 @spec.validate(
     resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["Auth"]

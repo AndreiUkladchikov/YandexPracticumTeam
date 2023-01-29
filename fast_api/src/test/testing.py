@@ -123,11 +123,11 @@ class TestFilms(unittest.TestCase):
         )
 
     def test_films_main_page(self):
-        response = requests.get(self.baseurl + f"/")
+        response = requests.get(self.baseurl + "/")
         self.assertEqual(response.status_code, 200)
 
     def test_films_sort_rating_desc(self):
-        response = requests.get(self.baseurl + f"/?sort=-imdb_rating")
+        response = requests.get(self.baseurl + "/?sort=-imdb_rating")
         if response.json()["films"][0].get("imdb_rating") and response.json()["films"][
             -1
         ].get("imdb_rating"):
@@ -137,7 +137,7 @@ class TestFilms(unittest.TestCase):
             )
 
     def test_films_sort_rating_asc(self):
-        response = requests.get(self.baseurl + f"/?sort=imdb_rating")
+        response = requests.get(self.baseurl + "/?sort=imdb_rating")
         if response.json()["films"][0].get("imdb_rating") and response.json()["films"][
             -1
         ].get("imdb_rating"):
