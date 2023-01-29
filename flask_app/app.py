@@ -16,7 +16,7 @@ from errors import ERROR_BASE_CODE, SERVER_ERROR
 from flask import Flask, request
 from flask_jwt_extended import JWTManager, get_jwt_identity, jwt_required
 from flask_opentracing import FlaskTracer
-from helpers import check_path, create_test_roles
+from helpers import check_path
 from limiter import limiter
 from loguru import logger
 from messages import ResponseForm

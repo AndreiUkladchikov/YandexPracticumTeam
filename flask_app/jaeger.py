@@ -32,7 +32,7 @@ tracer: FlaskTracer = None
 def trace(fn):
     @functools.wraps(fn)
     def decorated(*args, **kwargs):
-        with tracer.start_span(operation_name=fn.__name__) as span:
+        with tracer.start_span(operation_name=fn.__name__):
             return fn(*args, **kwargs)
 
     return decorated

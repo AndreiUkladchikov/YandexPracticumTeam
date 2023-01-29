@@ -21,7 +21,7 @@ router = APIRouter()
     summary="Search Persons",
     description="Get list of Persons by search criteria",
 )
-async def person_details(
+async def list_of_persons(
     request: Request,
     query: str,
     page_number: int

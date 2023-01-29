@@ -42,7 +42,6 @@ def oauth_login():
 
         if result.status_code == http.HTTPStatus.OK:
             access_token_oauth = result.json()["access_token"]
-            refresh_token_oauth = result.json()["refresh_token"]
 
             headers = {"Authorization": f"Bearer {access_token_oauth}"}
             data = {"format": "json"}

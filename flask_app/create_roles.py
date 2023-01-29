@@ -10,7 +10,7 @@ def create_test_roles():
         role_service.insert(constants.ROLE_SUBSCRIBER)
         role_service.insert(constants.ROLE_ADMIN)
         role_service.insert(constants.ROLE_OWNER)
-    except IntegrityError as e:
+    except IntegrityError:
         logger.info("Roles have been already created")
 
 
