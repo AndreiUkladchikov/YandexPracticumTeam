@@ -174,3 +174,29 @@ services:
       KAFKA_REST_BOOTSTRAP_SERVERS: 'kafka-broker:29092'
       KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://kafka-schema-registry:8081'
+
+  clickhouse-zookeeper:
+    image: zookeeper:3.5
+    hostname: clickhouse-zookeeper
+    container_name: clickhouse-zookeeper
+
+  clickhouse-node1:
+    image: yandex/clickhouse-server:20.4
+    container_name: clickhouse-node1
+    hostname: clickhouse-node1
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - ./clickhouse/node1:/etc/clickhouse-server
+    depends_on:
+      - clickhouse-zookeeper
+
+  clickhouse-node2:
+    image: yandex/clickhouse-server:20.4
+    container_name: clickhouse-node2
+    hostname: clickhouse-node2
+    volumes:
+      - ./clickhouse/node2:/etc/clickhouse-server
+    depends_on:
+      - clickhouse-zookeeper
