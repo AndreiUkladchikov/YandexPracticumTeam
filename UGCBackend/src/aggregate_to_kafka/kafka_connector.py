@@ -28,7 +28,7 @@ async def send_data(value: bytes, key: bytes):
         await producer.stop()
 
 
-async def consume():
+async def consume_data():
     consumer = AIOKafkaConsumer(
         f"{settings.kafka_topic}",
         bootstrap_servers=f"{settings.kafka_host}:{settings.kafka_port}",
