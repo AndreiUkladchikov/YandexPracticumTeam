@@ -43,6 +43,23 @@ class Base(BaseSettings):
         ...,
         env='CLICKHOUSE_WATCH_LATER_TABLE',
     )
+    
+    BACKOFF_START_SLEEP_TIME: float = Field(
+        1.0,
+        env='BACKOFF_START_SLEEP_TIME',
+    )
+    BACKOFF_FACTOR: int = Field(
+        2,
+        env='BACKOFF_FACTOR',
+    )
+    BACKOFF_BORDER_SLEEP_TIME: float = Field(
+        60.0,
+        env='BACKOFF_BORDER_SLEEP_TIME',
+    )
+    BACKOFF_TRY_LIMIT: int = Field(
+        50,
+        env='BACKOFF_TRY_LIMIT',
+    )
 
     class Config:
         case_sensitive = False
