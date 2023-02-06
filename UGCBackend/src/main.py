@@ -12,22 +12,6 @@ app = FastAPI(
 )
 
 
-@app.on_event("startup")
-async def startup():
-    try:
-        pass
-    except Exception:
-        pass
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    try:
-        pass
-    except (ConnectionRefusedError, AttributeError):
-        pass
-
-
 app.include_router(router.router, prefix="/views", tags=["views"])
 
 if __name__ == "__main__":
