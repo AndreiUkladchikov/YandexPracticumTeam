@@ -4,6 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pydantic = {extras = ["dotenv"], version = "==1.10.2"}
+confluent-kafka = "*"
+clickhouse-driver = "*"
+redis = "*"
+loguru = "*"
 
 [dev-packages]
 black = "*"
