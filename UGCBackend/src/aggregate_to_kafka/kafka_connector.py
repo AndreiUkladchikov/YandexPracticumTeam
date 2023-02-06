@@ -26,27 +26,3 @@ async def send_data(value: bytes, key: bytes):
     finally:
         # Wait for all pending messages to be delivered or expire.
         await producer.stop()
-
-
-async def consume_data():
-    consumer = AIOKafkaConsumer(
-        f"{settings.kafka_topic}",
-        bootstrap_servers=f"{settings.kafka_host}:{settings.kafka_port}",
-    )
-    # Get cluster layout and join group `my-group`
-    await consumer.start()
-    try:
-        # Consume messages
-        async for msg in consumer:
-            print(
-                "consumed: ",
-                msg.topic,
-                msg.partition,
-                msg.offset,
-                msg.key,
-                msg.value,
-                msg.timestamp,
-            )
-    finally:
-        # Will leave consumer group; perform autocommit if enabled.
-        await consumer.stop()

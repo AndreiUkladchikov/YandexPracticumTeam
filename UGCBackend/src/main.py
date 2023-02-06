@@ -33,6 +33,6 @@ app.include_router(router.router, prefix="/views", tags=["views"])
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
-        host=str(settings.ugc_backend_host),
+        host=settings.ugc_backend_host,
         port=settings.ugc_backend_port,
     )
