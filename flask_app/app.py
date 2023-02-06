@@ -97,7 +97,7 @@ def handle_exception(e):
         else:
             return {
                 "code": ERROR_BASE_CODE,
-                "msg": str(e)
+                "msg": str(e),
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
 
