@@ -1,5 +1,3 @@
-import os
-
 from dotenv import load_dotenv
 from pydantic import BaseSettings, Field, RedisDsn, KafkaDsn
 
@@ -8,9 +6,10 @@ load_dotenv()
 
 class Base(BaseSettings):
 
-    batch_size: int = Field(100)
+    batch_size: int = Field(1000000)
 
-    redis_state_storage: RedisDsn = Field(...)
+    redis_storage: RedisDsn = Field(...)
+    redis_list_key: str = Field(...)
 
     kafka_broker: KafkaDsn = Field(...)
     kafka_group_id: str = Field(...)
@@ -18,7 +17,6 @@ class Base(BaseSettings):
     kafka_sleep_timeout: int = Field(5)
 
     clickhouse_dsn: str = Field(...)
-    clickhouse_table: str = Field(...)
 
     backoff_start_sleep_time: float = Field(1.0)
     backoff_factor: int = Field(2)
