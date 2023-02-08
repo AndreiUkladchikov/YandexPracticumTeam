@@ -3,16 +3,15 @@ from functools import wraps
 from logging import Logger
 from time import sleep
 
-from loguru import logger as LoguruLogger
+from loguru import logger
 
 from common.config import settings
 
 
-def backoff(start_sleep_time: float = settings.BACKOFF_START_SLEEP_TIME,
-            factor: int = settings.BACKOFF_FACTOR,
-            border_sleep_time: float = settings.BACKOFF_BORDER_SLEEP_TIME,
-            try_limit: int = settings.BACKOFF_TRY_LIMIT,
-            logger: Logger = LoguruLogger):
+def backoff(start_sleep_time: float = settings.backoff_start_sleep_time,
+            factor: int = settings.backoff_factor,
+            border_sleep_time: float = settings.backoff_border_sleep_time,
+            try_limit: int = settings.backoff_try_limit):
     """
     Функция для повторного выполнения функции через некоторое время, если возникла ошибка.
     Использует наивный экспоненциальный рост времени повтора (factor)
@@ -24,7 +23,6 @@ def backoff(start_sleep_time: float = settings.BACKOFF_START_SLEEP_TIME,
     :param factor: во сколько раз нужно увеличить время ожидания
     :param border_sleep_time: граничное время ожидания
     :param try_limit: кол-во попыток после достижения border_sleep_time
-    :param logger: пользовательский логгер
     :return: результат выполнения функции
     """
     def func_wrapper(func):

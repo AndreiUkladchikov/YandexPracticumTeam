@@ -7,59 +7,23 @@ load_dotenv()
 
 
 class Base(BaseSettings):
-    
-    BATCH_SIZE: int = Field(
-        100,
-        env='BATCH_SIZE',
-    )
-    
-    REDIS_STATE_STORAGE: RedisDsn = Field(
-        ...,
-        env="REDIS_STATE_STORAGE",
-    )
-    
-    KAFKA_DSN: KafkaDsn = Field(
-        ...,
-        env='KAFKA_DSN',
-    )    
-    KAFKA_WATCH_TOPIC: str = Field(
-        ...,
-        env='KAFKA_WATCH_TOPIC',
-    )    
-    KAFKA_WATCH_LATER_TOPIC: str = Field(
-        ...,
-        env='KAFKA_WATCH_LATER_TOPIC',
-    )
-    
-    CLICKHOUSE_DSN: KafkaDsn = Field(
-        ...,
-        env='CLICKHOUSE_DSN',
-    )    
-    CLICKHOUSE_WATCH_TOPIC: str = Field(
-        ...,
-        env='CLICKHOUSE_WATCH_TABLE',
-    )    
-    CLICKHOUSE_WATCH_LATER_TOPIC: str = Field(
-        ...,
-        env='CLICKHOUSE_WATCH_LATER_TABLE',
-    )
-    
-    BACKOFF_START_SLEEP_TIME: float = Field(
-        1.0,
-        env='BACKOFF_START_SLEEP_TIME',
-    )
-    BACKOFF_FACTOR: int = Field(
-        2,
-        env='BACKOFF_FACTOR',
-    )
-    BACKOFF_BORDER_SLEEP_TIME: float = Field(
-        60.0,
-        env='BACKOFF_BORDER_SLEEP_TIME',
-    )
-    BACKOFF_TRY_LIMIT: int = Field(
-        50,
-        env='BACKOFF_TRY_LIMIT',
-    )
+
+    batch_size: int = Field(100)
+
+    redis_state_storage: RedisDsn = Field(...)
+
+    kafka_broker: KafkaDsn = Field(...)
+    kafka_group_id: str = Field(...)
+    kafka_topic: str = Field(...)
+    kafka_sleep_timeout: int = Field(5)
+
+    clickhouse_dsn: str = Field(...)
+    clickhouse_table: str = Field(...)
+
+    backoff_start_sleep_time: float = Field(1.0)
+    backoff_factor: int = Field(2)
+    backoff_border_sleep_time: float = Field(60.0)
+    backoff_try_limit: int = Field(50)
 
     class Config:
         case_sensitive = False
