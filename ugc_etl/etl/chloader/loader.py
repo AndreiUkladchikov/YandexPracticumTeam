@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Generator
 
 from clickhouse_driver import Client
 
@@ -8,16 +8,18 @@ from common.config import settings
 class ClickHouseLoader:
     """Загрузка данных батчами в ClickHouse."""
 
-    host: str = settings.clickhouse_dsn
+    host: str = settings.clickhouse_host
 
     def __init__(self) -> None:
-        self.client = Client(self.host)
+        self.client = Client(host=self.host)
 
     def create_table(self) -> None:
         """Создаем таблицу, если она еще не была создана."""
-        self.client.execute('CREATE TABLE IF NOT EXISTS film_watch (user_id UUID, film_id UUID, timestamp Int16)')
+        self.client.execute(
+            'CREATE TABLE IF NOT EXISTS film_watch (user_id UUID, film_id UUID, timestamp Int16) ENGINE = MergeTree() ORDER BY (user_id, film_id)'
+        )
 
-    def insert_batch(self, batch: Iterable[tuple, ]) -> int:
+    def insert_batch(self, batch: Generator[tuple[str, ], None, None]) -> int:
         """Загружаем данные пачкой в ClickHouse.
 
         Args:

@@ -1,5 +1,6 @@
 import abc
 import redis
+from typing import Iterator
 
 from common.config import settings
 
@@ -18,7 +19,7 @@ class BaseStorage:
 
 
 class RedisStorage(BaseStorage):
-    """Собирает батч для загрузки в ClickHouse."""
+    """Собирает и хранит батч для загрузки в ClickHouse."""
 
     def __init__(self):
         self.redis = redis.StrictRedis(host=settings.redis_storage.host,
@@ -35,7 +36,11 @@ class RedisStorage(BaseStorage):
         """
         self.redis.rpush(self.list_key, value)
 
-    def retrieve(self) -> str:
+    def retrieve(self) -> Iterator[str, ]:
         """Читаем все значения из списка Redis."""
         for _ in range(self.redis.llen(self.list_key)):
             yield self.redis.lpop(self.list_key)
+
+    def current_batch_size(self) -> int:
+        """Возращает размер батча в Redis."""
+        return self.redis.llen(self.list_key)

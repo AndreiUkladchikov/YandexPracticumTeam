@@ -16,7 +16,7 @@ class Base(BaseSettings):
     kafka_topic: str = Field(...)
     kafka_sleep_timeout: int = Field(5)
 
-    clickhouse_dsn: str = Field(...)
+    clickhouse_host: str = Field(...)
 
     backoff_start_sleep_time: float = Field(1.0)
     backoff_factor: int = Field(2)

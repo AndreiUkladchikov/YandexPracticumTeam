@@ -29,12 +29,11 @@ class KafkaExtractor:
 
     def __init__(self) -> None:
         """Создаем инстанс Kafka Consumer и подписываемся на топик."""
-        consumer = Consumer(self.consumer_config)
-        consumer.subscribe([self.topic])
+        consumer = Consumer(**self.consumer_config)
+        consumer.subscribe([self.topic, ])
         self.consumer = consumer
 
-    @backoff()
-    def extract_batch(self) -> Iterator[tuple[str, ]]:
+    def extract_batch(self, batch_size: int) -> Iterator[tuple[str, ]]:
         """Выгружаем записи из Kafka.
 
         Raises:
@@ -44,15 +43,19 @@ class KafkaExtractor:
             Iterator[tuple[str, ]]: кортеж (ключ, значение) из топика.
         """
         try:
-            while True:
-                msg = self.consumer.poll(1.0)
+            counter = 0
+            while counter < batch_size:
+                msg = self.consumer.poll(1)
                 if msg is None:
-                    logger.info(f'Waiting for message or event/error in poll() {self.sleep_timeout} sec.')
+                    logger.info(
+                        f'Fetched {counter}/{batch_size}. Waiting for message or event/error in poll() {self.sleep_timeout} sec.')
                     sleep(self.sleep_timeout)
                     continue
                 elif msg.error():
                     logger.error(f'Error: {msg.error()}.')
                 else:
+                    counter += 1
+                    logger.info(f'Message {msg.key().decode("utf-8")}: {msg.value().decode("utf-8")} extract.')
                     yield msg.key().decode('utf-8'), msg.value().decode('utf-8')
                     self.consumer.commit()
         except Exception as e:
