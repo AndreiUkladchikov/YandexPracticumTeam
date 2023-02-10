@@ -14,7 +14,7 @@ router = APIRouter()
 )
 async def film_views(request_model: Item):
     key = request_model.user_id + "+" + request_model.film_id
-
-    await send_data(value=request_model.json().encode("utf-8"), key=key.encode("utf-8"))
-
+    await send_data(
+        value=str(request_model.timestamp).encode("utf-8"), key=key.encode("utf-8")
+    )
     return ResponseModel(msg="OK")

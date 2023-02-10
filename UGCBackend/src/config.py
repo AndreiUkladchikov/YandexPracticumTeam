@@ -7,10 +7,7 @@ class Settings(BaseSettings):
     kafka_topic: str = Field(default="views")
 
     ugc_backend_host: str = Field(default="localhost")
-    ugc_backend_port: int = Field(default=8092)
-
-    class Config:
-        env_file = "./env"
+    ugc_backend_port: int = Field(default=8080)
 
 
 settings = Settings()
