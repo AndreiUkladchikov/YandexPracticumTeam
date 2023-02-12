@@ -3,11 +3,10 @@ from __future__ import annotations
 from time import sleep
 from typing import Iterator
 
-from confluent_kafka import Consumer
-from loguru import logger
-
 from common.config import settings
 from common.decorators import backoff
+from confluent_kafka import Consumer
+from loguru import logger
 
 
 class KafkaExtractor:
@@ -19,10 +18,10 @@ class KafkaExtractor:
     """
 
     consumer_config = {
-        'bootstrap.servers': settings.kafka_broker,
-        'group.id': settings.kafka_group_id,
-        'auto.offset.reset': 'earliest',
-        'enable.auto.commit': 'false',
+        "bootstrap.servers": settings.kafka_broker,
+        "group.id": settings.kafka_group_id,
+        "auto.offset.reset": "earliest",
+        "enable.auto.commit": "false",
     }
     topic = settings.kafka_topic
     sleep_timeout = settings.kafka_sleep_timeout
@@ -30,10 +29,16 @@ class KafkaExtractor:
     def __init__(self) -> None:
         """Создаем инстанс Kafka Consumer и подписываемся на топик."""
         consumer = Consumer(**self.consumer_config)
-        consumer.subscribe([self.topic, ])
+        consumer.subscribe(
+            [
+                self.topic,
+            ]
+        )
         self.consumer = consumer
 
-    def extract_batch(self, batch_size: int) -> Iterator[tuple[str, ]]:
+    def extract_batch(
+        self, batch_size: int
+    ) -> Iterator[tuple[str,]]:
         """Выгружаем записи из Kafka.
 
         Raises:
@@ -48,15 +53,16 @@ class KafkaExtractor:
                 msg = self.consumer.poll(1)
                 if msg is None:
                     logger.info(
-                        f'Fetched {counter}/{batch_size}. Waiting for message or event/error in poll() {self.sleep_timeout} sec.')
+                        f"Fetched {counter}/{batch_size}. Waiting for message or event/error in poll() {self.sleep_timeout} sec."
+                    )
                     sleep(self.sleep_timeout)
                     continue
                 elif msg.error():
-                    logger.error(f'Error: {msg.error()}.')
+                    logger.error(f"Error: {msg.error()}.")
                 else:
                     counter += 1
-                    logger.info(f'Message {msg.key().decode("utf-8")}: {msg.value().decode("utf-8")} extract.')
-                    yield msg.key().decode('utf-8'), msg.value().decode('utf-8')
+                    # logger.info(f'Message {msg.key().decode("utf-8")}: {msg.value().decode("utf-8")} extract.')
+                    yield msg.key().decode("utf-8"), msg.value().decode("utf-8")
                     self.consumer.commit()
         except Exception as e:
             # Прокидываем ошибку в backoff

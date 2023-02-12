@@ -1,17 +1,17 @@
 from dotenv import load_dotenv
-from pydantic import BaseSettings, Field, RedisDsn, KafkaDsn
+from pydantic import BaseSettings, Field, KafkaDsn, RedisDsn
 
-load_dotenv()
+load_dotenv("../.env")
 
 
 class Base(BaseSettings):
 
-    batch_size: int = Field(1000000)
+    batch_size: int = Field(10000)
 
     redis_storage: RedisDsn = Field(...)
     redis_list_key: str = Field(...)
 
-    kafka_broker: KafkaDsn = Field(...)
+    kafka_broker: str = Field(...)
     kafka_group_id: str = Field(...)
     kafka_topic: str = Field(...)
     kafka_sleep_timeout: int = Field(5)

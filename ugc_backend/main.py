@@ -1,14 +1,10 @@
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import ORJSONResponse
 from src.aggregate_to_kafka import router
 from src.config import settings
 
 app = FastAPI(
-    title="UGCBackend",
-    docs_url="/api/openapi",
-    openapi_url="/api/openapi.json",
-    default_response_class=ORJSONResponse,
+    title="ugc_backend", docs_url="/api/openapi", openapi_url="/api/openapi.json"
 )
 
 

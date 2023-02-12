@@ -1,8 +1,19 @@
+version: '3.8'
 services:
+  ugc_backend:
+    build: ./ugc_backend
+    image: ugc_backend_image
+    container_name: ugc_backend_container
+    ports:
+      - '${UGC_BACKEND_PORT}:${UGC_BACKEND_PORT}'
+    command: gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${UGC_BACKEND_PORT}
+    env_file:
+      - .ugc.env
+
   redis-state-storage:
     container_name: redis-state
     build:
-      context: ./redis
+      context: ./ugc_etl/redis
       dockerfile: Dockerfile
     volumes:
       - redis_state_dump:/data
@@ -23,6 +34,7 @@ services:
     container_name: kafka-broker
     ports:
       - "9092:9092"
+      - "29092:29092"
     depends_on:
       - kafka-zookeeper
     environment:
@@ -33,6 +45,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "views:1:1"
 
   clickhouse-zookeeper:
     image: zookeeper:3.5
@@ -47,18 +60,21 @@ services:
       - "8123:8123"
       - "9000:9000"
     volumes:
-      - ./clickhouse/node1:/etc/clickhouse-server
+      -  ./ugc_etl/clickhouse/node1:/etc/clickhouse-server
     depends_on:
       - clickhouse-zookeeper
 
   ugc_etl:
     build:
-      context: ./etl
+      context: ./ugc_etl/etl
       dockerfile: Dockerfile
+    image: ugc_etl_image
     depends_on:
       - redis-state-storage
       - kafka-broker
       - clickhouse-node1
+    env_file:
+      - .ugc.env
 
 volumes:
   redis_state_dump:
