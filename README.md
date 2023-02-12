@@ -60,5 +60,5 @@ http://localhost:5001/apidoc/redoc/
 - в Clickhouse пишем по 10.000 записей
 - данные из Kafka храним в Redis до достижения 10.000 записей
 
-
+Docker Compose файл для продакшн среды находится в ./prod_env
 
