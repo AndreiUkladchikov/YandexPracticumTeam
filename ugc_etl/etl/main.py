@@ -11,11 +11,12 @@ from storage.storage import RedisStorage
 
 @backoff()
 def init_etl() -> None:
-
+    """Запускаем процесс ETL из Kafka в ClickHouse."""
     extract = KafkaExtractor()
     loader = ClickHouseLoader()
     storage = RedisStorage()
 
+    # создаем таблицы в ClickHouse, если они еще не созданы.
     loader.create_table()
 
     while True:
