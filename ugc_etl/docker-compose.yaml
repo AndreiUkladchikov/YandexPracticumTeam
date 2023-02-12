@@ -1,0 +1,64 @@
+services:
+  redis-state-storage:
+    container_name: redis-state
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    volumes:
+      - redis_state_dump:/data
+    restart: always
+    ports:
+      - "6379:6379"
+
+  kafka-zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    hostname: kafka-zookeeper
+    container_name: kafka-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka-broker:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka-broker
+    ports:
+      - "9092:9092"
+    depends_on:
+      - kafka-zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'kafka-zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka-broker:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  clickhouse-zookeeper:
+    image: zookeeper:3.5
+    hostname: clickhouse-zookeeper
+    container_name: clickhouse-zookeeper
+
+  clickhouse-node1:
+    image: clickhouse/clickhouse-server:22.3
+    container_name: clickhouse-node1
+    hostname: clickhouse-node1
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - ./clickhouse/node1:/etc/clickhouse-server
+    depends_on:
+      - clickhouse-zookeeper
+
+  ugc_etl:
+    build:
+      context: ./etl
+      dockerfile: Dockerfile
+    depends_on:
+      - redis-state-storage
+      - kafka-broker
+      - clickhouse-node1
+
+volumes:
+  redis_state_dump:

@@ -53,6 +53,12 @@ http://localhost:5001/apidoc/redoc/
 2) сгенерировать основные роли: docker exec -it auth_server python create_roles.py
 
 
+# Спринт 8
+Для старта сервисов: docker-compose -f docker-compose-ugc.yaml --env-file .ugc.env --build up -d 
 
+Основные моменты в ETL:
+- в Clickhouse пишем по 10.000 записей
+- данные из Kafka храним в Redis до достижения 10.000 записей
 
+Docker Compose файл для продакшн среды находится в ./prod_env
 
