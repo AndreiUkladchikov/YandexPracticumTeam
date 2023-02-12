@@ -1,0 +1,11 @@
+Operation,Rows,Speed
+Insert,100,110.359 ms
+Insert,100,102.308 ms
+Insert,100,108.728 ms
+Insert,100,118.124 ms
+Insert,100,98.728 ms
+Insert,100,99.027 ms
+Insert,100,98.820 ms
+Insert,100,119.041 ms
+Insert,100,98.263 ms
+Insert,100,48.892 ms

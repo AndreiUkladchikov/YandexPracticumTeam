@@ -1,15 +1,9 @@
-# Catch telemetry and put to Log
+import csv
 
 
-def select_random():
-    # for
-    # start timer
-    # select from clickhouse
-    # end timer
-    # show in log
-
-    # for
-    # start timer
-    # select from vertica
-    # end timer
-    # show in log
+def save_telemetry(operation, cluster, chunk_size, data):
+    with open(f'results/{cluster}-{operation}{chunk_size}.csv', 'w', newline='') as file:
+        fieldnames = ['Operation', 'Rows', 'Speed']
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(data)
