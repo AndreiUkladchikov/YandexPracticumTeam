@@ -1,6 +1,3 @@
-import ast
-
-
 class DataTransform:
 
     @staticmethod
@@ -10,5 +7,6 @@ class DataTransform:
         return ','.join(entry)
 
     @staticmethod
-    def parse_redis_enrty(entry: str) -> tuple[str, ]:
-        return ast.literal_eval(entry)
+    def parse_redis_entry(entry: str) -> tuple[str, str, int]:
+        user_id, film_id, timestamp = entry.split(',')
+        return user_id, film_id, timestamp

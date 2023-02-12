@@ -22,7 +22,7 @@ class KafkaExtractor:
         'bootstrap.servers': settings.kafka_broker,
         'group.id': settings.kafka_group_id,
         'auto.offset.reset': 'earliest',
-        'enable.auto.commit': 'false',
+        'enable.auto.commit': 'true',
     }
     topic = settings.kafka_topic
     sleep_timeout = settings.kafka_sleep_timeout
@@ -57,7 +57,7 @@ class KafkaExtractor:
                     counter += 1
                     logger.info(f'Message {msg.key().decode("utf-8")}: {msg.value().decode("utf-8")} extract.')
                     yield msg.key().decode('utf-8'), msg.value().decode('utf-8')
-                    self.consumer.commit()
+                    # self.consumer.commit()
         except Exception as e:
             # Прокидываем ошибку в backoff
             raise e

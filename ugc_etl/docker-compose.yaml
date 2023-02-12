@@ -38,14 +38,14 @@ services:
     container_name: clickhouse-zookeeper
 
   clickhouse-node1:
-    image: yandex/clickhouse-server:20.4
+    image: clickhouse/clickhouse-server:22.3
     container_name: clickhouse-node1
     hostname: clickhouse-node1
     ports:
       - "8123:8123"
       - "9000:9000"
     volumes:
-      - ./clickhouse/node1:/etc/clickhouse-server
+      - ch_node1:/etc/clickhouse-server
     depends_on:
       - clickhouse-zookeeper
 
@@ -60,3 +60,4 @@ services:
 
 volumes:
   redis_state_dump:
+  ch_node1:
