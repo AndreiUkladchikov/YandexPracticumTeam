@@ -8,7 +8,7 @@ services:
       - '${UGC_BACKEND_PORT}:${UGC_BACKEND_PORT}'
     command: gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${UGC_BACKEND_PORT}
     env_file:
-      - .ugc.env
+      - ../.ugc.env
 
   redis-state-storage:
     container_name: redis-state
@@ -18,8 +18,8 @@ services:
     volumes:
       - redis_state_dump:/data
     restart: always
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
 
   kafka-zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
@@ -32,9 +32,9 @@ services:
   kafka-broker:
     image: confluentinc/cp-kafka:7.3.0
     container_name: kafka-broker
-    ports:
-      - "9092:9092"
-      - "29092:29092"
+    expose:
+      - "9092"
+      - "29092"
     depends_on:
       - kafka-zookeeper
     environment:
@@ -56,11 +56,11 @@ services:
     image: clickhouse/clickhouse-server:22.3
     container_name: clickhouse-node1
     hostname: clickhouse-node1
-    ports:
-      - "8123:8123"
-      - "9000:9000"
+    expose:
+      - "8123"
+      - "9000"
     volumes:
-      -  ./ugc_etl/clickhouse/node1:/etc/clickhouse-server
+      -  ../ugc_etl/clickhouse/node1:/etc/clickhouse-server
     depends_on:
       - clickhouse-zookeeper
 
@@ -74,7 +74,7 @@ services:
       - kafka-broker
       - clickhouse-node1
     env_file:
-      - .ugc.env
+      - ../.ugc.env
 
 volumes:
   redis_state_dump:
