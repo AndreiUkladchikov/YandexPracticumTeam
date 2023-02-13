@@ -6,8 +6,7 @@ ENV PYTHONUNBUFFERED 1
 ENV LANG ru_RU.utf8
 
 
-RUN useradd -m -s /bin/sh ugcbackend \
-     && mkdir -p /home/ugcbackend
+RUN useradd -m -s /bin/sh ugcbackend
 
 WORKDIR /home/ugcbackend
 
