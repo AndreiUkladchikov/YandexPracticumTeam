@@ -12,7 +12,7 @@ from storage.storage import RedisStorage
 def init_etl() -> None:
 
     extract = KafkaExtractor()
-    loader = ClickHouseLoader()
+    loader = ClickHouseLoader(host=settings.clickhouse_host)
     storage = RedisStorage()
 
     loader.create_table()

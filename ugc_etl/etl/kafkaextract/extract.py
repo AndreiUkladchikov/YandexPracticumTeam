@@ -4,7 +4,6 @@ from time import sleep
 from typing import Iterator
 
 from common.config import settings
-from common.decorators import backoff
 from confluent_kafka import Consumer
 from loguru import logger
 
@@ -64,9 +63,6 @@ class KafkaExtractor:
                     # logger.info(f'Message {msg.key().decode("utf-8")}: {msg.value().decode("utf-8")} extract.')
                     yield msg.key().decode("utf-8"), msg.value().decode("utf-8")
                     self.consumer.commit()
-        except Exception as e:
-            # Прокидываем ошибку в backoff
-            raise e
         finally:
             # Закрываем consumer
             self.consumer.close()
