@@ -21,11 +21,11 @@ class BaseStorage(abc.ABC):
 
 class ListStorage(BaseStorage):
     def __init__(self) -> None:
-        """Создаем пустой список в кором будем собирать батч."""
+        """Создаем пустой список, в кором будем собирать батч."""
         self.list_storage = []
 
     def save(self, value: str) -> None:
-        """Добавляем значение в список Redis.
+        """Добавляем значение в список.
 
         Args:
             value (str): значение для добавления в список.
@@ -34,8 +34,8 @@ class ListStorage(BaseStorage):
 
     def retrieve(
         self,
-    ) -> Iterator[str,]:
-        """Читаем все значения из списка Redis."""
+    ) -> Iterator[str, ]:
+        """Читаем все значения из списка."""
         for _ in range(len(self.list_storage)):
             yield self.list_storage.pop(0)
 
