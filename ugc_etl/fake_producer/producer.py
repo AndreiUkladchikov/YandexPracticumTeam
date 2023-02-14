@@ -28,7 +28,7 @@ def push_fake_data() -> None:
 
     producer = Producer(**config)
 
-    topic = "views"
+    topic = "watch"
     users = [uuid.uuid4() for _ in range(1000)]
     films = [uuid.uuid4() for _ in range(1000)]
     timestamps = [str(i) for i in range(18000)]

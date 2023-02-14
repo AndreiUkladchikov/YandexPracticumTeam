@@ -2,11 +2,14 @@ from typing import Any, Generator
 
 from clickhouse_driver import Client
 
+from common.config import settings
+
 
 class ClickHouseLoader:
     """Загрузка данных батчами в ClickHouse."""
 
-    def __init__(self, host) -> None:
+    def __init__(self,
+                 host: str = settings.clickhouse_host) -> None:
         self.host = host
 
     def get_client(self):
