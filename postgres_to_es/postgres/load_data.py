@@ -1,8 +1,8 @@
-import logging
 import uuid
 from datetime import datetime
 
 import psycopg2
+from loguru import logger
 from models import Movie, NestedModel, NestedModelPerson, Person, PersonTypes
 from psycopg2.extensions import connection as _connection
 from psycopg2.extras import NamedTupleCursor
@@ -102,8 +102,7 @@ def load_film_works(
             movies_list = list(movies.values())[1:]
         return movies_list
     except (psycopg2.Error) as error:
-        logging.error(error)
-        print(error)
+        logger.error(error)
 
 
 def load_genres(
@@ -127,7 +126,7 @@ def load_genres(
                 genres.extend([NestedModel(id=genre.id, name=genre.name)])
         return genres
     except (psycopg2.Error) as error:
-        logging.error(error)
+        logger.error(error)
 
 
 def load_persons(
@@ -179,4 +178,4 @@ def load_persons(
             persons_list = list(persons.values())[1:]
         return persons_list
     except (psycopg2.Error) as error:
-        logging.error(error)
+        logger.error(error)

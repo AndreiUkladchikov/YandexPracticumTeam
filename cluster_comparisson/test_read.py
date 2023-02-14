@@ -3,14 +3,11 @@
 import time
 import random
 
-from clickhouse.client import read_rows as read_from_clickhouse
-
-from vertica.client import read_rows as read_from_vertica
-
-from storage_telemetry import save_telemetry
-
 import constants
-
+from clickhouse.client import read_rows as read_from_clickhouse
+from loguru import logger
+from storage_telemetry import save_telemetry
+from vertica.client import read_rows as read_from_vertica
 
 ITERATIONS = 100
 
@@ -28,7 +25,7 @@ def test_read():
     test_result = []
     while ve_count < ITERATIONS:
         speed = vertica_read()
-        test_result.append({'Operation': 'Read', 'Rows': 'all', 'Speed': speed})
+        test_result.append({"Operation": "Read", "Rows": "all", "Speed": speed})
         ve_count = ve_count + 1
     save_telemetry(constants.TYPE_READ, constants.VERTICA, '', test_result)
 
