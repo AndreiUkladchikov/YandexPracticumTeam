@@ -5,13 +5,14 @@ import uuid
 from time import sleep
 
 from confluent_kafka import Producer
+from loguru import logger
 
 
 def delivery_callback(err, msg):
     if err:
-        print("ERROR: Message failed delivery: {}".format(err))
+        logger.error("ERROR: Message failed delivery: {}".format(err))
     else:
-        print(
+        logger.info(
             "Produced event to topic {topic}: key = {key:12} value = {value:12}".format(
                 topic=msg.topic(),
                 key=msg.key().decode("utf-8"),
