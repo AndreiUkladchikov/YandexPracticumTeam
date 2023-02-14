@@ -1,9 +1,9 @@
-import logging
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime
 
 import db_config
+from loguru import logger
 from models import Filmwork, Genre, GenreFilmwork, Person, PersonFilmwork
 
 load_limit = 100
@@ -33,7 +33,7 @@ def load_from_sqlite() -> list:
                         data = next(current_gen)
                 yield data
         except (sqlite3.Error) as error:
-            logging.exception(error)
+            logger.exception(error)
 
 
 def load_film_works(curs: sqlite3.Cursor) -> list[Filmwork]:
@@ -135,7 +135,7 @@ def dict_factory(curs: sqlite3.Cursor, row: tuple) -> dict:
 
 @contextmanager
 def conn_context():
-    print(db_config.SQLITE_CON)
+    logger.info(db_config.SQLITE_CON)
     conn = sqlite3.connect(db_config.SQLITE_CON)
     conn.row_factory = dict_factory
     yield conn
