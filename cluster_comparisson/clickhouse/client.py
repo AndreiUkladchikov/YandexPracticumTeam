@@ -22,8 +22,8 @@ def count_rows() -> int:
     return client.execute('SELECT count() from movies.watch_history')
 
 
-def read_rows():
-    client.execute('SELECT * from movies.watch_history WHERE timestamp = 12345678')
+def read_rows(timestamp: int):
+    client.execute(f"SELECT TOP 1 * from movies.watch_history WHERE timestamp={timestamp}")
 
 
 if __name__ == "__main__":

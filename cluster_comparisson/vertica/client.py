@@ -35,10 +35,10 @@ def count_rows() -> int:
     return result[0]
 
 
-def read_rows():
+def read_rows(timestamp: int):
     with vertica_python.connect(**connection_info) as connection:
         cursor = connection.cursor()
-        cursor.execute("SELECT * from movies_history WHERE timestamp > 5000000")
+        cursor.execute(f"SELECT * from movies_history WHERE timestamp={timestamp} LIMIT 1")
         cursor.fetchall()
         connection.commit()
 

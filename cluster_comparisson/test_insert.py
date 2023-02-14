@@ -1,7 +1,5 @@
-# 1. Create tables in Clickhouse and Vertica
-# 2. Start loop for 4 000 000 records:
-# 2.1. Generate fake data
-# 2.2. Save to Clickhouse and Vertica
+# 1. Generate fake data 
+# 2. Insert to Clickhouse and Vertica
 
 import time
 
@@ -13,7 +11,7 @@ from storage_telemetry import save_telemetry
 from vertica.client import insert_rows as insert_to_vertica
 
 ITERATIONS = 10
-BULK_CHUNK = 1000
+BULK_CHUNK = 100
 
 
 def test_insert():
@@ -21,9 +19,8 @@ def test_insert():
     test_result = []
     while ch_count < ITERATIONS:
         speed = clickhouse_insert()
-        test_result.append({"Operation": "Insert", "Rows": BULK_CHUNK, "Speed": speed})
-        ch_count = ch_count + 1
-        logger.info(f"Clickhouse {ch_count} test insert iterations")
+        test_result.append({'Operation': 'Insert', 'Rows': BULK_CHUNK, 'Speed': speed})
+        ch_count = ch_count + 1       
     save_telemetry(constants.TYPE_INSERT, constants.CLICKHOUSE, BULK_CHUNK, test_result)
 
     ve_count = 0
@@ -32,7 +29,6 @@ def test_insert():
         speed = vertica_insert()
         test_result.append({"Operation": "Insert", "Rows": BULK_CHUNK, "Speed": speed})
         ve_count = ve_count + 1
-        logger.info(f"Vertica {ve_count} test insert iterations")
     save_telemetry(constants.TYPE_INSERT, constants.VERTICA, BULK_CHUNK, test_result)
 
 

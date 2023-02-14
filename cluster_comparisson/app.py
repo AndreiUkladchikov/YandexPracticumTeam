@@ -24,16 +24,12 @@ def fill_db():
         data = generate_range_data(BULK_CHUNK, False)
         insert_to_clickhouse(data)
         clickhouse_count = count_clickhouse()
-        logger.info(
-            f"Clickhouse: {clickhouse_count[0][0]} from {TOTAL_ROWS_AMOUNT} added"
-        )
 
     vertica_count = count_vertica()
     while vertica_count < TOTAL_ROWS_AMOUNT:
         data = generate_range_data(BULK_CHUNK, True)
         insert_to_clickhouse(data)
         vertica_count = count_vertica()
-        logger.info(f"Vertica: {vertica_count} from {TOTAL_ROWS_AMOUNT} added")
 
 
 if __name__ == "__main__":

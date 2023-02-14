@@ -91,7 +91,14 @@ def handle_exception(e):
         }, e.code
 
     elif isinstance(e, Exception):
-        return SERVER_ERROR, HTTPStatus.INTERNAL_SERVER_ERROR
+        if not settings.debug_mode_handler:
+            return SERVER_ERROR, HTTPStatus.INTERNAL_SERVER_ERROR
+
+        else:
+            return {
+                "code": ERROR_BASE_CODE,
+                "msg": str(e),
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
 
 @jwt.token_in_blocklist_loader

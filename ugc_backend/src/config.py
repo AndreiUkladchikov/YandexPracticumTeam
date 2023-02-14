@@ -9,7 +9,10 @@ class Settings(BaseSettings):
     ugc_backend_host: str = Field(default="0.0.0.0")
     ugc_backend_port: int = Field(default=8080)
 
+    class Config:
+        case_sensitive = False
+        env_file_encoding = "utf-8"
+        env_file = "../.env"
+
 
 settings = Settings()
-
-print(settings)
