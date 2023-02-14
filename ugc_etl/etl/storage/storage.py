@@ -1,12 +1,8 @@
 import abc
-import redis
 from typing import Iterator
 
-from common.config import settings
 
-
-class BaseStorage:
-
+class BaseStorage(abc.ABC):
     @abc.abstractmethod
     def save(self, value: str) -> None:
         """Сохранить значение в хранилище."""
@@ -17,30 +13,32 @@ class BaseStorage:
         """Загрузить значения из хранилища."""
         pass
 
+    @abc.abstractmethod
+    def current_batch_size(self) -> int:
+        """Возращает размер батча в хранилище."""
+        pass
 
-class RedisStorage(BaseStorage):
-    """Собирает и хранит батч для загрузки в ClickHouse."""
 
-    def __init__(self):
-        self.redis = redis.StrictRedis(host=settings.redis_storage.host,
-                                       port=settings.redis_storage.port,
-                                       charset='utf-8',
-                                       decode_responses=True)
-        self.list_key = settings.redis_list_key
+class ListStorage(BaseStorage):
+    def __init__(self) -> None:
+        """Создаем пустой список, в кором будем собирать батч."""
+        self.list_storage = []
 
     def save(self, value: str) -> None:
-        """Добавляем значение в список Redis.
+        """Добавляем значение в список.
 
         Args:
             value (str): значение для добавления в список.
         """
-        self.redis.rpush(self.list_key, value)
+        self.list_storage.append(value)
 
-    def retrieve(self) -> Iterator[str, ]:
-        """Читаем все значения из списка Redis."""
-        for _ in range(self.redis.llen(self.list_key)):
-            yield self.redis.lpop(self.list_key)
+    def retrieve(
+        self,
+    ) -> Iterator[str, ]:
+        """Читаем все значения из списка."""
+        for _ in range(len(self.list_storage)):
+            yield self.list_storage.pop(0)
 
     def current_batch_size(self) -> int:
-        """Возращает размер батча в Redis."""
-        return self.redis.llen(self.list_key)
+        """Возращает размер батча в списке."""
+        return len(self.list_storage)

@@ -8,9 +8,6 @@ class Base(BaseSettings):
 
     batch_size: int = Field(10000)
 
-    redis_storage: RedisDsn = Field(...)
-    redis_list_key: str = Field(...)
-
     kafka_broker: str = Field(...)
     kafka_group_id: str = Field(...)
     kafka_topic: str = Field(...)
