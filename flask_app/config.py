@@ -41,6 +41,8 @@ class Settings(BaseSettings):
     jaeger_agent_host: str = Field(default="localhost")
     jaeger_logging: str = Field(default=False)
 
+    debug_mode_handler: bool = Field(default=True)
+
     class Config:
         env_file = f"{base_dir}/.env"
 
