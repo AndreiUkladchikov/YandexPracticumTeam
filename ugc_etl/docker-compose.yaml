@@ -45,7 +45,6 @@ services:
       context: ./etl
       dockerfile: Dockerfile
     depends_on:
-      - redis-state-storage
       - kafka-broker
       - clickhouse-node1
 
