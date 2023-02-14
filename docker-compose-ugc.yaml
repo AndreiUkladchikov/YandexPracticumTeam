@@ -34,7 +34,6 @@ services:
 
   kafka-broker:
     image: confluentinc/cp-kafka:7.3.0
-    profiles: ["local"]
     container_name: kafka-broker
     ports:
       - "9092:9092"
