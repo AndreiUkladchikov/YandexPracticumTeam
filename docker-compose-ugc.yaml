@@ -18,7 +18,6 @@ services:
     build:
       context: ./ugc_etl/redis
       dockerfile: Dockerfile
-    profiles: ["local"]
     volumes:
       - redis_state_dump:/data
     restart: always
@@ -27,7 +26,6 @@ services:
 
   kafka-zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
-    profiles: ["local"]
     hostname: kafka-zookeeper
     container_name: kafka-zookeeper
     environment:
@@ -55,13 +53,11 @@ services:
 
   clickhouse-zookeeper:
     image: zookeeper:3.5
-    profiles: ["local"]
     hostname: clickhouse-zookeeper
     container_name: clickhouse-zookeeper
 
   clickhouse-node1:
     image: clickhouse/clickhouse-server:22.3
-    profiles: ["local"]
     container_name: clickhouse-node1
     hostname: clickhouse-node1
     ports:
