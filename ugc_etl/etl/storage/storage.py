@@ -1,12 +1,8 @@
 import abc
 from typing import Iterator
 
-import redis
-from common.config import settings
-
 
 class BaseStorage(abc.ABC):
-
     @abc.abstractmethod
     def save(self, value: str) -> None:
         """Сохранить значение в хранилище."""
@@ -24,7 +20,6 @@ class BaseStorage(abc.ABC):
 
 
 class ListStorage(BaseStorage):
-
     def __init__(self) -> None:
         """Создаем пустой список в кором будем собирать батч."""
         self.list_storage = []
@@ -39,7 +34,7 @@ class ListStorage(BaseStorage):
 
     def retrieve(
         self,
-    ) -> Iterator[str, ]:
+    ) -> Iterator[str,]:
         """Читаем все значения из списка Redis."""
         for _ in range(len(self.list_storage)):
             yield self.list_storage.pop(0)
