@@ -1,0 +1,44 @@
+@startuml
+skinparam componentStyle uml2
+actor Client
+component NGINX
+file FilmSQLite
+
+node Auth-Service{
+component Auth
+database AuthPostgres
+database AuthCache
+}
+
+node Admin-Service{
+component AdminBackend
+database AdminPostgres
+}
+
+node Film-Service{
+component FilmBackend
+database FilmElastic
+database FilmCache
+}
+
+node ETL-Service{
+component ETLService
+}
+
+Client -> NGINX
+NGINX -> Auth
+Auth -up- AuthPostgres
+Auth -up- AuthCache
+Auth <-left-> AdminBackend: Добавление новых\n фильмов\n администраторами
+AdminBackend -down- AdminPostgres
+
+FilmSQLite-[dotted]right-->AdminPostgres
+
+Auth <-> FilmBackend: Запрос на получение фильма\nперсоны\nжанра
+FilmBackend -right- FilmElastic
+FilmBackend -down- FilmCache
+
+
+AdminPostgres-[dashed]->ETLService
+ETLService-[dashed]>FilmElastic
+@enduml
