@@ -2,7 +2,7 @@ import http
 import json
 
 import requests
-from src.config import settings
+from core.config import settings
 from tests.functional.constants import (
     test_data,
     test_invalid_timestamp,

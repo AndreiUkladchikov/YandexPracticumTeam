@@ -1,4 +1,4 @@
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, MongoDsn
 
 
 class Settings(BaseSettings):
@@ -8,6 +8,8 @@ class Settings(BaseSettings):
 
     ugc_backend_host: str = Field(default="0.0.0.0")
     ugc_backend_port: int = Field(default=8080)
+
+    mongo: MongoDsn = Field(default="mongodb://localhost:27017")
 
     class Config:
         case_sensitive = False
