@@ -9,7 +9,7 @@ from loguru import logger
 from models import Up, Down, Likes, ReviewEvaluation, Review, FilmUserRate
 
 
-RANDOM_FILM_ID = [str(uuid4()) for _ in range(300)]
+RANDOM_FILM_ID = [str(uuid4()) for _ in range(100)]
 RANDOM_USER_ID = [str(uuid4()) for _ in range(100)]
 
 

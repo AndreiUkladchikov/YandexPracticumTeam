@@ -1,9 +1,9 @@
-from uuid import uuid4
+from time import sleep
 
 import motor.motor_asyncio
 
 from fakedata import insert_fake_data
-from loadtests import get_film_user_rate
+from loadtests import run_query_test
 
 
 CONNECTION_URL = 'mongodb://127.0.0.1:27019,127.0.0.1:27020'
@@ -19,4 +19,5 @@ collection = db[COLLECTION_NAME]
 if __name__ == '__main__':
     loop = client.get_io_loop()
     loop.run_until_complete(insert_fake_data(collection))
-    loop.run_until_complete(get_film_user_rate(collection))
+    sleep(5)
+    run_query_test(loop, collection)

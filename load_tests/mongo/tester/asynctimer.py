@@ -9,7 +9,7 @@ def timeit(func):
     async def helper(*args, **params):
         logger.info(f'Start timeit for {func.__name__}.')
         _results = []
-        for _ in range(1000):
+        for _ in range(100):
             start = time.time()
             result = await func(*args, **params)
             _results.append(time.time() - start)
