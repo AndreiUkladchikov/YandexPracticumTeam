@@ -1,11 +1,26 @@
+from __future__ import annotations
+
 from enum import Enum
 
 from models.parent_model import BaseOrjsonModel
 
 
+class UserInfo(BaseOrjsonModel):
+    user_id: str
+
+
+class CountLikes(BaseOrjsonModel):
+    count: int
+    ids: list[str]
+
+
 class Likes(BaseOrjsonModel):
-    likes: int
-    dislikes: int
+    up: CountLikes | None
+    down: CountLikes | None
+
+
+class UserLikes(Likes):
+    user_id: str
 
 
 class AverageRating(BaseOrjsonModel):
@@ -13,5 +28,5 @@ class AverageRating(BaseOrjsonModel):
 
 
 class Rating(str, Enum):
-    like = 10
-    dislike = 1
+    up = 10
+    down = 1

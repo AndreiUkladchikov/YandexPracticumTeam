@@ -1,0 +1,75 @@
+db.createCollection("movies", {
+   validator: {
+      $jsonSchema: {
+         bsonType: "object",
+         title: "Reviews and likes Object Validation",
+         required: [ "film_id"],
+         properties: {
+            film_id: {
+               bsonType: "string",
+               description: "'film_id' must be a string and is required"
+            },
+            reviews: {
+               bsonType: "array",
+               items: {
+                  bsonType: "object",
+                  required: [ "user_id" ],
+                  properties: {
+                      user_id: { bsonType: "string" },
+                      firstname: { bsonType: "string" },
+                      lastname: { bsonType: "string" },
+                      created: { bsonType: "date" },
+                      mark: { bsonType: "int" },
+                      text: { bsonType: "string" },
+                      review_evaluation: {
+                        bsonType: "object",
+                        properties:
+                        {
+                          up: {
+                            bsonType: "object",
+                            required: ["count", "ids"],
+                            properties: {
+                              count: { bsonType: "int" },
+                              ids: { bsonType: "array" }
+                            }
+                          },
+                          down: {
+                            bsonType: "object",
+                            required: ["count", "ids"],
+                            properties: {
+                              count: { bsonType: "int" },
+                              ids: { bsonType: "array" }
+                            }
+                          }
+                        }
+
+                      }
+                  }
+            }
+            },
+            likes: {
+              bsonType: "object",
+              properties:
+              {
+                up: {
+                  bsonType: "object",
+                  required: ["count", "ids"],
+                  properties: {
+                    count: { bsonType: "int" },
+                    ids: { bsonType: "array" }
+                  }
+                },
+                down: {
+                  bsonType: "object",
+                  required: ["count", "ids"],
+                  properties: {
+                    count: { bsonType: "int" },
+                    ids: { bsonType: "array" }
+                  }
+                }
+              }
+            }
+         }
+      }
+   }
+})

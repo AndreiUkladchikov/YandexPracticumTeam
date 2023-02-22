@@ -11,6 +11,12 @@ class Settings(BaseSettings):
 
     mongo: MongoDsn = Field(default="mongodb://localhost:27017")
 
+    max_page_number: int = Field(default=1000)
+    max_page_size: int = Field(default=50)
+
+    mongo_db: str = Field(default="myNewDB")
+    mongo_collection: str = Field(default="movies")
+
     class Config:
         case_sensitive = False
         env_file_encoding = "utf-8"

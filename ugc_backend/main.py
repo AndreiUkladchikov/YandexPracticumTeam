@@ -26,6 +26,24 @@ async def startup_event():
         # raise kafka_error
 
     mongo.mongo_client = AsyncIOMotorClient(settings.mongo)
+    # db = mongo.mongo_client.test_database
+    # print(db)
+    # client = AsyncIOMotorClient(settings.mongo)
+    # db = client["myNewDB"]
+    # collection = db["movies"]
+    # print("type", type(collection))
+    # document = await collection.find_one({'age': {'$gt': 1}})
+    # document = {'film_id': 'qqq-111-qqq',
+    #             'likes': {
+    #                 'up':
+    #                     {
+    #                         'count': 3,
+    #                         'ids': ['user1', 'user2', 'user3']
+    #                     }
+    #             }
+    #             }
+    # result = await collection.insert_one(document)
+    # print('result %s' % repr(result.inserted_id))
 
 
 @app.on_event("shutdown")

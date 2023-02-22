@@ -1,6 +1,4 @@
 from http import HTTPStatus
-from typing import Union
-from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from models.likes import AverageRating, Likes, Rating
@@ -18,7 +16,8 @@ router = APIRouter()
 async def likes_view(
     movie_id: str, like_service: LikeService = Depends(get_like_service)
 ) -> Likes:
-    return Likes()
+    res = await like_service.get_likes(movie_id)
+    return res
 
 
 @router.get(
@@ -44,6 +43,8 @@ async def add_rating(
     rating: Rating = Query(description="Like: 10, dislike: 0"),
     like_service: LikeService = Depends(get_like_service),
 ):
+    await like_service.put_like(movie_id, user_id, rating)
+
     return HTTPStatus.OK
 
 
