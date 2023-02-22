@@ -4,6 +4,12 @@ from uuid import UUID
 
 
 @dataclass
+class WatchLater:
+    user_id: UUID
+    films: list[UUID, ]
+
+
+@dataclass
 class Up:
     ids: list[UUID, ]
     count: int = 0

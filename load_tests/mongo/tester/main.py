@@ -1,23 +1,29 @@
-from time import sleep
-
 import motor.motor_asyncio
 
-from fakedata import insert_fake_data
-from loadtests import run_query_test
+from common.config import settings
+from loadfakedata.fakerate import insert_fake_film_rate_data
+from loadfakedata.fakewatchlater import insert_fake_user_watch_later_data
+from loadtests.loadrate import run_query_test_for_rate
+from loadtests.loadwatch import run_query_test_for_watch_later
 
 
-CONNECTION_URL = 'mongodb://127.0.0.1:27019,127.0.0.1:27020'
-DB_NAME = 'someTestDb'
-COLLECTION_NAME = 'testCollection'
+def start_load_test() -> None:
+    """Подключаемся к шарду MongoDB и тестируем время выполнения запросов."""
+    client = motor.motor_asyncio.AsyncIOMotorClient(settings.mongo_connection_url)
 
+    db_rate = client[settings.mongo_db_name]
+    collection_rate = db_rate[settings.mongo_collection_rate]
+    collection_watch = db_rate[settings.mongo_collection_watch]
 
-client = motor.motor_asyncio.AsyncIOMotorClient(CONNECTION_URL)
-db = client[DB_NAME]
-collection = db[COLLECTION_NAME]
+    loop = client.get_io_loop()
+
+    # Наполняем MongoDB
+    loop.run_until_complete(insert_fake_film_rate_data(collection_rate))
+    loop.run_until_complete(insert_fake_user_watch_later_data(collection_watch))
+    # Тестируем время выполнения запросов к MongoDB
+    run_query_test_for_rate(loop, collection_rate)
+    run_query_test_for_watch_later(loop, collection_watch)
 
 
 if __name__ == '__main__':
-    loop = client.get_io_loop()
-    loop.run_until_complete(insert_fake_data(collection))
-    sleep(5)
-    run_query_test(loop, collection)
+    start_load_test()

@@ -6,20 +6,18 @@ from uuid import uuid4, UUID
 
 from loguru import logger
 
-from models import Up, Down, Likes, ReviewEvaluation, Review, FilmUserRate
-
-
-RANDOM_FILM_ID = [str(uuid4()) for _ in range(100)]
-RANDOM_USER_ID = [str(uuid4()) for _ in range(100)]
+from common.config import settings
+from common.models import Up, Down, Likes, ReviewEvaluation, Review, FilmUserRate
+from common.fakedata import fakeids
 
 
 def random_up() -> Up:
-    up_votes = [RANDOM_USER_ID[i] for i in range(random.randint(10, 100))]
+    up_votes = [fakeids.users_id[i] for i in range(random.randint(10, settings.max_up_votes_count))]
     return Up(ids=up_votes, count=len(up_votes))
 
 
 def random_down() -> Down:
-    down_votes = [RANDOM_USER_ID[i] for i in range(random.randint(10, 100))]
+    down_votes = [fakeids.users_id[i] for i in range(random.randint(10, settings.max_down_votes_count))]
     return Down(ids=down_votes, count=len(down_votes))
 
 
@@ -34,7 +32,7 @@ def random_review_evaluation() -> ReviewEvaluation:
 def random_review() -> Review:
     return Review(
         id=str(uuid4()),
-        user_id=random.choice(RANDOM_USER_ID),
+        user_id=random.choice(fakeids.users_id),
         firstname=''.join(random.choices(string.ascii_lowercase, k=random.randint(3, 10))),
         lastname=''.join(random.choices(string.ascii_lowercase, k=random.randint(3, 10))),
         created=datetime.now(),
@@ -47,18 +45,18 @@ def random_review() -> Review:
 def random_film_user_rate(film_id: str) -> FilmUserRate:
     return FilmUserRate(
         film_id=film_id,
-        reviews=[random_review() for _ in range(random.randint(10, 100))],
+        reviews=[random_review() for _ in range(random.randint(10, settings.max_fake_reviews_count))],
         likes=random_likes()
     )
 
 
 def fake_film_rate_data() -> dict[str, UUID | list[Review, ] | Likes]:
     """Генератор случайных записей."""
-    for film_id in RANDOM_FILM_ID:
+    for film_id in fakeids.films_id:
         yield asdict(random_film_user_rate(film_id))
 
 
-async def insert_fake_data(collection):
+async def insert_fake_film_rate_data(collection) -> None:
     """Запись данных в MongoDB."""
     await collection.delete_many({})
     await collection.insert_many([film_rate for film_rate in fake_film_rate_data()])
