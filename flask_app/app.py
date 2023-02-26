@@ -8,6 +8,7 @@ import jaeger
 import messages
 import redis
 import requests
+import sentry_sdk
 from black_list import jwt_redis_blocklist
 from config import settings
 from db_models import User
@@ -24,12 +25,22 @@ from opentelemetry import trace
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+from sentry_sdk.integrations.flask import FlaskIntegration
 from services import user_role_service, user_service
 from spectree import Response
 from v1.auth.auth import auth_blueprint
 from v1.auth.oauth import oauth_blueprint
 from v1.roles.roles import roles_blueprint
 from werkzeug.exceptions import HTTPException
+
+
+sentry_sdk.init(
+    dsn=settings.sentry_url,
+    integrations=[
+        FlaskIntegration(),
+    ],
+    traces_sample_rate=settings.sentry_traces_sample_rate
+)
 
 
 def configure_tracer() -> None:

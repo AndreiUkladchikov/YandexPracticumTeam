@@ -43,6 +43,9 @@ class Settings(BaseSettings):
 
     debug_mode_handler: bool = Field(default=True)
 
+    sentry_url: str = Field(...)
+    sentry_traces_sample_rate: float = Field(0.05)
+
     class Config:
         env_file = f"{base_dir}/.env"
 
