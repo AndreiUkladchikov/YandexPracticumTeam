@@ -8,7 +8,7 @@ from src.custom_log import logger
 
 
 sentry_sdk.init(
-    dsn="https://fac7f1bdbad04347bd4f8e12a0f31b3a@o4504746002612224.ingest.sentry.io/4504746011394048",
+    dsn=settings.sentry_url,
     traces_sample_rate=0.05,
 )
 
