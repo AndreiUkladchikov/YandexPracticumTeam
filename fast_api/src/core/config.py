@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     max_page_size: int = 10000
     max_page_number: int = 200
 
+    sentry_url: str = Field(...)
+    sentry_traces_sample_rate: float = Field(0.05)
+
     class Config:
         env_file = f"{base_dir}/.env"
 

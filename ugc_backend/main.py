@@ -9,7 +9,7 @@ from src.custom_log import logger
 
 sentry_sdk.init(
     dsn=settings.sentry_url,
-    traces_sample_rate=0.05,
+    traces_sample_rate=settings.sentry_traces_sample_rate,
 )
 
 app = FastAPI(

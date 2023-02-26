@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     ugc_backend_port: int = Field(default=8080)
 
     sentry_url: str = Field(...)
+    sentry_traces_sample_rate: float = Field(0.05)
 
     class Config:
         case_sensitive = False
