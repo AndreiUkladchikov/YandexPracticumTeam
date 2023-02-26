@@ -1,9 +1,16 @@
 import uvicorn
 from aiokafka import AIOKafkaProducer, errors
 from fastapi import FastAPI
+import sentry_sdk
 from src.aggregate_to_kafka import dependency, router
 from src.config import settings
 from src.custom_log import logger
+
+
+sentry_sdk.init(
+    dsn="https://fac7f1bdbad04347bd4f8e12a0f31b3a@o4504746002612224.ingest.sentry.io/4504746011394048",
+    traces_sample_rate=0.05,
+)
 
 app = FastAPI(
     title="ugc_backend", docs_url="/api/openapi", openapi_url="/api/openapi.json"
