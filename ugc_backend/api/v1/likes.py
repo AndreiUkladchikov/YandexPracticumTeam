@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+from core.custom_log import logger
 from fastapi import APIRouter, Depends, HTTPException, Query
 from models.likes import AverageRating, Likes, Rating
 from services.likes import LikeService, get_like_service
