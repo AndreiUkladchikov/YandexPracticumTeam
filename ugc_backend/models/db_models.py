@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Optional
 
@@ -16,5 +18,5 @@ class DBModelMixin(DateTimeModelMixin):
 
 class AboutFilm(BaseModel):
     film_id: str
-    reviews: list[Review]
-    likes: Likes
+    reviews: list[Review] | None
+    likes: Likes | None

@@ -1,15 +1,15 @@
-from datetime import datetime
-from uuid import uuid4
+from __future__ import annotations
 
-from models.likes import Likes, Rating
-from models.parent_model import BaseOrjsonModel
-from pydantic import Field
+import datetime
+
+from models.likes import Likes, RatingInt
+from pydantic import BaseModel, Field
 
 
-class Review(BaseOrjsonModel):
-    id: uuid4 = Field(default=uuid4())
+class Review(BaseModel):
+    review_id: str = ...
     user_id: str
-    publication_date: datetime = Field(default=datetime.now())
-    mark: Rating
+    created: datetime.datetime = Field(default=datetime.datetime.utcnow())
+    mark: RatingInt
     text: str
-    review_evaluation: Likes
+    review_evaluation: Likes | None = {}

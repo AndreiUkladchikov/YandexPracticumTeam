@@ -6,6 +6,7 @@ from core.config import settings
 from fastapi import APIRouter, Depends, HTTPException, Query
 from models.likes import Rating
 from models.reviews import Review
+from services.likes import LikeService, get_like_service
 from services.reviews import ReviewService, get_review_service
 
 router = APIRouter()
@@ -24,7 +25,7 @@ async def all_reviews(
     | None = Query(default=1, alias="page[number]", ge=1, le=settings.max_page_number),
     page_size: int
     | None = Query(
-        default=settings.pagination_size,
+        default=50,
         alias="page[size]",
         ge=1,
         le=settings.max_page_size,
@@ -54,9 +55,13 @@ async def add_like(
     description="Add review to film",
 )
 async def add_review(
-    movie_id: str,
+    film_id: str,
+    user_id: str,
     text: str = Query(min_length=1, max_length=7000),
     rating: Rating = Query(description="Like: 10, dislike: 0"),
     review_service: ReviewService = Depends(get_review_service),
+    like_service: LikeService = Depends(get_like_service),
 ):
+    await review_service.add_review(film_id, user_id, text, rating, like_service)
+
     return HTTPStatus.OK

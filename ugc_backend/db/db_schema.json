@@ -13,8 +13,8 @@ db.createCollection("movies", {
                bsonType: "array",
                items: {
                   bsonType: "object",
-                  required: [ "user_id" ],
                   properties: {
+                      review_id: {bsonType: "string"},
                       user_id: { bsonType: "string" },
                       firstname: { bsonType: "string" },
                       lastname: { bsonType: "string" },
@@ -27,7 +27,6 @@ db.createCollection("movies", {
                         {
                           up: {
                             bsonType: "object",
-                            required: ["count", "ids"],
                             properties: {
                               count: { bsonType: "int" },
                               ids: { bsonType: "array" }
@@ -35,7 +34,6 @@ db.createCollection("movies", {
                           },
                           down: {
                             bsonType: "object",
-                            required: ["count", "ids"],
                             properties: {
                               count: { bsonType: "int" },
                               ids: { bsonType: "array" }
@@ -53,7 +51,6 @@ db.createCollection("movies", {
               {
                 up: {
                   bsonType: "object",
-                  required: ["count", "ids"],
                   properties: {
                     count: { bsonType: "int" },
                     ids: { bsonType: "array" }
@@ -61,7 +58,6 @@ db.createCollection("movies", {
                 },
                 down: {
                   bsonType: "object",
-                  required: ["count", "ids"],
                   properties: {
                     count: { bsonType: "int" },
                     ids: { bsonType: "array" }

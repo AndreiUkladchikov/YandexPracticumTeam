@@ -10,13 +10,13 @@ class UserInfo(BaseOrjsonModel):
 
 
 class CountLikes(BaseOrjsonModel):
-    count: int
-    ids: list[str]
+    count: int | None = 0
+    ids: list[str] | None = []
 
 
 class Likes(BaseOrjsonModel):
-    up: CountLikes | None
-    down: CountLikes | None
+    up: CountLikes | None = {}
+    down: CountLikes | None = {}
 
 
 class UserLikes(Likes):
@@ -28,5 +28,10 @@ class AverageRating(BaseOrjsonModel):
 
 
 class Rating(str, Enum):
+    up = 10
+    down = 1
+
+
+class RatingInt(int, Enum):
     up = 10
     down = 1

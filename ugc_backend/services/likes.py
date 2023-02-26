@@ -1,39 +1,49 @@
+from __future__ import annotations
+
 from core.config import settings
-from core.custom_log import logger
 from db.mongo import get_mongo
 from fastapi import Depends
-from helpers.db_context import DbContext
-from models.likes import Likes, Rating
+from helpers.likes import add_dislike, add_like, average, delete_like
+from models.likes import AverageRating, Likes, Rating
 from motor.motor_asyncio import AsyncIOMotorClient
 
 
 class LikeService:
     def __init__(self, mongo: AsyncIOMotorClient):
-        self.db_context = DbContext(
-            mongo_collection=mongo.mongo_client[settings.mongo_db].db[
-                settings.mongo_collection
-            ]
+        self.mongo_client = mongo
+        self.db = self.mongo_client[settings.mongo_db]
+        self.collection = self.db[settings.mongo_collection]
+
+    async def get_likes(self, film_id: str) -> Likes:
+        result = await self.collection.find_one({"film_id": film_id})
+
+        return Likes(**result["likes"]) if result else Likes()
+
+    async def put_like(self, film_id: str, user_id: str, rating: Rating):
+        """Добавление лайка."""
+        doc: dict = await self.collection.find_one({"film_id": {"$eq": film_id}})
+        result_likes: dict = {}
+        if rating == Rating.up:
+            result_likes: dict = add_like(doc, user_id)
+
+        elif rating == Rating.down:
+            result_likes: dict = add_dislike(doc, user_id)
+
+        _ = await self.collection.update_one(
+            {"film_id": film_id}, {"$set": {"likes": result_likes}}, upsert=True
         )
-        # self.mongo_client = mongo
-        # self.db = self.mongo_client["myNewDB"]
-        # self.collection = self.db["movies"]
 
-    async def get_likes(self, movie_id: str) -> Likes:
-        likes = await self.db_context.get_data(key="film_id", value=movie_id)
-        logger.info(Likes(**likes))
-        return Likes(**likes["likes"])
+    async def delete_like(self, film_id: str, user_id: str):
+        doc: dict = await self.collection.find_one({"film_id": {"$eq": film_id}})
+        result_likes = delete_like(doc, user_id)
+        _ = await self.collection.update_one(
+            {"film_id": film_id}, {"$set": {"likes": result_likes}}
+        )
 
-    async def put_like(self, movie_id: str, user_id: str, rating: Rating):
-        # db = mongo.mongo_client.test_database
-        # print(db)
-        # document = await collection.find_one({'age': {'$gt': 1}})
-        # document = {
-        #     "film_id": f"{movie_id}",
-        #     "likes": {rating.name: {"count": 1, "ids": [user_id]}},
-        # }
-
-        await self.db_context.put_data(movie_id, user_id, rating)
-        # print('result %s' % repr(result.inserted_id))
+    async def average_rating(self, film_id: str) -> AverageRating:
+        doc: dict = await self.collection.find_one({"film_id": {"$eq": film_id}})
+        res_rating = average(doc)
+        return AverageRating(rating=res_rating)
 
 
 def get_like_service(mongo: AsyncIOMotorClient = Depends(get_mongo)) -> LikeService:

@@ -1,7 +1,7 @@
 import uvicorn
 from aggregate_to_kafka import dependency, router
 from aiokafka import AIOKafkaProducer, errors
-from api.v1 import likes
+from api.v1 import likes, reviews
 from core.config import settings
 from core.custom_log import logger
 from db import mongo
@@ -26,24 +26,6 @@ async def startup_event():
         # raise kafka_error
 
     mongo.mongo_client = AsyncIOMotorClient(settings.mongo)
-    # db = mongo.mongo_client.test_database
-    # print(db)
-    # client = AsyncIOMotorClient(settings.mongo)
-    # db = client["myNewDB"]
-    # collection = db["movies"]
-    # print("type", type(collection))
-    # document = await collection.find_one({'age': {'$gt': 1}})
-    # document = {'film_id': 'qqq-111-qqq',
-    #             'likes': {
-    #                 'up':
-    #                     {
-    #                         'count': 3,
-    #                         'ids': ['user1', 'user2', 'user3']
-    #                     }
-    #             }
-    #             }
-    # result = await collection.insert_one(document)
-    # print('result %s' % repr(result.inserted_id))
 
 
 @app.on_event("shutdown")
@@ -57,7 +39,7 @@ async def shutdown_event():
 app.include_router(router.router, prefix="/views", tags=["views"])
 
 app.include_router(likes.router, prefix="/api/v1/likes", tags=["likes"])
-# app.include_router(persons.router, prefix="/api/v1/persons", tags=["persons"])
+app.include_router(reviews.router, prefix="/api/v1/reviews", tags=["reviews"])
 # app.include_router(persons.router, prefix="/api/v1/persons", tags=["persons"])
 
 if __name__ == "__main__":

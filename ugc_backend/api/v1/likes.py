@@ -15,9 +15,9 @@ router = APIRouter()
     description="Viewing the number of likes and dislikes of a movie",
 )
 async def likes_view(
-    movie_id: str, like_service: LikeService = Depends(get_like_service)
+    film_id: str, like_service: LikeService = Depends(get_like_service)
 ) -> Likes:
-    res = await like_service.get_likes(movie_id)
+    res = await like_service.get_likes(film_id)
     return res
 
 
@@ -28,9 +28,10 @@ async def likes_view(
     description="Viewing the average user rating of a movie",
 )
 async def average_rating(
-    movie_id: str, like_service: LikeService = Depends(get_like_service)
+    film_id: str, like_service: LikeService = Depends(get_like_service)
 ) -> AverageRating:
-    return AverageRating()
+    rating = await like_service.average_rating(film_id)
+    return rating
 
 
 @router.post(
@@ -39,12 +40,12 @@ async def average_rating(
     description="Add user rating of a movie",
 )
 async def add_rating(
-    movie_id: str,
+    film_id: str,
     user_id: str,
     rating: Rating = Query(description="Like: 10, dislike: 0"),
     like_service: LikeService = Depends(get_like_service),
 ):
-    await like_service.put_like(movie_id, user_id, rating)
+    await like_service.put_like(film_id, user_id, rating)
 
     return HTTPStatus.OK
 
@@ -55,22 +56,9 @@ async def add_rating(
     description="Delete user rating of a movie",
 )
 async def delete_rating(
-    movie_id: str,
+    film_id: str,
     user_id: str,
     like_service: LikeService = Depends(get_like_service),
 ):
-    return HTTPStatus.OK
-
-
-@router.patch(
-    "/change_rating",
-    summary="Change rating",
-    description="Change user rating of a movie",
-)
-async def change_rating(
-    movie_id: str,
-    user_id: str,
-    rating: Rating,
-    like_service: LikeService = Depends(get_like_service),
-):
+    await like_service.delete_like(film_id, user_id)
     return HTTPStatus.OK
