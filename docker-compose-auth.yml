@@ -10,6 +10,11 @@ services:
     depends_on:
       - auth_redis
       - auth_service
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://127.0.0.1:5044
+        tag: auth-app-nginx
     ports:
       - '${AUTH_NGINX_PUBLIC_PORT}:${AUTH_NGINX_PORT}'
     
