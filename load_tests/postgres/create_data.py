@@ -25,7 +25,6 @@ def main():
             save_film_reviews(conn, reviews)
 
         count = count + 1
-        print(count)
 
 
 def save_film_reviews(conn: _connection, reviews: list[Review]) -> None:

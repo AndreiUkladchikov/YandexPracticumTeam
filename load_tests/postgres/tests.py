@@ -38,7 +38,7 @@ def test_read(id):
         try:
             curs = conn.cursor(cursor_factory=NamedTupleCursor)
             curs.execute(f"SELECT * FROM loadtest.film_rate WHERE id='{id}';")
-            result = curs.fetchall()        
+            curs.fetchall()        
         except (psycopg2.Error) as error:
             logging.error(error)
     end = time.perf_counter() 
