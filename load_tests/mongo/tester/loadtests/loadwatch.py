@@ -7,7 +7,7 @@ from common.fakedata import fakeids
 @timeit
 async def get_user_watch_later_films(collection,
                                      user_id: str = random.choice(fakeids.users_id)) -> None:
-    """Получаем список фильмов пользователя для просмотра позже."""
+    """Список фильмов пользователя для просмотра позже."""
     _query = {'user_id': {'$eq': user_id}}
     _ = await collection.find_one(_query)
 

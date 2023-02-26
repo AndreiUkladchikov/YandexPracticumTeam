@@ -1,5 +1,6 @@
 import random
 import string
+import time
 from dataclasses import asdict
 from datetime import datetime
 from uuid import uuid4, UUID
@@ -59,6 +60,16 @@ def fake_film_rate_data() -> dict[str, UUID | list[Review, ] | Likes]:
 async def insert_fake_film_rate_data(collection) -> None:
     """Запись данных в MongoDB."""
     await collection.delete_many({})
-    await collection.insert_many([film_rate for film_rate in fake_film_rate_data()])
-    count_docs = await collection.count_documents({})
-    logger.info(f'inserted {count_docs} docs to collection.')
+    _results = []
+    for film_rate in fake_film_rate_data():
+        start = time.time()
+        _ = await insert_fake_film_rate_data_row(collection, film_rate)
+        _results.append(time.time() - start)
+    logger.info(
+        f'Write FilmRateDoc results: max: {max(_results)}, min: {min(_results)}, avg: {sum(_results)/len(_results)}'
+    )
+
+
+async def insert_fake_film_rate_data_row(collection, film_rate) -> dict:
+    """Записываем строку в MongoDB."""
+    return await collection.insert_one(film_rate)
