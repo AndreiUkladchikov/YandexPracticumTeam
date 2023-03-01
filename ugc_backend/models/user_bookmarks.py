@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from models.parent_model import BaseOrjsonModel
 
 
 class Bookmarks(BaseOrjsonModel):
     user_id: str
-    films_id: list[str]
+    film_id: list[str] | None

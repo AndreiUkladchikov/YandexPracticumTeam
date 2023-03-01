@@ -15,8 +15,8 @@ class CountLikes(BaseOrjsonModel):
 
 
 class Likes(BaseOrjsonModel):
-    up: CountLikes | None = {}
-    down: CountLikes | None = {}
+    up: CountLikes | None = CountLikes()
+    down: CountLikes | None = CountLikes()
 
 
 class UserLikes(Likes):

@@ -1,7 +1,9 @@
 from http import HTTPStatus
 
+from api.constants.error_msg import DontHaveLikeToDeleteMsg, FilmMsg
 from core.custom_log import logger
 from fastapi import APIRouter, Depends, HTTPException, Query
+from helpers.custom_exceptions import FilmNotFound, ThereIsNoLikeToDelete
 from models.likes import AverageRating, Likes, Rating
 from services.likes import LikeService, get_like_service
 
@@ -30,8 +32,13 @@ async def likes_view(
 async def average_rating(
     film_id: str, like_service: LikeService = Depends(get_like_service)
 ) -> AverageRating:
-    rating = await like_service.average_rating(film_id)
-    return rating
+    try:
+        rating = await like_service.average_rating(film_id)
+        return rating
+    except FilmNotFound:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail=FilmMsg.not_found_by_id
+        )
 
 
 @router.post(
@@ -60,5 +67,11 @@ async def delete_rating(
     user_id: str,
     like_service: LikeService = Depends(get_like_service),
 ):
-    await like_service.delete_like(film_id, user_id)
+    try:
+        await like_service.delete_like(film_id, user_id)
+    except ThereIsNoLikeToDelete:
+        logger.exception(ThereIsNoLikeToDelete)
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_REQUEST, detail=DontHaveLikeToDeleteMsg.no_like
+        )
     return HTTPStatus.OK

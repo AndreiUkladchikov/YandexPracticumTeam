@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from datetime import datetime
 from typing import Optional
 
@@ -13,10 +14,9 @@ class DateTimeModelMixin(BaseModel):
 
 
 class DBModelMixin(DateTimeModelMixin):
-    id: Optional[int] = None
+    id: uuid.UUID | None = None
 
 
 class AboutFilm(BaseModel):
     film_id: str
-    reviews: list[Review] | None
     likes: Likes | None

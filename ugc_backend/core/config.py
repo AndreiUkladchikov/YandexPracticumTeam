@@ -2,7 +2,7 @@ from pydantic import BaseSettings, Field, MongoDsn
 
 
 class Settings(BaseSettings):
-    kafka_host: str = Field(...)
+    kafka_host: str = Field(default="localhost")
     kafka_port: str = Field(default=9092)
     kafka_topic: str = Field(default="views")
 
@@ -15,7 +15,9 @@ class Settings(BaseSettings):
     max_page_size: int = Field(default=50)
 
     mongo_db: str = Field(default="myNewDB")
-    mongo_collection: str = Field(default="movies")
+    like_collection: str = Field(default="films")
+    reviews_collection: str = Field(default="reviews")
+    bookmarks_collection: str = Field(default="bookmarks")
 
     class Config:
         case_sensitive = False
