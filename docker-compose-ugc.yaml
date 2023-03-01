@@ -12,6 +12,18 @@ services:
     restart: on-failure
     depends_on:
       - kafka-broker
+      - mongo_db
+
+  mongo_db:
+    image: mongo:5.0.15
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: '${MONGO_DB}'
+    volumes:
+      # - mongodb_data_container:/data/db
+      - ./ugc_backend/db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   redis-state-storage:
     container_name: redis-state
