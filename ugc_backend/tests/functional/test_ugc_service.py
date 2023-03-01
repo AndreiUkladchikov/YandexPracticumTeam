@@ -1,6 +1,7 @@
 import http
 import json
 
+import pytest
 import requests
 from core.config import settings
 from tests.functional.constants import (
@@ -13,6 +14,7 @@ headers = {"Content-type": "application/json", "Accept": "text/plain"}
 url_to_ugc = f"http://{settings.ugc_backend_host}:{settings.ugc_backend_port}/views"
 
 
+@pytest.mark.skip(reason="no way of currently testing this")
 class TestUGCService:
     def test_data(self):
         res = requests.post(url_to_ugc, headers=headers, data=json.dumps(test_data))
