@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
-from api.constants.error_msg import DuplicateFilmMsg, NoUserBookmarksMsg
-from fastapi import APIRouter, Depends, HTTPException, Query
-from helpers.custom_exceptions import DuplicateFilm, UserHasNoBookmarks
+from api.constants.error_msg import DuplicateFilmMsg
+from fastapi import APIRouter, Depends, HTTPException
+from helpers.custom_exceptions import DuplicateFilm
 from models.user_bookmarks import Bookmarks
 from services.user_bookmarks import BookmarkService, get_bookmark_service
 

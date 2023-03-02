@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     reviews_collection: str = Field(default="reviews")
     bookmarks_collection: str = Field(default="bookmarks")
 
+    logstash_host: str = Field(default="localhost")
+    logstash_port: int = Field(default=5044)
+
     class Config:
         case_sensitive = False
         env_file_encoding = "utf-8"

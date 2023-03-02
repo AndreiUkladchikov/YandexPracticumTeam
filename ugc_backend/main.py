@@ -5,12 +5,31 @@ from api.v1 import likes, reviews, user_bookmarks
 from core.config import settings
 from core.custom_log import logger
 from db import mongo
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from motor.motor_asyncio import AsyncIOMotorClient
+from starlette.routing import Match
 
 app = FastAPI(
     title="UGC Backend", docs_url="/api/openapi", openapi_url="/api/openapi.json"
 )
+
+
+@app.middleware("http")
+async def log_middle(request: Request, call_next):
+    logger.debug(f"{request.method} {request.url}")
+    routes = request.app.router.routes
+    logger.debug("Params:")
+    for route in routes:
+        match, scope = route.matches(request)
+        if match == Match.FULL:
+            for name, value in scope["path_params"].items():
+                logger.debug(f"\t{name}: {value}")
+    logger.debug("Headers:")
+    for name, value in request.headers.items():
+        logger.debug(f"\t{name}: {value}")
+
+    response = await call_next(request)
+    return response
 
 
 @app.on_event("startup")
