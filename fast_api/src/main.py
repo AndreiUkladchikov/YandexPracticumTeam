@@ -1,4 +1,5 @@
 import aioredis
+import sentry_sdk
 import uvicorn
 from api.v1 import films, genres, persons
 from core.config import settings
@@ -7,6 +8,12 @@ from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from loguru import logger
+
+
+sentry_sdk.init(
+    dsn=settings.sentry_url,
+    traces_sample_rate=settings.sentry_traces_sample_rate,
+)
 
 app = FastAPI(
     title="movies",

@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     logstash_host: str = Field(default="localhost")
     logstash_port: int = Field(default=5044)
 
+    sentry_url: str = Field(...)
+    sentry_traces_sample_rate: float = Field(0.05)
+
     class Config:
         case_sensitive = False
         env_file_encoding = "utf-8"

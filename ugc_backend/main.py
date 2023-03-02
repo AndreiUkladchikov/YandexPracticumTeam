@@ -9,6 +9,13 @@ from fastapi import FastAPI, Request
 from motor.motor_asyncio import AsyncIOMotorClient
 from starlette.routing import Match
 
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn=settings.sentry_url,
+    traces_sample_rate=settings.sentry_traces_sample_rate,
+)
+
 app = FastAPI(
     title="UGC Backend", docs_url="/api/openapi", openapi_url="/api/openapi.json"
 )
