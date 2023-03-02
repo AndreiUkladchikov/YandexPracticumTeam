@@ -12,17 +12,18 @@ services:
     restart: on-failure
     depends_on:
       - kafka-broker
+      - mongo_db
 
-  redis-state-storage:
-    container_name: redis-state
-    build:
-      context: ./ugc_etl/redis
-      dockerfile: Dockerfile
-    volumes:
-      - redis_state_dump:/data
-    restart: always
+  mongo_db:
+    image: mongo:5.0.15
+    container_name: mongodb
     ports:
-      - "6379:6379"
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: '${MONGO_DB}'
+    volumes:
+      - mongodb_data_container:/data/db
+      - ./ugc_backend/db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   kafka-zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
@@ -73,11 +74,12 @@ services:
       dockerfile: Dockerfile
     image: ugc_etl_image
     depends_on:
-      - redis-state-storage
       - kafka-broker
       - clickhouse-node1
     env_file:
       - .ugc.env
 
+
+
 volumes:
-  redis_state_dump:
+  mongodb_data_container:

@@ -1,8 +1,8 @@
 import http
 
 from aiokafka import AIOKafkaProducer, errors
+from core.custom_log import logger
 from fastapi import HTTPException
-from src.custom_log import logger
 
 
 async def send_data(value: bytes, key: bytes, topic: str, producer: AIOKafkaProducer):
