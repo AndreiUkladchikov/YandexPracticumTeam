@@ -13,6 +13,6 @@ class DuplicateFilmMsg:
     film_duplicate = "You have already added this film"
 
 
-class NoUserBookmarksMsg:
+class DontHaveLikeToDeleteMsg:
     _slots__ = ()
-    no_bookmarks = "The user has no bookmarks"
+    no_like = "There is no like to delete!"
