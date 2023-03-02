@@ -16,8 +16,3 @@ class DuplicateFilmMsg:
 class NoUserBookmarksMsg:
     _slots__ = ()
     no_bookmarks = "The user has no bookmarks"
-
-
-class DontHaveLikeToDeleteMsg:
-    _slots__ = ()
-    no_like = "There is no like to delete!"

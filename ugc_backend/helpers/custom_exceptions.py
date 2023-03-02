@@ -16,7 +16,3 @@ class FilmNotFound(Exception):
 
 class DuplicateFilm(Exception):
     pass
-
-
-class UserHasNoBookmarks(Exception):
-    pass

@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
-from api.constants.error_msg import DuplicateFilmMsg, NoUserBookmarksMsg
-from fastapi import APIRouter, Depends, HTTPException, Query
-from helpers.custom_exceptions import DuplicateFilm, UserHasNoBookmarks
+from api.constants.error_msg import DuplicateFilmMsg
+from fastapi import APIRouter, Depends, HTTPException
+from helpers.custom_exceptions import DuplicateFilm
 from models.user_bookmarks import Bookmarks
 from services.user_bookmarks import BookmarkService, get_bookmark_service
 
@@ -18,13 +18,8 @@ router = APIRouter()
 async def bookmarks_view(
     user_id: str, like_service: BookmarkService = Depends(get_bookmark_service)
 ) -> Bookmarks:
-    try:
-        res = await like_service.all_bookmarks(user_id)
-        return res
-    except UserHasNoBookmarks:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail=NoUserBookmarksMsg.no_bookmarks
-        )
+    res = await like_service.all_bookmarks(user_id)
+    return res
 
 
 @router.post(

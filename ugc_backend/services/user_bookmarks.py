@@ -3,7 +3,7 @@ from __future__ import annotations
 from core.config import settings
 from db.mongo import get_mongo
 from fastapi import Depends
-from helpers.custom_exceptions import DuplicateFilm, UserHasNoBookmarks
+from helpers.custom_exceptions import DuplicateFilm
 from models.user_bookmarks import Bookmarks
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import WriteError
@@ -22,7 +22,7 @@ class BookmarkService:
         if doc:
             return Bookmarks(**doc)
         else:
-            raise UserHasNoBookmarks
+            return Bookmarks(user_id=user_id)
 
     async def add_bookmark(self, user_id: str, film_id: str):
         try:
