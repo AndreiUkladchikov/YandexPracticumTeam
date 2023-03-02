@@ -18,13 +18,8 @@ router = APIRouter()
 async def bookmarks_view(
     user_id: str, like_service: BookmarkService = Depends(get_bookmark_service)
 ) -> Bookmarks:
-    try:
-        res = await like_service.all_bookmarks(user_id)
-        return res
-    except UserHasNoBookmarks:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail=NoUserBookmarksMsg.no_bookmarks
-        )
+    res = await like_service.all_bookmarks(user_id)
+    return res
 
 
 @router.post(

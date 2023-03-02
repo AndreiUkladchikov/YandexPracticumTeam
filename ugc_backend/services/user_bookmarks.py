@@ -22,7 +22,7 @@ class BookmarkService:
         if doc:
             return Bookmarks(**doc)
         else:
-            raise UserHasNoBookmarks
+            return Bookmarks(user_id=user_id)
 
     async def add_bookmark(self, user_id: str, film_id: str):
         try:
