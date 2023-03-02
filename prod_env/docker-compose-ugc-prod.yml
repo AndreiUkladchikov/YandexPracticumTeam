@@ -1,0 +1,77 @@
+version: '3.8'
+services:
+  ugc_backend:
+    build: ./ugc_backend
+    image: ugc_backend_image
+    container_name: ugc_backend_container
+    ports:
+      - '${UGC_BACKEND_PORT}:${UGC_BACKEND_PORT}'
+    command: gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${UGC_BACKEND_PORT}
+    env_file:
+      - .ugc.env
+    restart: on-failure
+    depends_on:
+      - kafka-broker
+      - mongo_db
+
+  mongo_db:
+    image: mongo:5.0.15
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_DATABASE: '${MONGO_DB}'
+    volumes:
+      - mongodb_data_container:/data/db
+      - ./ugc_backend/db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+  kafka-zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    hostname: kafka-zookeeper
+    container_name: kafka-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka-broker:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka-broker
+    depends_on:
+      - kafka-zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'kafka-zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka-broker:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "${KAFKA_TOPIC}:1:1"
+
+  clickhouse-zookeeper:
+    image: zookeeper:3.5
+    hostname: clickhouse-zookeeper
+    container_name: clickhouse-zookeeper
+
+  clickhouse-node1:
+    image: clickhouse/clickhouse-server:22.3
+    container_name: clickhouse-node1
+    hostname: clickhouse-node1
+    volumes:
+      -  ./ugc_etl/clickhouse/node1:/etc/clickhouse-server
+    depends_on:
+      - clickhouse-zookeeper
+
+  ugc_etl:
+    build:
+      context: ./ugc_etl/etl
+      dockerfile: Dockerfile
+    image: ugc_etl_image
+    depends_on:
+      - kafka-broker
+      - clickhouse-node1
+    env_file:
+      - .ugc.env
+
+
+
+volumes:
+  mongodb_data_container:
