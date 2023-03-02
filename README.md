@@ -62,3 +62,14 @@ http://localhost:5001/apidoc/redoc/
 
 Docker Compose файл для продакшн среды находится в ./prod_env
 
+# Спринт 9
+Было решено объединить backend сервис из прошлого спринта и сервис ugc_backend (ugc_backend/)
+
+Для старта сервисов: docker-compose -f docker-compose-ugc.yaml --env-file .ugc.env --build up -d
+
+Сравнение производительности [mongo и postgres](https://github.com/AndreiUkladchikov/YandexPracticumTeam/tree/main/load_tests)
+
+В проект было добавлено логгирование (docker-compose-elk.yml) для сервиса ugc_backend и nginx
+
+
+

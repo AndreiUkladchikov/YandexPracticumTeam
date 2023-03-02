@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+from aggregate_to_kafka.dependency import get_kafka
+from aggregate_to_kafka.kafka_connector import send_data
+from aggregate_to_kafka.schemas import Item, ResponseModel
 from aiokafka import AIOKafkaProducer
+from core.config import settings
 from fastapi import APIRouter, Depends
-from src.aggregate_to_kafka.dependency import get_kafka
-from src.aggregate_to_kafka.kafka_connector import send_data
-from src.aggregate_to_kafka.schemas import Item, ResponseModel
-from src.config import settings
 
 router = APIRouter()
 
