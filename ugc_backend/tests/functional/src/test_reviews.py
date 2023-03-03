@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 film = {"film_id": "test_film"}
 user = {"user_id": "test_user"}
 
@@ -20,7 +22,7 @@ class TestReview:
     def test_show_all_reviews_of_film(self, client, delete_review_collection):
         client.post(common_url + "/add_review", params=film_user_text_rating)
         response = client.get(common_url, params=film)
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
 
     def test_add_like_to_review(self, client, delete_review_collection):
         resp = client.post(common_url + "/add_review", params=film_user_text_rating)
@@ -28,13 +30,13 @@ class TestReview:
         response = client.post(
             common_url + "/add_like", params={**film_user_rating, **review_id}
         )
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
 
     def test_asc_sort_like(self, client, delete_review_collection):
         client.post(common_url + "/add_review", params=film_user_text_rating)
         response = client.get(common_url, params={**film, **sort})
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
 
     def test_non_existent_film_id(self, client, delete_review_collection):
         response = client.get(common_url, params=film)
-        assert response.status_code == 404
+        assert response.status_code == HTTPStatus.NOT_FOUND

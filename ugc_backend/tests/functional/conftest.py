@@ -1,7 +1,8 @@
-import pytest
-from core.config import settings
-from fastapi.testclient import TestClient
 from main import app
+from core.config import settings
+
+import pytest
+from fastapi.testclient import TestClient
 from pymongo import MongoClient
 
 

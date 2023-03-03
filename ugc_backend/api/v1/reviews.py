@@ -1,10 +1,10 @@
 from __future__ import annotations
-
 from http import HTTPStatus
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.constants.error_msg import FilmMsg, ReviewMsg
 from core.config import settings
-from fastapi import APIRouter, Depends, HTTPException, Query
 from helpers.custom_exceptions import FilmNotFound, ReviewNotFound
 from models.likes import Rating
 from models.reviews import Review, ReviewResponse

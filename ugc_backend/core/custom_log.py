@@ -1,5 +1,6 @@
 import logstash
 import loguru
+
 from core.config import settings
 
 logger = loguru.logger

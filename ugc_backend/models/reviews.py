@@ -1,9 +1,9 @@
 from __future__ import annotations
-
 import datetime
 
-from models.likes import Likes, RatingInt
 from pydantic import BaseModel, Field
+
+from models.likes import Likes, RatingInt
 
 
 class Review(BaseModel):

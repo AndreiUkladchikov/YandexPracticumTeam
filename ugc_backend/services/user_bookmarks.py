@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from core.config import settings
-from db.mongo import get_mongo
 from fastapi import Depends
-from helpers.custom_exceptions import DuplicateFilm
-from models.user_bookmarks import Bookmarks
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import WriteError
+
+from core.config import settings
+from db.mongo import get_mongo
+from helpers.custom_exceptions import DuplicateFilm
+from models.user_bookmarks import Bookmarks
 
 
 class BookmarkService:
