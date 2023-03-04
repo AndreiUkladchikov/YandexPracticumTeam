@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 
 from api.constants.error_msg import FilmMsg, ReviewMsg
+from api.v1.models.request_models import LikeRequest
 from core.config import settings
 from helpers.custom_exceptions import FilmNotFound, ReviewNotFound
 from models.likes import Rating
@@ -52,12 +54,12 @@ async def add_like(
     film_id: str,
     user_id: str,
     review_id: str,
-    rating: Rating = Query(description="Like: 10, dislike: 0"),
+    rating: LikeRequest = Body(description="Like: 10, dislike: 0"),
     review_service: ReviewService = Depends(get_review_service),
 ):
     try:
         await review_service.add_like_to_review(
-            film_id=film_id, user_id=user_id, review_id=review_id, rating=rating
+            film_id=film_id, user_id=user_id, review_id=review_id, rating=rating.rating
         )
     except ReviewNotFound:
         raise HTTPException(
@@ -75,11 +77,12 @@ async def add_like(
 async def add_review(
     film_id: str,
     user_id: str,
-    text: str = Query(min_length=1, max_length=7000),
-    rating: Rating = Query(description="Like: 10, dislike: 0"),
+    text: str = Body(min_length=1, max_length=7000),
+    rating: Rating = Body(),
     review_service: ReviewService = Depends(get_review_service),
     like_service: LikeService = Depends(get_like_service),
 ) -> ReviewResponse:
+    print(text, rating)
     review_id: dict = await review_service.add_review(
         film_id, user_id, text, rating, like_service
     )

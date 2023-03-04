@@ -64,12 +64,12 @@ async def shutdown_event():
         logger.critical(kafka_error)
 
 
-app.include_router(router.router, prefix="/views", tags=["views"])
+app.include_router(router.router, prefix="/views", tags=["Film timestamp"])
 
-app.include_router(likes.router, prefix="/api/v1/likes", tags=["likes"])
-app.include_router(reviews.router, prefix="/api/v1/reviews", tags=["reviews"])
+app.include_router(likes.router, prefix="/api/v1/likes", tags=["Films likes"])
+app.include_router(reviews.router, prefix="/api/v1/reviews", tags=["Films reviews"])
 app.include_router(
-    user_bookmarks.router, prefix="/api/v1/bookmarks", tags=["bookmarks"]
+    user_bookmarks.router, prefix="/api/v1/bookmarks", tags=["User bookmarks"]
 )
 
 if __name__ == "__main__":

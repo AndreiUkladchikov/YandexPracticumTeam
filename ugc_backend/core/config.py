@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     max_page_number: int = Field(default=1000)
     max_page_size: int = Field(default=50)
 
-    mongo_db: str = Field(default="myNewDB")
+    mongo_db: str = Field(default="ugc")
     like_collection: str = Field(default="films")
     reviews_collection: str = Field(default="reviews")
     bookmarks_collection: str = Field(default="bookmarks")

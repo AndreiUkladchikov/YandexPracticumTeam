@@ -34,6 +34,25 @@ db.createCollection("films", {
    }
 })
 
+
+db.createCollection("rating", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            title: "Rating Object Validation",
+            properties: {
+                film_id: {bsonType: "string"},
+                rating: {bsonType: "int"},
+                user_id: {bsonType: "string"},
+            }
+        }
+    }
+}
+
+)
+
+db.rating.createIndex({"user_id": 1}, {unique: true})
+
 db.createCollection("bookmarks", {
    validator: {
       $jsonSchema: {
