@@ -16,6 +16,7 @@ class LikeService:
         self.mongo_client = mongo
         self.db = self.mongo_client[settings.mongo_db]
         self.collection = self.db[settings.like_collection]
+        self.rating_collection = self.db["rating"]
 
     async def get_likes(self, film_id: str) -> Likes:
         result = await self.collection.find_one({"film_id": film_id})
@@ -47,12 +48,18 @@ class LikeService:
             raise ThereIsNoLikeToDelete
 
     async def average_rating(self, film_id: str) -> AverageRating:
-        doc: dict = await self.collection.find_one({"film_id": {"$eq": film_id}})
-        if doc:
-            res_rating = average(doc)
-            return AverageRating(rating=res_rating)
+
+        avg = [{'$match': {'film_id': film_id}}, {"$group": {"_id": "null", "avg": {"$avg": "$rating"}}}]
+        result = [doc async for doc in self.rating_collection.aggregate(avg)]
+        if result:
+            return AverageRating(rating=result[0]['avg'])
         else:
             raise FilmNotFound
+
+    async def put_rating(self, film_id: str, user_id: str, rating: int):
+        await self.rating_collection.insert_one(
+            {"film_id": film_id, "user_id": user_id, "rating": rating}
+        )
 
 
 def get_like_service(mongo: AsyncIOMotorClient = Depends(get_mongo)) -> LikeService:

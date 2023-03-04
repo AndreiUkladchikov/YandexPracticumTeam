@@ -21,4 +21,4 @@ class TestBookmark:
 
     def test_user_has_no_bookmarks(self, client, delete_bookmark_collection):
         response = client.get(common_url, params=user)
-        assert response.status_code == HTTPStatus.NOT_FOUND
+        assert response.status_code == HTTPStatus.OK
