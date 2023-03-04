@@ -82,7 +82,6 @@ async def add_review(
     review_service: ReviewService = Depends(get_review_service),
     like_service: LikeService = Depends(get_like_service),
 ) -> ReviewResponse:
-    print(text, rating)
     review_id: dict = await review_service.add_review(
         film_id, user_id, text, rating, like_service
     )
