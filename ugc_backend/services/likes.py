@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+from fastapi import Depends
+from motor.motor_asyncio import AsyncIOMotorClient
+
 from core.config import settings
 from db.mongo import get_mongo
-from fastapi import Depends
 from helpers.custom_exceptions import FilmNotFound, ThereIsNoLikeToDelete
 from helpers.likes import add_dislike, add_like, average, delete_like
 from models.db_models import AboutFilm
 from models.likes import AverageRating, Likes, Rating
-from motor.motor_asyncio import AsyncIOMotorClient
 
 
 class LikeService:

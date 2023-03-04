@@ -1,15 +1,16 @@
 import uvicorn
-from aggregate_to_kafka import dependency, router
+import sentry_sdk
+from fastapi import FastAPI, Request
+from motor.motor_asyncio import AsyncIOMotorClient
+from starlette.routing import Match
 from aiokafka import AIOKafkaProducer, errors
+
+from aggregate_to_kafka import dependency, router
 from api.v1 import likes, reviews, user_bookmarks
 from core.config import settings
 from core.custom_log import logger
 from db import mongo
-from fastapi import FastAPI, Request
-from motor.motor_asyncio import AsyncIOMotorClient
-from starlette.routing import Match
 
-import sentry_sdk
 
 sentry_sdk.init(
     dsn=settings.sentry_url,
@@ -56,6 +57,7 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
+    mongo.mongo_client.close()
     try:
         await dependency.kafka_producer.stop()
     except errors.KafkaConnectionError as kafka_error:

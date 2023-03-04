@@ -1,15 +1,15 @@
 from __future__ import annotations
-
 from uuid import uuid4
+
+from fastapi import Depends
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from core.config import settings
 from db.mongo import get_mongo
-from fastapi import Depends
 from helpers.custom_exceptions import FilmNotFound, ReviewNotFound
 from helpers.likes import add_dislike, add_like
 from models.likes import Likes, Rating
 from models.reviews import Review
-from motor.motor_asyncio import AsyncIOMotorClient
 from services.likes import LikeService
 
 

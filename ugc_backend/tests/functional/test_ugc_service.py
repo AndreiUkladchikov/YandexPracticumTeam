@@ -3,6 +3,7 @@ import json
 
 import pytest
 import requests
+
 from core.config import settings
 from tests.functional.constants import (
     test_data,

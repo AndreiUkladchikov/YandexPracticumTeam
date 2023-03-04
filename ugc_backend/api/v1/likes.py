@@ -1,8 +1,9 @@
 from http import HTTPStatus
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+
 from api.constants.error_msg import DontHaveLikeToDeleteMsg, FilmMsg
 from core.custom_log import logger
-from fastapi import APIRouter, Depends, HTTPException, Query
 from helpers.custom_exceptions import FilmNotFound, ThereIsNoLikeToDelete
 from models.likes import AverageRating, Likes, Rating
 from services.likes import LikeService, get_like_service
