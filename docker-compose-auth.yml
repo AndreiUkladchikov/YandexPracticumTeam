@@ -10,6 +10,11 @@ services:
     depends_on:
       - auth_redis
       - auth_service
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://${LOGSTASH_PUBLIC_HOST}:${LOGSTASH_PUBLIC_PORT}'
+        tag: auth-nginx
     ports:
       - '${AUTH_NGINX_PUBLIC_PORT}:${AUTH_NGINX_PORT}'
     
