@@ -1,0 +1,17 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.11.10-management-alpine
+    env_file:
+      - ./rabbitmq/.env
+    ports:
+      - 15672:15672
+      - 5672:5672
+
+  etl_worker:
+    build:
+      context: ./etl_worker
+      dockerfile: Dockerfile
+    env_file:
+      - ./etl_worker/.env
+    depends_on:
+      - rabbitmq
