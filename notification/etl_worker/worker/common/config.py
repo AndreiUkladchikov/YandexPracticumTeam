@@ -21,6 +21,8 @@ class Base(BaseSettings):
     send_queue_password: str = Field('rabbitmq')
     send_queue: str = Field('send_auth_message')
 
+    auth_service_bearer_token: str = Field(...)
+
     user_info_url: str = Field('http://127.0.0.1:8081/v1/user/')
     film_info_url: str = Field('http://127.0.0.1:8080/v1/film/')
 
