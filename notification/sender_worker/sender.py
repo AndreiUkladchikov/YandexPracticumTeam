@@ -32,7 +32,7 @@ class EmailSender(AbstractSender):
         # Иначе пользователю придёт набор тегов вместо красивого письма
         message.set_content(self.body)
 
-        resp = self.smtp_conn.sendmail(
+        self.smtp_conn.sendmail(
             message["From"], [self.email], message.as_string()
         )
 
