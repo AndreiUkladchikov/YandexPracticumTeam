@@ -2,6 +2,7 @@ import json
 
 import pika
 from common.config import settings
+from loguru import logger
 from pika.exceptions import ConnectionClosedByBroker
 from retry import retry
 
@@ -22,7 +23,7 @@ def rabbit_consumer():
 
             channel.queue_declare(queue=settings.send_queue)
 
-            print(" [*] Waiting for messages. To exit press CTRL+C")
+            logger.info(" [*] Waiting for messages. To exit press CTRL+C")
             channel.start_consuming()
             # channel.basic_consume(queue=settings.send_queue, on_message_callback=catch_callback, auto_ack=True)
             for method, properties, body in channel.consume(

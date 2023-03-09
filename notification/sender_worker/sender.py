@@ -35,7 +35,6 @@ class EmailSender(AbstractSender):
         resp = self.smtp_conn.sendmail(
             message["From"], [self.email], message.as_string()
         )
-        print(resp)
 
 
 class SMTPConnection:
