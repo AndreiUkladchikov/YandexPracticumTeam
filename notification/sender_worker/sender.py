@@ -1,11 +1,14 @@
 import abc
 import smtplib
-from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from smtplib import SMTP
 
-from common.config import settings
 from loguru import logger
 from retry import retry
+
+from common.config import settings
+from produces import rabbit_producer
 
 
 class AbstractSender(abc.ABC):
@@ -16,25 +19,31 @@ class AbstractSender(abc.ABC):
 
 
 class EmailSender(AbstractSender):
-    def __init__(self, email: str, subject: str, body: str, smtp_conn: smtplib.SMTP):
+    def __init__(self, email: dict, smtp_conn: smtplib.SMTP):
         self.email = email
-        self.subject = subject
-        self.body = body
         self.smtp_conn = smtp_conn
 
     def send_message(self):
-        message = EmailMessage()
+        message = MIMEMultipart("alternative")
         message["From"] = "from@example.com"
-        message["To"] = ",".join([self.email])
-        message["Subject"] = self.subject
+        message["To"] = ",".join([self.email.get("email")])
+        message["Subject"] = self.email.get("subject")
+        message.attach(MIMEText(self.email.get("text"), "plain"))
+        message.attach(MIMEText(self.email.get("html"), "html"))
 
-        # Для отправки HTML-письма нужно вместо метода `set_content` использовать `add_alternative` с subtype "html",
-        # Иначе пользователю придёт набор тегов вместо красивого письма
-        message.set_content(self.body)
-
-        self.smtp_conn.sendmail(
-            message["From"], [self.email], message.as_string()
-        )
+        try:
+            self.smtp_conn.sendmail(
+                message.get("From"),
+                message.get("To"),
+                message.as_string(),
+            )
+            logger.info(message.as_string())
+        except smtplib.SMTPRecipientsRefused as smtp_recipient:
+            logger.exception(smtp_recipient)
+            rabbit_producer(settings.death_queue, self.email)
+        except smtplib.SMTPSenderRefused as smtp_sender:
+            logger.exception(smtp_sender)
+            rabbit_producer(settings.death_queue, self.email)
 
 
 class SMTPConnection:
