@@ -5,9 +5,9 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from admin_panel.rabbit_client import send_message
-from admin_panel.models import MessageModel, MessageTypes
+from admin_panel.models import MessageTypes
 
-from api.serializers import NotificationSerializer
+from admin_panel.api.serializers import NotificationSerializer
 
 
 def get_type_by_sender(sender: str):
