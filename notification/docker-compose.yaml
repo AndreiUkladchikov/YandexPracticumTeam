@@ -1,14 +1,29 @@
 services:
   rabbitmq:
     image: rabbitmq:3.11.10-management-alpine
+    container_name: rabbitmq-container
     env_file:
       - ./rabbitmq/.env.example
     ports:
       - 15672:15672
       - 5672:5672
+      
   mailhog:
     image: mailhog/mailhog:v1.0.1
+    container_name: mailhog-container
     restart: always
     ports:
       - 1025:1025
       - 8025:8025
+
+  sender:
+    build: ./sender_worker
+    image: sender-worker
+    container_name: sender-worker-container
+    env_file:
+      - ./.env.dev
+    command: python /home/sender/main.py
+    restart: on-failure
+    depends_on:
+      - mailhog
+      - rabbitmq
