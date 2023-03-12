@@ -14,6 +14,8 @@ class Base(BaseSettings):
     send_queue_username: str = Field("rabbitmq")
     send_queue_password: str = Field("rabbitmq")
 
+    queue_name: str = Field("send_message")
+
     class Config:
         case_sensitive = False
         env_file_encoding = "utf-8"

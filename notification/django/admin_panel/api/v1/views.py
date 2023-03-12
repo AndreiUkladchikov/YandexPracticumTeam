@@ -2,9 +2,15 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
-import pika
 
-from admin_panel.config import settings
+from admin_panel.rabbit_client import send_message
+from admin_panel.models import MessageModel, MessageTypes
+
+
+def get_type_by_sender(sender: str):
+    # В зависимости от отправителя - выбираем определяем тип сообщения
+    # Пока просто возвращаем рандомный тип (например UGC - уведомление о комментарии)
+    return MessageTypes.UGC
 
 
 class TemplateApiView(APIView):
@@ -20,14 +26,14 @@ class TemplateApiView(APIView):
 
 class NotificationApiView(APIView):
     def post(self, request, *args, **kwargs):
-        cred = pika.PlainCredentials(settings.send_queue_username, settings.send_queue_password)
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.send_queue_host, credentials=cred))
-        channel = connection.channel()
+        message = MessageModel(
+            type=get_type_by_sender("UGC"),
+            subject=request.data['subject'],
+            template='',
+            user_id=request.data['user_id']
+        )
 
-        channel.queue_declare(queue='test-queue')
+        if 'film_id' in request.data.keys():
+            message.film_id = request.data['film_id']
 
-        channel.basic_publish('',
-                              'test-queue',
-                              request.data,)
-        connection.close()
-        return JsonResponse({})
+        return send_message(message)
