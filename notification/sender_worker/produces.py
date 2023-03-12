@@ -1,5 +1,5 @@
 import json
-
+from datetime import datetime
 import pika
 
 from common.config import settings
@@ -11,8 +11,23 @@ mail = {
     "html": "<h1>Спасибо, что Вы с нами!</h1> <br>Дорогой друг</br>",
 }
 
+change_password = {
+    "email": "bary@yandex.ru",
+    "subject": "Change password",
+    "text": "Вы сменили пароль. Уважаемый пользователь! Если вы этого не делали,"
+    f" то необходимо срочно обратиться в службу поддержки",
+    "html": f"<h1>Смена пароля {datetime.now()}</h1> <br>Уважаемый пользователь! Если вы этого не делали,"
+    f" то необходимо срочно обратиться в службу поддержки</br>",
+}
 
-def rabbit_producer(queue: str, template: dict):
+
+def rabbit_producer(queue: str, template: dict[str, str]):
+    """
+    Функция для тестовой отправки писем (mail, change_password) в очередь
+    :param queue: название очереди
+    :param template: сообщение
+    :return:
+    """
     cred = pika.PlainCredentials(settings.send_queue_username, settings.send_queue_password)
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(host=settings.send_queue_host, credentials=cred)
@@ -25,4 +40,4 @@ def rabbit_producer(queue: str, template: dict):
 
 
 if __name__ == "__main__":
-    rabbit_producer(settings.send_queue, mail)
+    rabbit_producer(settings.send_queue, change_password)
