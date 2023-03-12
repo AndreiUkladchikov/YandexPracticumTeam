@@ -2,9 +2,12 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 
 from admin_panel.rabbit_client import send_message
 from admin_panel.models import MessageModel, MessageTypes
+
+from api.serializers import NotificationSerializer
 
 
 def get_type_by_sender(sender: str):
@@ -26,14 +29,7 @@ class TemplateApiView(APIView):
 
 class NotificationApiView(APIView):
     def post(self, request, *args, **kwargs):
-        message = MessageModel(
-            type=get_type_by_sender("UGC"),
-            subject=request.data['subject'],
-            template='',
-            user_id=request.data['user_id']
-        )
-
-        if 'film_id' in request.data.keys():
-            message.film_id = request.data['film_id']
-
-        return send_message(message)
+        serializer = NotificationSerializer(data=request, type=get_type_by_sender("UGC"))
+        if serializer.is_valid():
+            return send_message(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
