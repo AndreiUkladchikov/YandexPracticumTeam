@@ -4,10 +4,9 @@ import pika
 from pika import exceptions
 
 from admin_panel.config import settings
-from admin_panel.models import MessageModel
 
 
-def send_message(message: MessageModel):
+def send_message(message):
     cred = pika.PlainCredentials(settings.send_queue_username, settings.send_queue_password)
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.send_queue_host, credentials=cred))
     try:
