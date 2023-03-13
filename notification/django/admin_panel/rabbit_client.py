@@ -14,6 +14,6 @@ def send_message(message):
         channel.queue_declare(queue=settings.queue_name)
         channel.basic_publish('', settings.queue_name, message.__dict__)
         connection.close()
-        return HTTPStatus.Ok
+        return HTTPStatus.OK
     except exceptions.ChannelError:
         return HTTPStatus.NOT_FOUND

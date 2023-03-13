@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from admin_panel.rabbit_client import send_message
-from admin_panel.models import MessageTypes
+from admin_panel.models import MessageTypes, PersonalizedTemplate, CommonTemplate
 
 from admin_panel.api.serializers import NotificationSerializer
 
@@ -16,15 +16,20 @@ def get_type_by_sender(sender: str):
     return MessageTypes.UGC
 
 
-class TemplateApiView(APIView):
-    def get_queryset(self):
-        # Получаем шаблоны
-        return []
-
+class PersonalizedTemplateApiView(APIView):
     def get(self, request, *args, **kwargs):
-        templates = self.get_queryset()
-        # Some logic
-        return JsonResponse({})
+        templates = PersonalizedTemplate.objects.filter(slug=kwargs['slug']).first()
+        if templates is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(templates.template)
+
+
+class CommonTemplateApiView(APIView):
+    def get(self, request, *args, **kwargs):
+        templates = CommonTemplate.objects.filter(slug=kwargs['slug']).first()
+        if templates is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(templates.template)
 
 
 class NotificationApiView(APIView):
