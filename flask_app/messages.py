@@ -25,6 +25,8 @@ roles_response = "Here are your roles"
 
 logout_from = "Logout from "
 
+user_not_found = "User by this id is not found"
+
 
 def logout(user: str) -> str:
     return "Logout from {}".format(user)
@@ -78,3 +80,14 @@ class RolesResponseForm(ResponseForm):
 class ErrorYandexResponseForm(BaseModel):
     error_description: Optional[str]
     error: Optional[str]
+
+
+class UserExtended(BaseModel):
+    user_id: UUID
+    email: str
+    first_name: str | None
+    last_name: str | None
+
+
+class GetALlUsers(BaseModel):
+    result: list[UserExtended] | None

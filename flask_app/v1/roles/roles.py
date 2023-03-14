@@ -1,17 +1,18 @@
 from http import HTTPStatus
 
+from flask import Blueprint
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from spectree import Response
+
 import messages
 from config import settings
 from db_models import Role, User, UserRole
 from documentation import spec
-from flask import Blueprint
-from flask_jwt_extended import get_jwt_identity, jwt_required
 from forms import RoleForm, UserRoleForm
 from helpers import check_path
 from limiter import limiter
 from messages import ResponseForm, RoleRecord, RolesResponseForm
 from services import role_service, user_role_service, user_service
-from spectree import Response
 
 roles_blueprint = Blueprint("roles", __name__)
 

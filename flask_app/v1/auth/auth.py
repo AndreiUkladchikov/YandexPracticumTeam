@@ -2,35 +2,23 @@ from datetime import datetime, timedelta
 from http import HTTPStatus
 from math import ceil
 
+from flask import Blueprint, request
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                get_jwt, get_jwt_identity, jwt_required)
+from spectree import Response
+
 import messages
 from black_list import jwt_redis_blocklist
 from config import settings
 from db_models import Action, User, UserAccessHistory, UserRole
 from documentation import spec
-from flask import Blueprint, request
-from flask_jwt_extended import (
-    create_access_token,
-    create_refresh_token,
-    get_jwt,
-    get_jwt_identity,
-    jwt_required,
-)
 from forms import LoginForm, PasswordResetForm
 from helpers import check_device
 from limiter import limiter
-from messages import (
-    HistoryResponseForm,
-    ResponseForm,
-    ResponseFormWithTokens,
-    SingleAccessRecord,
-)
-from services import (
-    access_history_service,
-    role_service,
-    user_role_service,
-    user_service,
-)
-from spectree import Response
+from messages import (GetALlUsers, HistoryResponseForm, ResponseForm,
+                      ResponseFormWithTokens, SingleAccessRecord, UserExtended)
+from services import (access_history_service, role_service, user_role_service,
+                      user_service)
 
 auth_blueprint = Blueprint("auth", __name__)
 
@@ -87,6 +75,8 @@ def registration(json: LoginForm):
 
     user = User(email=json.email)
     user.set_password(json.password)
+    user.first_name = json.first_name
+    user.last_name = json.last_name
     user_service.insert(user)
 
     user = user_service.get({"email": json.email})
@@ -249,4 +239,36 @@ def get_login_history():
         records=history,
         total_pages=ceil(total / page_size),
         total_items=total,
+    )
+
+
+@auth_blueprint.route("/all_users", methods=["GET"])
+@spec.validate(resp=Response(HTTP_200=GetALlUsers), tags=["Auth"])
+def get_all_users():
+    result: list = []
+    for user in user_service.all():
+        u = UserExtended(
+            user_id=user.id,
+            email=user.email,
+            first_name=user.first_name,
+            last_name=user.last_name,
+        )
+        result.append(u)
+    return GetALlUsers(result=result)
+
+
+@auth_blueprint.route("/single_user/<user_id>", methods=["GET"])
+@spec.validate(
+    resp=Response(HTTP_200=UserExtended, HTTP_404=ResponseForm), tags=["Auth"]
+)
+def get_single_user(user_id):
+    user = user_service.get({"id": user_id})
+    if not user:
+        return ResponseForm(msg=messages.user_not_found), HTTPStatus.NOT_FOUND
+
+    return UserExtended(
+        user_id=user.id,
+        email=user.email,
+        first_name=user.first_name,
+        last_name=user.last_name,
     )
