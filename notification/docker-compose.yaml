@@ -27,3 +27,12 @@ services:
     depends_on:
       - mailhog
       - rabbitmq
+
+  etl_worker:
+    build:
+      context: ./etl_worker
+      dockerfile: Dockerfile
+    env_file:
+      - ./etl_worker/.env
+    depends_on:
+      - rabbitmq

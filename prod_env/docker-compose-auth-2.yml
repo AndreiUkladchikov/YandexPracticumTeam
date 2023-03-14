@@ -23,8 +23,8 @@ services:
     container_name: auth_redis
     env_file:
       - "./flask_app/.env"
-    ports:
-      - '${REDIS_PORT}:${REDIS_PORT}'
+    expose:
+      - '${REDIS_PORT}'
         
   auth_service:
     build: ./flask_app
@@ -53,5 +53,5 @@ services:
     container_name: auth_database
     env_file:
       - "./flask_app/.env"
-    ports:
-      - '${DB_PORT}:${DB_PORT}'
+    expose:
+      - '${DB_PORT}'

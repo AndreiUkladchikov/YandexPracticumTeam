@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
     auth_db_password: str = Field(env="POSTGRES_PASSWORD")
     auth_db_name: str = Field(env="POSTGRES_DB")
-    auth_db_host: str = Field(env="DB_HOST")
+    auth_db_host: str = Field(env="DB_HOST", default="localhost")
     auth_db_port: int = Field(env="DB_PORT")
     backend_host: str = ...
     backend_port: int = ...
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     access_token_expires_in_hours: int = Field(default=1)
     refresh_token_expires_in_days: int = Field(default=30)
 
-    redis_host: str = ...
+    redis_host: str = Field(default="localhost")
     redis_port: int = ...
 
     auth_server_host: str = ...

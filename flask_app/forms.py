@@ -25,6 +25,11 @@ class LoginForm(BaseModel):
         return email
 
 
+class RegistrationForm(LoginForm):
+    first_name: str = Field(min=1, max_length=30)
+    last_name: str = Field(min=1, max_length=30)
+
+
 class PasswordResetForm(LoginForm):
     previous_password: str = Field(min_length=3, max_length=20)
 
