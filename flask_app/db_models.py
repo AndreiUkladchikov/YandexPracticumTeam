@@ -44,6 +44,8 @@ class User(Base):
     )
     email: str = Column(String, unique=True, nullable=False)
     password: str = Column(String, nullable=False)
+    first_name: str = Column(String, nullable=True)
+    last_name: str = Column(String, nullable=True)
     refresh_token: str = Column(String, nullable=True)
     third_party_id: str = Column(String, nullable=True)
 
