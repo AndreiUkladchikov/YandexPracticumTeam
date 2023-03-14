@@ -3,8 +3,13 @@ from http import HTTPStatus
 from math import ceil
 
 from flask import Blueprint, request
-from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                get_jwt, get_jwt_identity, jwt_required)
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    get_jwt,
+    get_jwt_identity,
+    jwt_required,
+)
 from spectree import Response
 
 import messages
@@ -12,13 +17,23 @@ from black_list import jwt_redis_blocklist
 from config import settings
 from db_models import Action, User, UserAccessHistory, UserRole
 from documentation import spec
-from forms import LoginForm, PasswordResetForm
+from forms import LoginForm, PasswordResetForm, RegistrationForm
 from helpers import check_device
 from limiter import limiter
-from messages import (GetALlUsers, HistoryResponseForm, ResponseForm,
-                      ResponseFormWithTokens, SingleAccessRecord, UserExtended)
-from services import (access_history_service, role_service, user_role_service,
-                      user_service)
+from messages import (
+    GetALlUsers,
+    HistoryResponseForm,
+    ResponseForm,
+    ResponseFormWithTokens,
+    SingleAccessRecord,
+    UserExtended,
+)
+from services import (
+    access_history_service,
+    role_service,
+    user_role_service,
+    user_service,
+)
 
 auth_blueprint = Blueprint("auth", __name__)
 
@@ -69,7 +84,7 @@ def check_login_password(json: LoginForm):
 @spec.validate(
     resp=Response(HTTP_200=ResponseForm, HTTP_401=ResponseForm), tags=["Auth"]
 )
-def registration(json: LoginForm):
+def registration(json: RegistrationForm):
     if user_service.get({"email": json.email}):
         return ResponseForm(msg=messages.already_registered), HTTPStatus.UNAUTHORIZED
 

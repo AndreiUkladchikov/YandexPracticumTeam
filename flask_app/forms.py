@@ -10,8 +10,6 @@ from pydantic import BaseModel, Field, validator
 class LoginForm(BaseModel):
     email: str = Field(min_length=3, max_length=20)
     password: str = Field(min_length=3, max_length=20)
-    first_name: str = Field(min=1, max_length=30)
-    last_name: str = Field(min=1, max_length=30)
 
     @validator("email")
     def email_valid(cls, v):
@@ -25,6 +23,11 @@ class LoginForm(BaseModel):
         ):
             raise ValueError("The provided email address is invalid")
         return email
+
+
+class RegistrationForm(LoginForm):
+    first_name: str = Field(min=1, max_length=30)
+    last_name: str = Field(min=1, max_length=30)
 
 
 class PasswordResetForm(LoginForm):
