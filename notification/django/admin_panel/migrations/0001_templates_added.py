@@ -29,8 +29,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('slug', models.SlugField(help_text='Слаг, который будет идентифицировать конкретный шаблон', primary_key=True, serialize=False, verbose_name='Тип шаблона')),
                 ('description', models.CharField(max_length=250, verbose_name='Описание шаблона')),
-                ('template', models.TextField(help_text='Текст персонализированного шаблона. Возможно использовать внутри следующие вставки: {{ user '
-                  '}}, {{ film }}', validators=[django.core.validators.RegexValidator(message='Необходимо ввести валидный html текст или просто строку без тэгов', regex='^<.*>.*</.*>$|^[^<>/]+$')], verbose_name='Текст шаблона')),
+                ('template', models.TextField(help_text='Текст персонализированного шаблона. Возможно использовать внутри следующие вставки: {{ username }}, {{ filmname }} и другие ', validators=[django.core.validators.RegexValidator(message='Необходимо ввести валидный html текст или просто строку без тэгов', regex='^<.*>.*</.*>$|^[^<>/]+$')], verbose_name='Текст шаблона')),
             ],
             options={
                 'verbose_name': 'Персонализированный шаблон',

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from admin_panel.clients import RabbitClient
+from admin_panel.rabbit_client import send_message
 from admin_panel.models import MessageTypes, PersonalizedTemplate, CommonTemplate
 
 from admin_panel.api.serializers import NotificationSerializer
@@ -35,7 +35,6 @@ class CommonTemplateApiView(APIView):
 class NotificationApiView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = NotificationSerializer(data=request, type=get_type_by_sender("UGC"))
-        rabbit_client = RabbitClient()
         if serializer.is_valid():
-            return rabbit_client.send_message(serializer.data)
+            return send_message(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
