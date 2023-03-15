@@ -14,6 +14,8 @@ class Base(BaseSettings):
     send_queue_username: str = Field("rabbitmq")
     send_queue_password: str = Field("rabbitmq")
 
+    all_users_auth_url: str = Field("http://auth_service:8081/api/v1/auth/all_users/")
+
     queue_name: str = Field("auth_message")
 
     class Config:
