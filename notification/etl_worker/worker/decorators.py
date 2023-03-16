@@ -2,9 +2,8 @@ import re
 from functools import wraps
 from time import sleep
 
+from config import settings
 from loguru import logger
-
-from common.config import settings
 
 
 def backoff(
@@ -44,9 +43,7 @@ def backoff(
                     if try_number <= try_limit:
                         return retry(factor + 1, try_number)
                     else:
-                        try_limit_error_mes = (
-                            f'Function "{func.__name__}" reached the limit of attempts.'
-                        )
+                        try_limit_error_mes = f'Function "{func.__name__}" reached the limit of attempts.'
                         logger.error(try_limit_error_mes)
                         raise Exception(try_limit_error_mes)
 
