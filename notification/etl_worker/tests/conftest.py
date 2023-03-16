@@ -3,6 +3,7 @@ from uuid import uuid4
 
 import pytest
 from tests.config import settings
+from worker.message_render import MessagePreRender
 
 
 @pytest.fixture
@@ -13,8 +14,8 @@ def user_id() -> str:
 @pytest.fixture
 def user_expected() -> dict[str, Any]:
     return {
-        "email": "testuser@test.loc",
-        "firstname": "John",
+        "email": settings.test_user_email,
+        "firstname": settings.test_user_firstname,
     }
 
 
@@ -25,7 +26,10 @@ def film_id() -> str:
 
 @pytest.fixture
 def film_expected() -> dict[str, Any]:
-    return {"title": "Star Wars Episode XXX", "rating": 9.9}
+    return {
+        "title": settings.test_film_title,
+        "rating": settings.test_film_rate,
+    }
 
 
 @pytest.fixture
@@ -35,8 +39,6 @@ def template() -> str:
 
 @pytest.fixture
 def context(user_id: str, film_id: str) -> dict[str, Any]:
-    from worker.message_render import MessagePreRender
-
     return {"user": MessagePreRender.get_user_info(user_id), "film": MessagePreRender.get_film_info(film_id)}
 
 

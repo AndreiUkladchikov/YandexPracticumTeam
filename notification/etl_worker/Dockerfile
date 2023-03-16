@@ -23,7 +23,7 @@ COPY . .
 RUN find . -type f -print0 | xargs -0 dos2unix \
      && chown -R etlworker:etlworker /home/etlworker \
      && chmod u+x /home/etlworker/entrypoint.sh \
-     && chmod u+x /home/etlworker/worker/main.py 
+     && chmod u+x /home/etlworker/main.py 
 
 USER etlworker
 

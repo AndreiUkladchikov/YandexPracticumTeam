@@ -3,8 +3,8 @@ from typing import Any
 
 import pika
 import requests
-from config import settings
-from decorators import backoff
+from worker.config import settings
+from worker.decorators import backoff
 from jinja2 import BaseLoader, Environment
 from loguru import logger
 

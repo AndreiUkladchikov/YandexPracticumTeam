@@ -2,7 +2,7 @@ import re
 from functools import wraps
 from time import sleep
 
-from config import settings
+from worker.config import settings
 from loguru import logger
 
 
