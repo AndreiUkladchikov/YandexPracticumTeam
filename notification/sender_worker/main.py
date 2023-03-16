@@ -25,7 +25,10 @@ if __name__ == "__main__":
             sender.send_message()
     except KeyboardInterrupt:
         logger.info("Interrupted")
+
         try:
             sys.exit(0)
         except SystemExit:
             os._exit(0)
+    finally:
+        connection.close()
