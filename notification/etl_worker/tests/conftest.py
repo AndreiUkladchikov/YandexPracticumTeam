@@ -36,7 +36,7 @@ def template() -> str:
 @pytest.fixture
 def context(user_id: str, film_id: str) -> dict[str, Any]:
     from worker.message_render import MessagePreRender
-    
+
     return {"user": MessagePreRender.get_user_info(user_id), "film": MessagePreRender.get_film_info(film_id)}
 
 
