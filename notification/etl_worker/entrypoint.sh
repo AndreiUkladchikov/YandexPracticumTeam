@@ -3,7 +3,7 @@
 start_etl_worker () {
   echo "Starting ETL worker for email messages rendering..."
   
-  ./worker/main.py
+  python main.py
 }
 
 start_etl_worker
