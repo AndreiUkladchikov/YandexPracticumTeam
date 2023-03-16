@@ -1,19 +1,19 @@
 import json
-import requests
 from typing import Any
 
 import pika
-from jinja2 import Environment, BaseLoader
-from loguru import logger
-
+import requests
 from common.config import settings
 from common.decorators import backoff
+from jinja2 import BaseLoader, Environment
+from loguru import logger
 
 
-class BaseMessageRender:
+class MessagePreRender:
 
-    def __init__(self) -> None:
-        """Получаn информацию о сообщении из очереди."""
+    @staticmethod
+    def run() -> None:
+        """Получаn информацию о сообщении из очереди и обрабатываем."""
         logger.info(
             ' [*] Connecting to server {0}:{1} ...'.format(settings.messages_queue_host,
                                                            settings.messages_queue_port)
@@ -28,11 +28,11 @@ class BaseMessageRender:
         logger.info(' [*] Waiting for messages from {0} ...'.format(settings.messages_queue))
         channel.basic_qos(prefetch_count=1)
         channel.basic_consume(queue=settings.messages_queue,
-                              on_message_callback=self.process_message)
+                              on_message_callback=MessagePreRender.process_message)
         channel.start_consuming()
 
-    def get_user_info(self,
-                      user_id: str) -> dict[str, Any]:
+    @staticmethod
+    def get_user_info(user_id: str) -> dict[str, Any]:
         """Получаем информацию о пользователе по указаному URL."""
         if settings.debug:
             return {'email': 'testuser@test.loc',
@@ -43,8 +43,8 @@ class BaseMessageRender:
             resp = requests.get(url='{0}{1}'.format(settings.user_info_url, user_id), headers=headers)
             return resp.json()
 
-    def get_film_info(self,
-                      film_id: str) -> dict[str, Any]:
+    @staticmethod
+    def get_film_info(film_id: str) -> dict[str, Any]:
         """Получаем информацию о фильме по указаному URL."""
         if settings.debug:
             return {'title': 'Star Wars Episode XXX',
@@ -53,12 +53,14 @@ class BaseMessageRender:
             resp = requests.get(url='{0}{1}'.format(settings.film_info_url, film_id))
             return resp.json()
 
-    def render_template(self, template: str, context: dict[str, Any]) -> str:
+    @staticmethod
+    def render_template(template: str, context: dict[str, Any]) -> str:
         """Рендерим текст сообщения в соответствии с контекстом."""
         rtemplate = Environment(loader=BaseLoader, autoescape=True).from_string(template)
         return rtemplate.render(**context)
 
-    def process_message(self, ch, method, properties, body) -> None:
+    @staticmethod
+    def process_message(ch, method, properties, body) -> None:
         """Обрабатываем сообщение в соответствии с контекстом.
 
         Шаблон входящего сообщения
@@ -70,36 +72,39 @@ class BaseMessageRender:
             'film_id': '<film_id_optional_for_ugc_service>'
         }
         """
-        message_info: dict[str, Any, ] = json.loads(body.decode())
+        message_info: dict[str, Any, ] = json.loads(body.decode('utf-8'))
         logger.info(" [o] Received {0}".format(message_info.get('type')))
 
-        render_context = {'user': self.get_user_info(message_info.get('user_id'))}
+        render_context = {'user': MessagePreRender.get_user_info(message_info.get('user_id'))}
         if message_info.get('film_id') is not None:
-            render_context['film'] = self.get_film_info(message_info.get('film_id'))
+            render_context['film'] = MessagePreRender.get_film_info(message_info.get('film_id'))
 
         message = {
             'email': render_context.get('user').get('email'),
             'subject': message_info.get('subject'),
-            'body': self.render_template(message_info.get('template'), render_context)
+            'body': MessagePreRender.render_template(message_info.get('template'), render_context)
         }
 
-        self.send_message(message)
+        MessagePreRender.send_message(message)
         logger.info(" [o] Message add to {0}".format(settings.send_queue))
 
+    @staticmethod
     @backoff
-    def send_message(self, message: dict[str, Any]) -> int:
+    def send_message(message: dict[str, Any]) -> int:
         """Добавляет сформирование сообщение в очередь на отправку."""
-        credentials = pika.PlainCredentials(settings.send_queue_username, settings.send_queue_password)
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.send_queue_host,
+        credentials = pika.PlainCredentials(settings.send_queue_username, settings.send_queue_password)        
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.send_queue_host,
                                                                        port=settings.send_queue_port,
                                                                        credentials=credentials,))
-        channel = connection.channel()
-        channel.queue_declare(queue=settings.send_queue, durable=True)
-        channel.basic_publish(
-            exchange='',
-            routing_key=settings.send_queue,
-            body=json.dumps(message),
-            properties=pika.BasicProperties(
-                delivery_mode=2,
-            ))
-        connection.close()
+            channel = connection.channel()
+            channel.queue_declare(queue=settings.send_queue, durable=True)
+            channel.basic_publish(
+                exchange='',
+                routing_key=settings.send_queue,
+                body=json.dumps(message).encode('utf-8'),
+                properties=pika.BasicProperties(
+                    delivery_mode=2,
+                ))
+        finally:
+            connection.close()

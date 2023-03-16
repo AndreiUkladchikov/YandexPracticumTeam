@@ -1,5 +1,4 @@
-from message_render.base import BaseMessageRender
-
+from message_render.base import MessagePreRender
 
 if __name__ == '__main__':
-    messagerender = BaseMessageRender()
+    MessagePreRender.run()
