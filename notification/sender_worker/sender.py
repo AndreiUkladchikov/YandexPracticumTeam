@@ -38,11 +38,8 @@ class EmailSender(AbstractSender):
                 message.as_string(),
             )
             logger.info(message.as_string())
-        except smtplib.SMTPRecipientsRefused as smtp_recipient:
-            logger.exception(smtp_recipient)
-            rabbit_producer(settings.death_queue, self.email)
-        except smtplib.SMTPSenderRefused as smtp_sender:
-            logger.exception(smtp_sender)
+        except (smtplib.SMTPRecipientsRefused, smtplib.SMTPSenderRefused) as exc:
+            logger.exception(exc)
             rabbit_producer(settings.death_queue, self.email)
 
 
