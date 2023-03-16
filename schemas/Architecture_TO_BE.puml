@@ -1,4 +1,5 @@
-@startuml
+@startuml Architecture
+
 skinparam componentStyle uml2
 actor Client
 component NGINX
@@ -33,6 +34,25 @@ queue Kafka
 component ClickHouse
 component ETLServiceUGC
 }
+
+node Notification-Service{
+component NotificationAdminPanel
+component NotificationApi
+database TemplateDb
+queue RabbitMQ_Queue1
+queue RabbitMQ_Queue2
+component ETL
+component Sender
+}
+
+NotificationAdminPanel -up- TemplateDb
+NotificationApi -up- TemplateDb
+NotificationAdminPanel -up-> RabbitMQ_Queue1
+NotificationApi -up-> RabbitMQ_Queue1
+RabbitMQ_Queue1 -left-> ETL
+ETL -left-> RabbitMQ_Queue2
+RabbitMQ_Queue2 -left-> Sender
+Auth -up- NotificationApi
 
 Client -> NGINX
 NGINX -> Auth

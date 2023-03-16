@@ -1,5 +1,10 @@
 [![Build Status](https://github.com/AndreiUkladchikov/YandexPracticumTeam/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/AndreiUkladchikov/YandexPracticumTeam/actions/workflows/checks.yml)
 # YandexPracticumTeam
+Схема сервисов:
+- schemas
+- в виде картинок - out/schemas
+
+
 For Production:
 - prod_env/docker-compose-prod
 - prod_env/docker-compose-auth
@@ -72,8 +77,21 @@ Docker Compose файл для продакшн среды находится в
 В проект было добавлено логгирование (docker-compose-elk.yml) для сервиса ugc_backend и nginx
 
 # Спринт 10
+Сервис нотификации, функциональность:
+- AdminPanel - заполнение шаблонов, создание рассылок
+- API - получение сообщений из сторонних сервисов и постановка в очередь
+- Очередь - RabbitMQ
+- ETL - обработка сообщений из очереди и постановка в очередь на отправку
+- Sender worker - отправка сообщений через SMTP сервис
+
 Папка notification:
 - rabbitmq - очередь сообщений
 - etl - обработка сообщений. Получаем из очереди, рендерим (по шаблону из django) и отправка в sender
 - sender - обработка отрендеренных сообщений из очереди через smtp клиент (использовали MailHog)
 - django - админка (создание шаблонов для рендера + можно будет использовать для создания массовых рассылок) и DRF - API для отправки сообщений в очередь и для получения шаблонов
+
+# Team
+- Андрей Укладчиков
+- Андрей Гладченко
+- Михаил Ботусов
+- Ростислав Сулицкий

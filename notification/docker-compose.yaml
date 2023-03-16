@@ -36,3 +36,17 @@ services:
       - ./etl_worker/.env
     depends_on:
       - rabbitmq
+
+  notification_admin:
+    build: ./django
+    ports:
+      - 8000:8000
+    image: notification_admin_app
+    volumes:
+      - static_volume:/admin_panel/files
+    container_name: notification_admin_container
+    env_file:
+      - ./django/config/.env
+
+  volumes:
+  - static_volume
