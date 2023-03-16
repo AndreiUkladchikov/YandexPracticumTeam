@@ -3,9 +3,6 @@ from pydantic import BaseSettings, Field
 
 load_dotenv("../.env")
 
-RABBIT_PORT = 5672
-SMTP_PORT = 1025
-
 
 class Base(BaseSettings):
     debug: bool = Field(True)

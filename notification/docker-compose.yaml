@@ -21,7 +21,7 @@ services:
     image: sender-worker
     container_name: sender-worker-container
     env_file:
-      - ./.env.dev
+      - ./sender_worker/.env.dev
     command: python /home/sender/main.py
     restart: on-failure
     depends_on:

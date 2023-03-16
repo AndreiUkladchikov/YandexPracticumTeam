@@ -4,17 +4,15 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
 
-from loguru import logger
-from retry import retry
-
 from common.config import settings
+from loguru import logger
 from produces import rabbit_producer
+from retry import retry
 
 
 class AbstractSender(abc.ABC):
     @abc.abstractmethod
     def send_message(self) -> int:
-        """Отправляем сообщение в сервис SMTP."""
         pass
 
 
