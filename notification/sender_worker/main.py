@@ -1,9 +1,10 @@
 import os
 import sys
 
+from loguru import logger
+
 from common.config import settings
 from consumer import rabbit_consumer
-from loguru import logger
 from sender import EmailSender, SMTPConnection
 
 if __name__ == "__main__":

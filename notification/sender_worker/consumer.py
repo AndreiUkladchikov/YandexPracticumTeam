@@ -1,16 +1,19 @@
 import json
 
 import pika
-from common.config import settings
 from loguru import logger
 from pika.exceptions import ConnectionClosedByBroker
 from retry import retry
+
+from common.config import settings
 
 
 @retry()
 def rabbit_consumer(username: str, password: str, queue: str, host: str):
     cred = pika.PlainCredentials(username, password)
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, credentials=cred))
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host=host, credentials=cred)
+    )
     channel = connection.channel()
 
     channel.queue_declare(queue=settings.send_queue)
@@ -21,7 +24,10 @@ def rabbit_consumer(username: str, password: str, queue: str, host: str):
             for method, properties, body in channel.consume(queue=queue, auto_ack=True):
                 yield json.loads(body)
 
-        except (pika.exceptions.ConnectionClosedByBroker, pika.exceptions.AMQPChannelError) as e:
+        except (
+            pika.exceptions.ConnectionClosedByBroker,
+            pika.exceptions.AMQPChannelError,
+        ) as e:
             logger.exception(e)
             break
 

@@ -4,10 +4,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from smtplib import SMTP
 
-from common.config import settings
 from loguru import logger
-from produces import rabbit_producer
 from retry import retry
+
+from common.config import settings
+from produces import rabbit_producer
 
 
 class AbstractSender(abc.ABC):

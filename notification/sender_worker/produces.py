@@ -2,8 +2,9 @@ import json
 
 import pika
 import pika.exceptions
-from common.config import settings
 from loguru import logger
+
+from common.config import settings
 
 
 def rabbit_producer(queue: str, template: dict[str, str]):
@@ -13,7 +14,9 @@ def rabbit_producer(queue: str, template: dict[str, str]):
     :param template: сообщение
     :return:
     """
-    cred = pika.PlainCredentials(settings.send_queue_username, settings.send_queue_password)
+    cred = pika.PlainCredentials(
+        settings.send_queue_username, settings.send_queue_password
+    )
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(host=settings.send_queue_host, credentials=cred)
     )
@@ -22,7 +25,9 @@ def rabbit_producer(queue: str, template: dict[str, str]):
         channel.queue_declare(queue=queue)
 
         channel.basic_publish(
-            exchange="", routing_key=settings.send_queue, body=json.dumps(template).encode()
+            exchange="",
+            routing_key=settings.send_queue,
+            body=json.dumps(template).encode(),
         )
     except pika.exceptions as e:
         logger.exception(e)
