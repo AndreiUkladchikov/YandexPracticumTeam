@@ -18,7 +18,7 @@ class PersonalizedTemplateApiView(APIView):
     def get(self, request, *args, **kwargs):
         templates = PersonalizedTemplate.objects.filter(slug=kwargs['slug']).first()
         if templates is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(templates.template)
 
 
@@ -26,14 +26,14 @@ class CommonTemplateApiView(APIView):
     def get(self, request, *args, **kwargs):
         templates = CommonTemplate.objects.filter(slug=kwargs['slug']).first()
         if templates is None:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(templates.template)
 
 
 class NotificationApiView(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = NotificationSerializer(data=request, type=get_type_by_sender("UGC"))
-        rabbit_client = RabbitClient()
+        serializer = NotificationSerializer(data=request)
         if serializer.is_valid():
+            rabbit_client = RabbitClient()
             return rabbit_client.send_message(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_204_NO_CONTENT)
