@@ -3,15 +3,12 @@ from pydantic import BaseSettings, Field
 
 load_dotenv("../.env")
 
-RABBIT_PORT = 5672
-SMTP_PORT = 1025
-
 
 class Base(BaseSettings):
     debug: bool = Field(True)
 
     send_queue_host: str = Field("127.0.0.1")
-    send_queue_port: int = Field(RABBIT_PORT)
+    send_queue_port: int = Field(5672)
     send_queue_username: str = Field("rabbitmq")
     send_queue_password: str = Field("rabbitmq")
 
@@ -24,7 +21,7 @@ class Base(BaseSettings):
     backoff_try_limit: int = Field(10)
 
     smtp_host: str = Field("localhost")
-    smtp_port: int = Field(SMTP_PORT)
+    smtp_port: int = Field(1025)
 
     class Config:
         case_sensitive = False

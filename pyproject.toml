@@ -1,6 +1,2 @@
-[tool.black]
-line-length = 109
-target-version = ['py39']
-
 [tool.isort]
-profile = "black"
+src_paths=["notification/sender_worker"]
