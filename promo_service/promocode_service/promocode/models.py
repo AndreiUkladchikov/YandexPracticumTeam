@@ -8,7 +8,7 @@ class PromocodeType(models.Model):
     type_id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     description = models.TextField()
     discount = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(100)])
-    duration = models.PositiveIntegerField()
+    duration = models.PositiveIntegerField()  # ! Тут Integer это дней имеется в виду?
 
     class Meta:
         verbose_name = _('promocode type')
@@ -16,13 +16,16 @@ class PromocodeType(models.Model):
 
 
 class Promocode(models.Model):
-    promo_id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    promo_value = models.CharField(max_length=20)
-    type_of_promocode = models.ForeignKey(PromocodeType, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_valid = models.BooleanField()
-    is_reusable = models.BooleanField()
-    activate_until = models.DateTimeField()
+    promo_id = models.UUIDField(_("id"), primary_key=True, default=uuid.uuid4, )
+    promo_value = models.CharField(_("promo value"), max_length=20, )
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True, )
+    is_valid = models.BooleanField(_("is valid"), )
+    is_reusable = models.BooleanField(_("is reusable"), )
+    activate_until = models.DateTimeField(_("activate until"), )
+
+    type_of_promocode = models.ForeignKey(PromocodeType,
+                                          on_delete=models.CASCADE,
+                                          verbose_name=_("type of promocode"), )
 
     class Meta:
         verbose_name = _('promocode')

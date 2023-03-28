@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-28 22:28+0300\n"
+"POT-Creation-Date: 2023-03-28 23:17+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,18 +19,55 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
 "(n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: promocode/apps.py:8 promocode/models.py:32
+msgid "promocodes"
+msgstr "промокоды"
+
 #: promocode/models.py:14 promocode/models.py:15
 msgid "promocode type"
 msgstr "тип промокода"
 
+#: promocode/models.py:19
+msgid "id"
+msgstr "id"
+
+#: promocode/models.py:20
+msgid "promo value"
+msgstr "промокод"
+
+#: promocode/models.py:21
+msgid "created at"
+msgstr "создан"
+
+#: promocode/models.py:22
+msgid "is valid"
+msgstr "активный?"
+
+#: promocode/models.py:23
+msgid "is reusable"
+msgstr "многоразовый?"
+
+#: promocode/models.py:24
+msgid "activate until"
+msgstr "использовать до"
+
 #: promocode/models.py:28
+msgid "type of promocode"
+msgstr "тип промокода"
+
+#: promocode/models.py:31
 msgid "promocode"
 msgstr "промокод"
 
-#: promocode/models.py:29
-msgid "promocodes"
-msgstr "промокоды"
-
-#: promocode/models.py:39 promocode/models.py:40
+#: promocode/models.py:42 promocode/models.py:43
 msgid "promocode history"
 msgstr "использованые промокоды"
+
+#: promocode_service/urls.py:8
+msgid "Loyalty system"
+msgstr "Система лояльности"
+
+#: promocode_service/urls.py:9
+msgid "Cinema Loyalty System"
+msgstr "Система лояльности для кинотеатра"
