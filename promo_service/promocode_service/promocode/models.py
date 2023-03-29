@@ -1,7 +1,9 @@
 import uuid
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
 from django.utils.translation import gettext_lazy as _
+
+from .generator import get_promo_code
 
 
 class PromocodeType(models.Model):
@@ -16,8 +18,9 @@ class PromocodeType(models.Model):
 
 
 class Promocode(models.Model):
-    promo_id = models.UUIDField(_("id"), primary_key=True, default=uuid.uuid4, )
-    promo_value = models.CharField(_("promo value"), max_length=20, )
+    promo_id = models.UUIDField(_("id"), primary_key=True, default=uuid.uuid4)
+    promo_value = models.CharField(_("promo value"), max_length=20,
+                                   validators=[MinLengthValidator(8)], default=get_promo_code)
     created_at = models.DateTimeField(_("created at"), auto_now_add=True, )
     is_valid = models.BooleanField(_("is valid"), )
     is_reusable = models.BooleanField(_("is reusable"), )
@@ -26,6 +29,9 @@ class Promocode(models.Model):
     type_of_promocode = models.ForeignKey(PromocodeType,
                                           on_delete=models.CASCADE,
                                           verbose_name=_("type of promocode"), )
+
+    def __repr__(self):
+        return f"Promocode {self.promo_value}"
 
     class Meta:
         verbose_name = _('promocode')
