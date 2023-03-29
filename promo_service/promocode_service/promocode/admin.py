@@ -1,6 +1,6 @@
 from django.contrib import admin
 from import_export.admin import ExportMixin
-from rangefilter.filters import DateRangeFilter, DateTimeRangeFilter
+from rangefilter.filters import DateTimeRangeFilter
 
 from .models import PromocodeUserHistory, Promocode, PromocodeType
 
@@ -12,11 +12,9 @@ class PromocodeAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ('promo_value',
                     'type_of_promocode',
                     'is_valid',
-                    'is_reusable',
                     'activate_until',
                     'created_at', )
     list_filter = ('is_valid',
-                   'is_reusable',
                    ('type_of_promocode', admin.RelatedOnlyFieldListFilter),
                    ('created_at', DateTimeRangeFilter),
                    ('activate_until', DateTimeRangeFilter), )
