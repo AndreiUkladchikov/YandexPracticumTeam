@@ -20,7 +20,7 @@ def get_promo_code(num_chars=8) -> str:
 
 
 class PromocodeType(models.Model):
-    type_id = models.UUIDField(_('type id'), primary_key=True, default=uuid.uuid4, editable=False, )
+    id = models.UUIDField(_('type id'), primary_key=True, default=uuid.uuid4, editable=False, )
     description = models.TextField(_('description'), )
     discount = models.IntegerField(_('discount'), validators=[MinValueValidator(1), MaxValueValidator(100)], )
     duration = models.PositiveIntegerField(_('duration'), )
@@ -37,7 +37,7 @@ class PromocodeType(models.Model):
 
 
 class Promocode(models.Model):
-    promo_id = models.UUIDField(_("id"), primary_key=True, default=uuid.uuid4, editable=False, )
+    id = models.UUIDField(_("id"), primary_key=True, default=uuid.uuid4, editable=False, )
     promo_value = models.CharField(_("promo value"),
                                    max_length=20,
                                    validators=[MinLengthValidator(8)],
@@ -48,9 +48,13 @@ class Promocode(models.Model):
     personal_user_id = models.UUIDField(_('personal user id'), blank=True, null=True, )
     activate_until = models.DateTimeField(_("activate until"), )
 
-    type_of_promocode = models.ForeignKey(PromocodeType,
+    promocode_type_id = models.ForeignKey(PromocodeType,
                                           on_delete=models.CASCADE,
+
                                           verbose_name=_("type of promocode"), )
+
+    def __str__(self):
+        return self.promo_value
 
     class Meta:
         db_table = "promocode"
@@ -59,9 +63,9 @@ class Promocode(models.Model):
 
 
 class PromocodeUserHistory(models.Model):
-    promo_id = models.ForeignKey(Promocode,
-                                 on_delete=models.CASCADE,
-                                 verbose_name=_('promo id'), )
+    promocode_id = models.ForeignKey(Promocode,
+                                     on_delete=models.CASCADE,
+                                     verbose_name=_('promo id'), )
     user_id = models.UUIDField(_('user id'), )
     # при создании записи мы сразу активируем промокод
     activated_at = models.DateTimeField(_('activated at'), auto_now_add=True, )
@@ -72,5 +76,5 @@ class PromocodeUserHistory(models.Model):
         verbose_name = _('promocode history')
         verbose_name_plural = _('promocode history')
         constraints = [
-            models.UniqueConstraint(fields=['promo_id', 'user_id'], name='unique pair promocode-user')
+            models.UniqueConstraint(fields=['promocode_id', 'user_id'], name='unique pair promocode-user')
         ]

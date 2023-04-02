@@ -10,7 +10,8 @@ admin.site.site_title = _("Cinema Loyalty System")
 
 
 urlpatterns = [
-    path("", admin.site.urls),
+    path("api/v1/", include("promocode.urls")),
+    path("admin/", admin.site.urls),
     path("__debug__/", include("debug_toolbar.urls")),
 ]
 

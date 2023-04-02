@@ -10,20 +10,20 @@ class PromocodeAdmin(ExportMixin, admin.ModelAdmin):
 
     ordering = ('-created_at', )
     list_display = ('promo_value',
-                    'type_of_promocode',
+                    'promocode_type_id',
                     'is_valid',
                     'activate_until',
                     'created_at', )
     list_filter = ('is_valid',
-                   ('type_of_promocode', admin.RelatedOnlyFieldListFilter),
+                   ('promocode_type_id', admin.RelatedOnlyFieldListFilter),
                    ('created_at', DateTimeRangeFilter),
                    ('activate_until', DateTimeRangeFilter), )
-    search_fields = ('type_of_promocode__description',
-                     'type_of_promocode__discount',
-                     'type_of_promocode__duration',
+    search_fields = ('promocode_type_id__description',
+                     'promocode_type_id__discount',
+                     'promocode_type_id__duration',
                      'promo_value', )
     list_display_links = ('promo_value', )
-    raw_id_fields = ('type_of_promocode', )
+    raw_id_fields = ('promocode_type_id', )
 
     list_per_page = 50
 
@@ -32,18 +32,18 @@ class PromocodeAdmin(ExportMixin, admin.ModelAdmin):
 class PromocodeUserHistoryAdmin(ExportMixin, admin.ModelAdmin):
 
     ordering = ('-activated_at', )
-    list_display = ('promo_id',
+    list_display = ('promocode_id',
                     'user_id',
                     'activated_at',
                     'expire_at', )
     list_filter = (('activated_at', DateTimeRangeFilter),
                    ('expire_at', DateTimeRangeFilter), )
     search_fields = ('user_id',
-                     'promo_id__type_of_promocode__description',
-                     'promo_id__promo_value', )
-    list_display_links = ('promo_id',
+                     'promocode_id__promocode_type_id__description',
+                     'promocode_id__promo_value', )
+    list_display_links = ('promocode_id',
                           'user_id', )
-    raw_id_fields = ('promo_id', )
+    raw_id_fields = ('promocode_id', )
 
     list_per_page = 50
 
