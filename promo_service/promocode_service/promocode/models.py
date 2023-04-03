@@ -8,9 +8,10 @@ from django.utils.translation import gettext_lazy as _
 
 
 def get_promo_code(num_chars=8) -> str:
-    """
-    Function for generation promo code
+    """Function for generation promo code
+
     :param num_chars: number of characters (default 8)
+
     :return: promo code
     """
     code_chars = '123456789ABCDEFGHIJKLMNPQRSTUVWXYZ'
@@ -22,11 +23,20 @@ def get_promo_code(num_chars=8) -> str:
 
 
 class PromocodeType(models.Model):
+    """Тип промокода, описывающий его основные характеристики
+
+    Prop:
+        id: uuid идентификатор типа промокода
+        description: str краткое описание
+        discount: int процент скидки (допустимое значение от 1 до 100)
+        duration: int кол-во дней, в течении которых можно воспользоваться промоколом
+        max_number_activation: int максимальное кол-во раз, которое пользователь
+                                   может воспользоваться промоколом (если 0 то неограничено)
+    """
     id = models.UUIDField(_('type id'), primary_key=True, default=uuid.uuid4, editable=False, )
     description = models.TextField(_('description'), )
     discount = models.IntegerField(_('discount'), validators=[MinValueValidator(1), MaxValueValidator(100)], )
     duration = models.PositiveIntegerField(_('duration'), )
-    # ? Давайте если ноль, то кол-во активаций будет не ограничено?
     max_number_activation = models.PositiveIntegerField(_('max number activation'), default=0, )
 
     def __str__(self):
@@ -38,7 +48,51 @@ class PromocodeType(models.Model):
         verbose_name_plural = _('promocode type')
 
 
+class Task(models.Model):
+    """Задания на создание персональных промокодов
+
+    Prop:
+        id: uuid идентификатор задания
+        description: str краткое описание задания
+        api_endpoint: str url-адрес ручки сервиса, которая вернет перечень id пользователей,
+                          для которых необходимо создать промокоды (например, можно из сервиса
+                          статистики получить сто самых активных комментаторов или ревьюеров фильмов)
+        is_complete: bool текущий статус задания (True если задание выполнено и созданы промокоды)
+        promocode_type_id: uuid внешний ключ указывающий на тип промокода
+                                (размер скидки, период действия в днях,
+                                кол-во активаций для пользователя)
+    """
+    id = models.UUIDField(_('type id'), primary_key=True, default=uuid.uuid4, editable=False, )
+    description = models.TextField(_('description'), )
+    api_endpoint = models.URLField(_('api endpoint'), )
+    is_complete = models.BooleanField(_('is complete'), default=False, )
+
+    promocode_type_id = models.ForeignKey(PromocodeType,
+                                          on_delete=models.CASCADE,
+                                          verbose_name=_("type of promocode"), )
+
+    def __str__(self) -> str:
+        return self.description
+
+    class Meta:
+        db_table = "task"
+        verbose_name = _('task')
+        verbose_name_plural = _('task')
+
+
 class Promocode(models.Model):
+    """Промокоды
+
+    Prop:
+        id: uuid идентификатор промокода
+        promo_value: str случайное значение из 8 символов для промокода
+        created_at: str метка времени, когда был создан промокод
+        is_valid: bool ?????
+        number_activations: int сколько раз воспользовались промокодом
+        personal_user_id: uuid идентификатор пользователя (указывается если промокод персональный)
+        activate_until: datetime дата, по которую возможно воспользоваться промокодом
+        promocode_type_id: uuid идентификатор типа промокода
+    """
     id = models.UUIDField(_("id"), primary_key=True, default=uuid.uuid4, editable=False, )
     promo_value = models.CharField(_("promo value"),
                                    max_length=20,
@@ -52,7 +106,6 @@ class Promocode(models.Model):
 
     promocode_type_id = models.ForeignKey(PromocodeType,
                                           on_delete=models.CASCADE,
-
                                           verbose_name=_("type of promocode"), )
 
     def __str__(self):
@@ -65,13 +118,19 @@ class Promocode(models.Model):
 
 
 class PromocodeUserHistory(models.Model):
+    """История использования промокодов пользователями
+
+    Prop:
+        promocode_id: uuid идентификатор промокода
+        user_id: uuid идентификатор пользователя
+        activated_at: datetime метка времени, когда был использован промокод
+                               (при создании записи мы сразу ее ставим)
+    """
     promocode_id = models.ForeignKey(Promocode,
                                      on_delete=models.CASCADE,
                                      verbose_name=_('promo id'), )
     user_id = models.UUIDField(_('user id'), )
-    # при создании записи мы сразу активируем промокод
     activated_at = models.DateTimeField(_('activated at'), auto_now_add=True, )
-    expire_at = models.DateTimeField(_('expire at'), )
 
     class Meta:
         db_table = "promocode_user_history"
