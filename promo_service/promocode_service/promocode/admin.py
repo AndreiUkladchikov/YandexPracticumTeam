@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export.admin import ExportMixin
 from rangefilter.filters import DateTimeRangeFilter, NumericRangeFilter
 
-from .models import PromocodeUserHistory, Promocode, PromocodeType
+from .models import Promocode, PromocodeType, PromocodeUserHistory
 
 
 @admin.register(Promocode)

@@ -55,6 +55,7 @@ def _if_max_number_of_activations_exceed(promocode_id, promocode_type_id):
 
 
 def check_promocode(promocode_value: str, user_id: uuid.UUID):
+    """Функция проверки промокода"""
     promo = _get_promocode(promocode_value)
     _is_promocode_valid(promo)
     _is_personal_promocode(promo, user_id)

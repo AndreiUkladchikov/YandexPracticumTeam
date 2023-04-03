@@ -1,7 +1,9 @@
-import uuid
 import random
+import uuid
+
+from django.core.validators import (MaxValueValidator, MinLengthValidator,
+                                    MinValueValidator)
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
 from django.utils.translation import gettext_lazy as _
 
 
