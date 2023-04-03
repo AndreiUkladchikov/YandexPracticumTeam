@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-30 22:24+0300\n"
+"POT-Creation-Date: 2023-04-03 23:00+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,99 +16,99 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
-"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: promocode/apps.py:8 promocode/models.py:58
+#: .\promocode\apps.py:8 .\promocode\models.py:64
 msgid "promocodes"
 msgstr "промокоды"
 
-#: promocode/models.py:23
+#: .\promocode\models.py:25
 msgid "type id"
 msgstr "id"
 
-#: promocode/models.py:24
+#: .\promocode\models.py:26
 msgid "description"
 msgstr "описание"
 
-#: promocode/models.py:25
+#: .\promocode\models.py:27
 msgid "discount"
 msgstr "размер скидки в %"
 
-#: promocode/models.py:26
+#: .\promocode\models.py:28
 msgid "duration"
 msgstr "кол-во дней активности"
 
-#: promocode/models.py:28
+#: .\promocode\models.py:30
 msgid "max number activation"
 msgstr "максимальное кол-во активаций"
 
-#: promocode/models.py:35 promocode/models.py:36
+#: .\promocode\models.py:37 .\promocode\models.py:38
 msgid "promocode type"
 msgstr "тип промокода"
 
-#: promocode/models.py:40
+#: .\promocode\models.py:42
 msgid "id"
 msgstr "id"
 
-#: promocode/models.py:41
+#: .\promocode\models.py:43
 msgid "promo value"
 msgstr "промокод"
 
-#: promocode/models.py:45
+#: .\promocode\models.py:47
 msgid "created at"
 msgstr "создан"
 
-#: promocode/models.py:46
+#: .\promocode\models.py:48
 msgid "is valid"
 msgstr "активный?"
 
-#: promocode/models.py:47
+#: .\promocode\models.py:49
 msgid "number activations"
 msgstr "кол-во активаций"
 
-#: promocode/models.py:48
+#: .\promocode\models.py:50
 msgid "personal user id"
 msgstr "id пользователя (персональный промокод)"
 
-#: promocode/models.py:49
+#: .\promocode\models.py:51
 msgid "activate until"
 msgstr "использовать до"
 
-#: promocode/models.py:53
+#: .\promocode\models.py:56
 msgid "type of promocode"
 msgstr "тип промокода"
 
-#: promocode/models.py:57
+#: .\promocode\models.py:63
 msgid "promocode"
 msgstr "промокод"
 
-#: promocode/models.py:64
+#: .\promocode\models.py:70
 msgid "promo id"
 msgstr "промокод"
 
-#: promocode/models.py:65
+#: .\promocode\models.py:71
 msgid "user id"
 msgstr "пользователь"
 
-#: promocode/models.py:67
+#: .\promocode\models.py:73
 msgid "activated at"
 msgstr "использовать до"
 
-#: promocode/models.py:68
+#: .\promocode\models.py:74
 msgid "expire at"
 msgstr "активен до"
 
-#: promocode/models.py:72 promocode/models.py:73
+#: .\promocode\models.py:78 .\promocode\models.py:79
 msgid "promocode history"
 msgstr "использованые промокоды"
 
-#: promocode_service/urls.py:8
+#: .\promocode_service\urls.py:8
 msgid "Loyalty system"
 msgstr "Система лояльности"
 
-#: promocode_service/urls.py:9
+#: .\promocode_service\urls.py:9
 msgid "Cinema Loyalty System"
 msgstr "Система лояльности для кинотеатра"
 

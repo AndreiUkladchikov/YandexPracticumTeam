@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-import custom_exceptions
+from promocode import custom_exceptions
 import pytz
 
 from .models import Promocode, PromocodeType, PromocodeUserHistory
