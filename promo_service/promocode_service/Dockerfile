@@ -21,8 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 RUN find . -type f -print0 | xargs -0 dos2unix 
 RUN chown -R promo:promo /home/promo \
-    && chmod +x /home/promo/web/entrypoint.dev.sh \
-    && chmod +x /home/promo/web/entrypoint.celery.sh
+    && chmod +x /home/promo/web/*.sh
 
 VOLUME [ "/home/promo/web", ]
 
@@ -38,8 +37,22 @@ EXPOSE 8000
 
 ENTRYPOINT ["/home/promo/web/entrypoint.dev.sh"]
 
-FROM base as celery
+FROM base as prod
 
 USER promo
 
-ENTRYPOINT ["/home/promo/web/entrypoint.celery.sh"]
+EXPOSE 8000
+
+ENTRYPOINT ["/home/promo/web/entrypoint.prod.sh"]
+
+FROM base as celery-dev
+
+USER promo
+
+ENTRYPOINT ["/home/promo/web/entrypoint.celery.dev.sh"]
+
+FROM base as celery-prod
+
+USER promo
+
+ENTRYPOINT ["/home/promo/web/entrypoint.celery.prod.sh"]

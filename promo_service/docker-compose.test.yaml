@@ -11,14 +11,15 @@ services:
     build:
       context: ./promocode_service
       dockerfile: Dockerfile
-      target: dev
-    command: python manage.py runserver 0.0.0.0:8000
+      target: prod
+    command: python manage.py test
     volumes:
       - app_volume:/home/promo/web
     ports:
       - 8000:8000
     depends_on:
       - postgres
+      - celery
 
   redis:
     image: redis:7-alpine
@@ -27,37 +28,37 @@ services:
     build:
       context: ./promocode_service
       dockerfile: Dockerfile
-      target: celery-dev
+      target: celery-prod
     command: celery -A promocode_service worker -l info
     volumes:
       - app_volume:/home/promo/web
     depends_on:
       - redis
-      - promoapp
+      - postgres
   
   celery-beat:
     build:
       context: ./promocode_service
       dockerfile: Dockerfile
-      target: celery-dev
+      target: celery-prod
     command: celery -A promocode_service beat -l info
     volumes:
       - app_volume:/home/promo/web
     depends_on:
       - redis
-      - promoapp
+      - postgres
   
   dashboard:
     build:
       context: ./promocode_service
       dockerfile: Dockerfile
-      target: celery-dev
+      target: celery-prod
     command: celery flower -A promocode_service --port=5555 --broker=redis://redis:6379/0
     ports:
       - 5555:5555
     depends_on:
-      - promoapp
       - redis
+      - postgres
       - celery
 
 volumes:
