@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from dotenv import load_dotenv
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, RedisDsn
 
 
 load_dotenv()
@@ -21,6 +21,9 @@ class SettingsFromEnv(BaseSettings):
     db_password: str = Field(...)
     db_host: str = Field(...)
     db_port: int = Field(5432)
+
+    celery_broker_url: RedisDsn = Field(...)
+    celery_result_backend: RedisDsn = Field(...)
 
     class Config:
 
@@ -151,3 +154,6 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = "./media"
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+CELERY_BROKER_URL = config.celery_broker_url
+CELERY_RESULT_BACKEND = config.celery_result_backend
