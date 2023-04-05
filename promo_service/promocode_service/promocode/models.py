@@ -71,7 +71,6 @@ class PromocodeUserHistory(models.Model):
     user_id = models.UUIDField(_('user id'), )
     # при создании записи мы сразу активируем промокод
     activated_at = models.DateTimeField(_('activated at'), auto_now_add=True, )
-    expire_at = models.DateTimeField(_('expire at'), )
 
     class Meta:
         db_table = "promocode_user_history"

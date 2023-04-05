@@ -34,10 +34,8 @@ class PromocodeUserHistoryAdmin(ExportMixin, admin.ModelAdmin):
     ordering = ('-activated_at', )
     list_display = ('promocode_id',
                     'user_id',
-                    'activated_at',
-                    'expire_at', )
-    list_filter = (('activated_at', DateTimeRangeFilter),
-                   ('expire_at', DateTimeRangeFilter), )
+                    'activated_at',)
+    list_filter = (('activated_at', DateTimeRangeFilter),)
     search_fields = ('user_id',
                      'promocode_id__promocode_type_id__description',
                      'promocode_id__promo_value', )

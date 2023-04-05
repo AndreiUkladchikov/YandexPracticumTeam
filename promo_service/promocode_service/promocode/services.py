@@ -24,7 +24,7 @@ def _is_personal_promocode(promo: Promocode, user_id: uuid.UUID):
 
 def _is_promocode_spoiled(promo: Promocode, time_zone: pytz.utc):
     """Проверка промокода Promocode на срок годности"""
-    if promo.activate_until >= datetime.now(tz=time_zone):
+    if promo.activate_until <= datetime.now(tz=time_zone):
         raise PromocodeIsSpoiled(promocode_id=promo.id)
 
 
@@ -56,6 +56,11 @@ def _if_max_number_of_activations_exceed(promocode_id, promocode_type_id):
         raise MaxNumberOfActivationExceed(promocode_id=promocode_id)
 
 
+def _add_to_history(promocode: Promocode, user_id: uuid.UUID):
+    p = PromocodeUserHistory(promocode_id=promocode, user_id=user_id)
+    p.save()
+
+
 def check_promocode(promocode_value: str, user_id: uuid.UUID):
     """Функция проверки промокода"""
     promo = _get_promocode(promocode_value)
@@ -66,3 +71,11 @@ def check_promocode(promocode_value: str, user_id: uuid.UUID):
     _if_max_number_of_activations_exceed(promo.id, promo.promocode_type_id.id)
 
     return {"status": "Valid promocode"}
+
+
+def apply_promocode(promocode_value: str, user_id: uuid.UUID):
+    check_promocode(promocode_value, user_id)
+    promo = _get_promocode(promocode_value)
+    _add_to_history(promo, user_id)
+
+    return {"status": "Promo code applied successfully"}

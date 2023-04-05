@@ -3,9 +3,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path(
-        "check_promo",
-        views.GetCheckPromocodeView.as_view(),
-        name="Check promocode view",
-    ),
+    path("check_promocode", views.CheckPromocodeView.as_view(), name="Check promocode view"),
+    path("apply_promocode", views.ApplyPromocodeView.as_view(), name="Apply promocode view"),
 ]
