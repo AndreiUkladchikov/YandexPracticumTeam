@@ -55,9 +55,11 @@ class Task(models.Model):
         id: uuid идентификатор задания
         description: str краткое описание задания
         created_at: datetime метка времени, когда задание было создано
-        api_endpoint: str url-адрес ручки сервиса, которая вернет перечень id пользователей,
-                          для которых необходимо создать промокоды (например, можно из сервиса
-                          статистики получить сто самых активных комментаторов или ревьюеров фильмов)
+        users_api_endpoint: str url-адрес ручки сервиса, которая вернет перечень id пользователей,
+                                для которых необходимо создать промокоды (например, можно из сервиса
+                                статистики получить сто самых активных комментаторов или ревьюеров фильмов)
+        notify_api_endpoint: str url-адрес ручки сервиса нотификации, которая уведомит пользователя 
+                                 о новом промокоде 
         is_complete: bool текущий статус задания (True если задание выполнено и созданы промокоды)
         promocode_type: uuid внешний ключ указывающий на тип промокода
                                 (размер скидки, период действия в днях,
@@ -66,7 +68,8 @@ class Task(models.Model):
     id = models.UUIDField(_("type id"), primary_key=True, default=uuid.uuid4, editable=False, )
     description = models.TextField(_("description"), )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True, )
-    api_endpoint = models.URLField(_("api endpoint"), )
+    users_api_endpoint = models.URLField(_("users api endpoint"), )
+    notify_api_endpoint = models.URLField(_("notify api endpoint"), )
     is_complete = models.BooleanField(_("is complete"), default=False, editable=False, )
 
     promocode_type = models.ForeignKey(PromocodeType,

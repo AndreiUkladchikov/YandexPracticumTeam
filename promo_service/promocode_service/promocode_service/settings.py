@@ -25,6 +25,8 @@ class SettingsFromEnv(BaseSettings):
     celery_broker_url: RedisDsn = Field(...)
     celery_result_backend: RedisDsn = Field(...)
 
+    django_log_level: str = Field('INFO')
+
     class Config:
 
         env_file = str(BASE_DIR / ".env")
@@ -152,6 +154,27 @@ STATIC_ROOT = "./static"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = "./media"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": config.django_log_level,
+            "propagate": False,
+        },
+    },
+}
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 

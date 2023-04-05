@@ -71,13 +71,13 @@ class TaskAdmin(ExportMixin, admin.ModelAdmin):
 
     ordering = ("description", )
     list_display = ("description",
-                    "api_endpoint",
                     "is_complete",
                     "promocode_type", )
     list_filter = ("is_complete",
                    ("created_at", DateTimeRangeFilter), )
     search_fields = ("description",
-                     "api_endpoint",
+                     "users_api_endpoint",
+                     "notify_api_endpoint",
                      "promocode_type__description", )
     list_display_links = ("description", )
     raw_id_fields = ("promocode_type", )

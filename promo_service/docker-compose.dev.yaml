@@ -14,7 +14,7 @@ services:
       target: dev
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - app_volume:/home/promo/web
+      - ./promocode_service:/home/promo/web
     ports:
       - 8000:8000
     depends_on:
@@ -30,7 +30,7 @@ services:
       target: celery-dev
     command: celery -A promocode_service worker -l info
     volumes:
-      - app_volume:/home/promo/web
+      - ./promocode_service:/home/promo/web
     depends_on:
       - redis
       - promoapp
@@ -42,7 +42,7 @@ services:
       target: celery-dev
     command: celery -A promocode_service beat -l info
     volumes:
-      - app_volume:/home/promo/web
+      - ./promocode_service:/home/promo/web
     depends_on:
       - redis
       - promoapp
@@ -62,4 +62,3 @@ services:
 
 volumes:
   postgres_data:
-  app_volume:
