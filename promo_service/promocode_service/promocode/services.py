@@ -3,7 +3,8 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-import custom_exceptions
+from .custom_exceptions import (PromocodeIsNotValid, ItIsPersonalPromocode,
+                                PromocodeIsSpoiled, PromocodeIsNotFound, MaxNumberOfActivationExceed)
 import pytz
 
 from .models import Promocode, PromocodeType, PromocodeUserHistory
@@ -12,19 +13,19 @@ from .models import Promocode, PromocodeType, PromocodeUserHistory
 def _is_promocode_valid(promo: Promocode):
     """Проверка промокода Promocode на валидность"""
     if not promo.is_valid:
-        raise custom_exceptions.PromocodeIsNotValid
+        raise PromocodeIsNotValid(promocode_id=promo.id)
 
 
 def _is_personal_promocode(promo: Promocode, user_id: uuid.UUID):
     """Проверка промокода Promocode на наличие конкретного пользователя для активации"""
     if promo.personal_user_id and promo.personal_user_id != user_id:
-        raise custom_exceptions.ItIsPersonalPromocode
+        raise ItIsPersonalPromocode(promocode_id=promo.id)
 
 
 def _is_promocode_spoiled(promo: Promocode, time_zone: pytz.utc):
     """Проверка промокода Promocode на срок годности"""
     if promo.activate_until >= datetime.now(tz=time_zone):
-        return custom_exceptions.PromocodeIsSpoiled
+        raise PromocodeIsSpoiled(promocode_id=promo.id)
 
 
 def _get_promocode(promocode_value: str) -> Promocode | Exception:
@@ -33,7 +34,8 @@ def _get_promocode(promocode_value: str) -> Promocode | Exception:
     if promocode_obj:
         return promocode_obj[0]
     else:
-        raise custom_exceptions.PromocodeIsNotFound
+        print(promocode_value)
+        raise PromocodeIsNotFound(promo_value=promocode_value)
 
 
 def _times_of_using_promocode(promocode_id: uuid.UUID) -> int:
@@ -51,7 +53,7 @@ def _if_max_number_of_activations_exceed(promocode_id, promocode_type_id):
     if _get_max_number_of_activations(promocode_type_id) < _times_of_using_promocode(
         promocode_id
     ):
-        raise custom_exceptions.MaxNumberOfActivationExceed
+        raise MaxNumberOfActivationExceed(promocode_id=promocode_id)
 
 
 def check_promocode(promocode_value: str, user_id: uuid.UUID):
