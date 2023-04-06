@@ -42,7 +42,7 @@
 
 Скопируйте и настройте файл ./promocode_service/promocode_service/.env.prod как ./promocode_service/promocode_service/.env
 
-> docker compose -f docker-compose.prod.yaml up -d
+> docker compose -f docker-compose.yaml up -d
 
 Панель аднимитратора будет доступна по ссылке [http://127.0.0.1:8089/admin](http://127.0.0.1:8089/admin)
 
