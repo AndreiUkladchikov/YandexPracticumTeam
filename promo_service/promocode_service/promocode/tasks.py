@@ -16,7 +16,7 @@ from celery import shared_task
     retry_backoff_max=500,
     retry_jitter=True
 )
-def notify_user(user_id: UUID, promocode_value: str, notify_api_endpoint: str):
+def notify_user(self, user_id: UUID, promocode_value: str, notify_api_endpoint: str):
     """Отправляем уведомление пользователю о новом промокоде через сервис нотификации.
     """
     if not settings.DEBUG:

@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import UUID, uuid4
 
 import requests
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from .models import Task, Promocode, PromocodeType
 from .tasks import notify_user
@@ -46,7 +47,7 @@ def create_promocode(user_id: UUID, promocode_type: PromocodeType) -> Promocode:
     new_promocode = Promocode.objects.create(
         is_valid=True,
         personal_user_id=user_id,
-        activate_until=datetime.now() + timedelta(days=promocode_type.duration),
-        promocode_type_id=promocode_type.id,
+        activate_until=timezone.now() + timedelta(days=promocode_type.duration),
+        promocode_type=promocode_type,
     )
     return new_promocode
