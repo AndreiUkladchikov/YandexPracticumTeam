@@ -10,20 +10,20 @@ class PromocodeAdmin(ExportMixin, admin.ModelAdmin):
 
     ordering = ("-created_at", )
     list_display = ("promo_value",
-                    "promocode_type_id",
+                    "promocode_type",
                     "is_valid",
                     "activate_until",
                     "created_at", )
     list_filter = ("is_valid",
-                   ("promocode_type_id", admin.RelatedOnlyFieldListFilter),
+                   ("promocode_type", admin.RelatedOnlyFieldListFilter),
                    ("created_at", DateTimeRangeFilter),
                    ("activate_until", DateTimeRangeFilter), )
-    search_fields = ("promocode_type_id__description",
-                     "promocode_type_id__discount",
-                     "promocode_type_id__duration",
+    search_fields = ("promocode_type__description",
+                     "promocode_type__discount",
+                     "promocode_type__duration",
                      "promo_value", )
     list_display_links = ("promo_value", )
-    raw_id_fields = ("promocode_type_id", )
+    raw_id_fields = ("promocode_type", )
 
     list_per_page = 50
 
@@ -32,16 +32,16 @@ class PromocodeAdmin(ExportMixin, admin.ModelAdmin):
 class PromocodeUserHistoryAdmin(ExportMixin, admin.ModelAdmin):
 
     ordering = ("-activated_at", )
-    list_display = ("promocode_id",
+    list_display = ("promocode",
                     "user_id",
                     "activated_at", )
     list_filter = (("activated_at", DateTimeRangeFilter), )
     search_fields = ("user_id",
-                     "promocode_id__promocode_type_id__description",
-                     "promocode_id__promo_value", )
-    list_display_links = ("promocode_id",
+                     "promocode__promocode_type__description",
+                     "promocode__promo_value", )
+    list_display_links = ("promocode",
                           "user_id", )
-    raw_id_fields = ("promocode_id", )
+    raw_id_fields = ("promocode", )
 
     list_per_page = 50
 

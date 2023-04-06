@@ -96,7 +96,7 @@ class Promocode(models.Model):
         number_activations: int сколько раз воспользовались промокодом
         personal_user_id: uuid идентификатор пользователя (указывается если промокод персональный)
         activate_until: datetime дата, по которую возможно воспользоваться промокодом
-        promocode_type_id: uuid идентификатор типа промокода
+        promocode_type: uuid идентификатор типа промокода
     """
     id = models.UUIDField(_("id"), primary_key=True, default=uuid.uuid4, editable=False, )
     promo_value = models.CharField(_("promo value"),
@@ -109,9 +109,9 @@ class Promocode(models.Model):
     personal_user_id = models.UUIDField(_("personal user id"), blank=True, null=True, )
     activate_until = models.DateTimeField(_("activate until"), )
 
-    promocode_type_id = models.ForeignKey(PromocodeType,
-                                          on_delete=models.CASCADE,
-                                          verbose_name=_("type of promocode"), )
+    promocode_type = models.ForeignKey(PromocodeType,
+                                       on_delete=models.CASCADE,
+                                       verbose_name=_("type of promocode"), )
 
     def __str__(self):
         return self.promo_value
@@ -126,14 +126,14 @@ class PromocodeUserHistory(models.Model):
     """История использования промокодов пользователями
 
     Prop:
-        promocode_id: uuid идентификатор промокода
+        promocode: uuid идентификатор промокода
         user_id: uuid идентификатор пользователя
         activated_at: datetime метка времени, когда был использован промокод
                                (при создании записи мы сразу ее ставим)
     """
-    promocode_id = models.ForeignKey(Promocode,
-                                     on_delete=models.CASCADE,
-                                     verbose_name=_("promo id"), )
+    promocode = models.ForeignKey(Promocode,
+                                  on_delete=models.CASCADE,
+                                  verbose_name=_("promo id"), )
     user_id = models.UUIDField(_("user id"), )
     activated_at = models.DateTimeField(_("activated at"), auto_now_add=True, )
 
