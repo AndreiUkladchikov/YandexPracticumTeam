@@ -3,10 +3,16 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from .custom_exceptions import (PromocodeIsNotValid, ItIsPersonalPromocode,
-                                PromocodeIsSpoiled, PromocodeIsNotFound, MaxNumberOfActivationExceed)
 import pytz
 
+from .custom_exceptions import (
+    ItIsPersonalPromocode,
+    MaxNumberOfActivationExceed,
+    PromocodeIsNotFound,
+    PromocodeIsNotValid,
+    PromocodeIsSpoiled,
+    UserIsNotInUserHistory,
+)
 from .models import Promocode, PromocodeType, PromocodeUserHistory
 
 
@@ -34,7 +40,6 @@ def _get_promocode(promocode_value: str) -> Promocode | Exception:
     if promocode_obj:
         return promocode_obj[0]
     else:
-        print(promocode_value)
         raise PromocodeIsNotFound(promo_value=promocode_value)
 
 
@@ -79,3 +84,10 @@ def apply_promocode(promocode_value: str, user_id: uuid.UUID):
     _add_to_history(promo, user_id)
 
     return {"status": "Promo code applied successfully"}
+
+
+def get_user_history(user_id: uuid.UUID):
+    user_history = PromocodeUserHistory.objects.filter(user_id=user_id)
+    if not user_history:
+        raise UserIsNotInUserHistory
+    return user_history
