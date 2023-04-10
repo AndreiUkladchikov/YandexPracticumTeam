@@ -15,10 +15,16 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./promocode_service:/home/promo/web
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:5044'
+        tag: 'promoapp'
     ports:
       - 8000:8000
     depends_on:
       - postgres
+      - logstash
 
   redis:
     image: redis:7-alpine
@@ -31,9 +37,15 @@ services:
     command: celery -A promocode_service worker -l info
     volumes:
       - ./promocode_service:/home/promo/web
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:5044'
+        tag: 'promoapp-celery'
     depends_on:
       - redis
       - promoapp
+      - logstash
   
   celery-beat:
     build:
@@ -43,9 +55,15 @@ services:
     command: celery -A promocode_service beat -l info
     volumes:
       - ./promocode_service:/home/promo/web
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:5044'
+        tag: 'promoapp-celery-beat'
     depends_on:
       - redis
       - promoapp
+      - logstash
   
   dashboard:
     build:
@@ -53,12 +71,56 @@ services:
       dockerfile: Dockerfile
       target: celery-dev
     command: celery flower -A promocode_service --port=5555 --broker=redis://redis:6379/0
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://127.0.0.1:5044'
+        tag: 'promoapp-flower'
     ports:
       - 5555:5555
     depends_on:
       - promoapp
       - redis
       - celery
+      - logstash
+
+  logstash:
+    image: logstash:7.17.9
+    depends_on:
+      - elasticsearch
+    environment:
+      XPACK_MONITORING_ENABLED: "false"
+      ES_HOST: "elasticsearch:9200"
+    ports:
+      - 5044:5044/udp
+    volumes:
+      - ./logstash/logstash.conf:/config/logstash.conf:ro
+    command: logstash -f /config/logstash.conf
+
+  elasticsearch:
+    image: elasticsearch:7.17.9
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - xpack.security.enabled=false
+    ports:
+      - 9200:9200
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  kibana:
+    image: kibana:7.17.9
+    container_name: kibana
+    ports:
+      - 5601:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    depends_on:
+      - elasticsearch
 
 volumes:
   postgres_data:
