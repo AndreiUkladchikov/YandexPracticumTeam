@@ -4,7 +4,6 @@ from django.contrib import admin
 from django.urls import include, path
 from django.utils.translation import gettext_lazy as _
 
-
 admin.site.site_header = _("Loyalty system")
 admin.site.site_title = _("Cinema Loyalty System")
 
@@ -12,7 +11,7 @@ admin.site.site_title = _("Cinema Loyalty System")
 urlpatterns = [
     path("api/v1/", include("promocode.urls")),
     path("admin/", admin.site.urls),
-    path("__debug__/", include("debug_toolbar.urls")),
+    path("__debug__/", include("debug_toolbar.urls")),  # TODO только DEV
 ]
 
 if settings.DEBUG:

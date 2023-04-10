@@ -1,2 +1,2 @@
 [tool.isort]
-src_paths=["notification/sender_worker"]
+src_paths=["notification/sender_worker", "promo_service/promocode_service"]
