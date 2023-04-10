@@ -1,18 +1,47 @@
-import os
+from pathlib import Path
 
 from dotenv import load_dotenv
-from pathlib import Path
+from pydantic import BaseSettings, Field, RedisDsn
 
 
 load_dotenv()
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.environ.get("SECRET_KEY")
-DEBUG = (True if os.environ.get("DEBUG").lower() == "true" else False)
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(",")
-INTERNAL_IPS = os.environ.get("INTERNAL_IPS").split(",")
+
+
+class SettingsFromEnv(BaseSettings):
+
+    secret_key: str = Field(...)
+    debug: bool = Field(False)
+    allowed_hosts: str = Field(...)
+    csrf_trusted_origins: str = Field(...)
+    internal_ips: str = Field(...)
+
+    db_name: str = Field(...)
+    db_user: str = Field(...)
+    db_password: str = Field(...)
+    db_host: str = Field(...)
+    db_port: int = Field(5432)
+
+    celery_broker_url: RedisDsn = Field(...)
+    celery_result_backend: RedisDsn = Field(...)
+
+    django_log_level: str = Field('INFO')
+
+    class Config:
+
+        env_file = str(BASE_DIR / ".env")
+        env_file_encoding = 'utf-8'
+        case_sensitive = False
+
+
+config = SettingsFromEnv()
+
+
+SECRET_KEY = config.secret_key
+DEBUG = config.debug
+ALLOWED_HOSTS = config.allowed_hosts.split(",")
+CSRF_TRUSTED_ORIGINS = config.csrf_trusted_origins.split(",")
+INTERNAL_IPS = config.internal_ips.split(",")
 
 
 # Application definition
@@ -65,26 +94,17 @@ WSGI_APPLICATION = "promocode_service.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-if DEBUG:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config.db_name,
+        'USER': config.db_user,
+        'PASSWORD': config.db_password,
+        'HOST': config.db_host,
+        'PORT': config.db_port,
+        'OPTIONS': {'options': '-c search_path=public', }
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME'),
-            'USER': os.environ.get('DB_USER'),
-            'PASSWORD': os.environ.get('DB_PASSWORD'),
-            'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-            'PORT': os.environ.get('DB_PORT', 5432),
-            'OPTIONS': {'options': '-c search_path=public', }
-        }
-    }
+}
 
 
 # Password validation
@@ -135,4 +155,28 @@ STATIC_ROOT = "./static"
 MEDIA_URL = "media/"
 MEDIA_ROOT = "./media"
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": config.django_log_level,
+            "propagate": False,
+        },
+    },
+}
+
 IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+CELERY_BROKER_URL = config.celery_broker_url
+CELERY_RESULT_BACKEND = config.celery_result_backend

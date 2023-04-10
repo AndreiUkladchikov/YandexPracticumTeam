@@ -1,0 +1,75 @@
+services:
+
+  postgres:
+    image: postgres:15.2-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./postgres/.env
+
+  promoapp:
+    build:
+      context: ./promocode_service
+      dockerfile: Dockerfile
+      target: prod
+    command: gunicorn promocode_service.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - app_volume:/home/promo/web
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+
+  redis:
+    image: redis:7-alpine
+
+  celery:
+    build:
+      context: ./promocode_service
+      dockerfile: Dockerfile
+      target: celery-prod
+    command: celery -A promocode_service worker -l info
+    volumes:
+      - app_volume:/home/promo/web
+    depends_on:
+      - redis
+      - postgres
+  
+  celery-beat:
+    build:
+      context: ./promocode_service
+      dockerfile: Dockerfile
+      target: celery-prod
+    command: celery -A promocode_service beat -l info
+    volumes:
+      - app_volume:/home/promo/web
+    depends_on:
+      - redis
+      - postgres
+  
+  dashboard:
+    build:
+      context: ./promocode_service
+      dockerfile: Dockerfile
+      target: celery-prod
+    command: celery flower -A promocode_service --port=5555 --broker=redis://redis:6379/0
+    ports:
+      - 5555:5555
+    depends_on:
+      - redis
+      - celery
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    volumes:
+      - app_volume:/data:ro
+    depends_on:
+      - promoapp
+    ports:
+      - "8089:80"
+
+volumes:
+  postgres_data:
+  app_volume:
