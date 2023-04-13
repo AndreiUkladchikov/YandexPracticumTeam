@@ -5,14 +5,20 @@ import pytz
 from django.test import TestCase
 from rest_framework import status
 
-from .models import Promocode, PromocodeType
+from .models import Promocode, PromocodeType, Task
 from .tasks import create_promocodes_task
+
 
 test_promo_type = {
     "description": "Test promocode type",
     "discount": 100,
     "duration": 30,
     "max_number_activation": 5,
+}
+test_task_template = {
+    'description': 'Test task',
+    'users_api_endpoint': 'http://test.route.loc/',
+    'notify_api_endpoint': 'http://test.route.loc/',
 }
 promo_value = "QWERTY"
 
@@ -24,6 +30,7 @@ history_data = {"user_id": user_id}
 
 
 class TestCheckPromocode(TestCase):
+
     def setUp(self) -> None:
         promo_type_obj = PromocodeType.objects.create(**test_promo_type)
         Promocode.objects.create(
@@ -39,6 +46,7 @@ class TestCheckPromocode(TestCase):
 
 
 class TestApplyPromocode(TestCase):
+
     def setUp(self) -> None:
         promo_type_obj = PromocodeType.objects.create(**test_promo_type)
         Promocode.objects.create(
@@ -58,6 +66,7 @@ class TestApplyPromocode(TestCase):
 
 
 class TestPromocodeHistory(TestCase):
+
     def setUp(self) -> None:
         promo_type_obj = PromocodeType.objects.create(**test_promo_type)
         Promocode.objects.create(
@@ -78,8 +87,15 @@ class TestPromocodeHistory(TestCase):
 
 
 class TestTasks(TestCase):
+
     def test_create_promocodes_task(self):
         """Тестируем корректность настройки celery"""
-        assert create_promocodes_task.run(1)
-        assert create_promocodes_task.run(2)
-        assert create_promocodes_task.run(3)
+        promocode_type = PromocodeType.objects.create(
+            **test_promo_type
+        )
+        test_task = Task.objects.create(
+            promocode_type=promocode_type,
+            **test_task_template
+        )
+
+        assert create_promocodes_task.run(test_task.id)

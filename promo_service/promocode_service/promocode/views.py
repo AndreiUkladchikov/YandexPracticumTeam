@@ -1,8 +1,11 @@
+from uuid import UUID
+
 from django.http import JsonResponse
 from loguru import logger
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 
 from .custom_exceptions import PromocodeException
 from .serializers import (
@@ -50,6 +53,14 @@ class CheckPromocodeView(BaseView):
     Класс для проверки промокода на валидность
     """
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='promocode', description='Promocode value', type=str),
+            OpenApiParameter(name='user_id', description='User ID', type=UUID),
+        ],
+        request=PromocodeValidateSerializers,
+        responses={200: OpenApiResponse(description='Return promocode status')},
+    )
     def get(self, request):
         promocode_request_data = PromocodeValidateSerializers(data=request.GET)
         promocode_request_data.is_valid(raise_exception=True)
@@ -65,6 +76,10 @@ class ApplyPromocodeView(BaseView):
     Класс для применения промокода
     """
 
+    @extend_schema(
+        request=PromocodeValidateSerializers,
+        responses={200: OpenApiResponse(description='Return promocode apply status')},
+    )
     def post(self, request):
         promocode_request_data = PromocodeValidateSerializers(data=request.data)
         promocode_request_data.is_valid(raise_exception=True)
@@ -82,6 +97,12 @@ class UserHistoryView(BaseView):
     Класс для просмотра истории примененных промокодов
     """
 
+    @extend_schema(parameters=[
+        OpenApiParameter(name='user_id', description='User ID', type=UUID),
+    ],
+        request=HistoryValidateSerializers,
+        responses={200: PromocodeHistorySerializer},
+    )
     def get(self, request):
         request_data = HistoryValidateSerializers(data=request.GET)
         request_data.is_valid(raise_exception=True)

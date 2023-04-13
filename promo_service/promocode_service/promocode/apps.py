@@ -8,4 +8,4 @@ class PromocodeConfig(AppConfig):
     verbose_name = _("promocodes")
 
     def ready(self):
-        import signals
+        import promocode.signals

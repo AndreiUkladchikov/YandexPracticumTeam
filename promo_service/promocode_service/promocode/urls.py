@@ -1,6 +1,8 @@
 from django.urls import path
 
+
 from . import views
+
 
 urlpatterns = [
     path(
@@ -13,5 +15,9 @@ urlpatterns = [
         views.ApplyPromocodeView.as_view(),
         name="Apply promocode view",
     ),
-    path("user_history", views.UserHistoryView.as_view(), name="User history view"),
+    path(
+        "user_history",
+        views.UserHistoryView.as_view(),
+        name="User history view"
+    ),
 ]

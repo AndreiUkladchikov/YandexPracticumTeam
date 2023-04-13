@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
     "import_export",
     "rangefilter",
     "debug_toolbar",
@@ -127,13 +129,24 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # DRF settings
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
-    ]
+    ],
 }
 
+# Swagger settings
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Promocode API',
+    'DESCRIPTION': 'API schema for Promocode service',
+    'VERSION': '1.0.0',
+    'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
+    # OTHER SETTINGS
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

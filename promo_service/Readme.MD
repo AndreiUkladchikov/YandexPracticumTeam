@@ -30,7 +30,7 @@
 
 ## Запуск тестов
 
-Скопируйте и настройте файл ./promocode_service/promocode_service/.env.prod как ./promocode_service/promocode_service/.env
+Скопируйте и настройте файл ./promocode_service/promocode_service/.env.dev как ./promocode_service/promocode_service/.env
 
 > docker compose -f docker-compose.test.yaml up -d
 
@@ -45,5 +45,7 @@
 > docker compose -f docker-compose.yaml up -d
 
 Панель аднимитратора будет доступна по ссылке [http://127.0.0.1:8089/admin](http://127.0.0.1:8089/admin)
+
+Документация по API сервиса доступна по ссылке [http://127.0.0.1:8089/api/v1/schema/swagger-ui/](http://127.0.0.1:8089/api/v1/schema/swagger-ui/)
 
 * Логин и пароль администратора указывается в .env и будет создан при запуске контейнера.

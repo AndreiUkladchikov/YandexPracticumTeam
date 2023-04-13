@@ -37,21 +37,21 @@ class PromocodeAdmin(ExportMixin, admin.ModelAdmin):
 class PromocodeUserHistoryAdmin(ExportMixin, admin.ModelAdmin):
     ordering = ("-activated_at",)
     list_display = (
-        "promocode",
+        "promocode_id",
         "user_id",
         "activated_at",
     )
     list_filter = (("activated_at", DateTimeRangeFilter),)
     search_fields = (
         "user_id",
-        "promocode__promocode_type__description",
-        "promocode__promo_value",
+        "promocode_id__promocode_type__description",
+        "promocode_id__promo_value",
     )
     list_display_links = (
-        "promocode",
+        "promocode_id",
         "user_id",
     )
-    raw_id_fields = ("promocode",)
+    raw_id_fields = ("promocode_id",)
     list_per_page = 50
 
 
