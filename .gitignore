@@ -8,6 +8,8 @@ fast_api/src/typing_extensions.py
 commands.txt
 db_create/.env
 flask_app/.env
+promo_service/promocode_service/static
+promo_service/promocode_service/media
 
 # Byte-compiled / optimized / DLL files
 **/__pycache__

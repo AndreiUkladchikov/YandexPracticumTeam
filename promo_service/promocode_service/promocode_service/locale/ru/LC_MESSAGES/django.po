@@ -1,0 +1,134 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-04-13 21:05+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: promocode/apps.py:8 promocode/models.py:182
+msgid "promocodes"
+msgstr "промокоды"
+
+#: promocode/models.py:41 promocode/models.py:89
+msgid "type id"
+msgstr "id"
+
+#: promocode/models.py:47 promocode/models.py:95
+msgid "description"
+msgstr "описание"
+
+#: promocode/models.py:50
+msgid "discount"
+msgstr "размер скидки в %"
+
+#: promocode/models.py:54
+msgid "duration"
+msgstr "кол-во дней активности"
+
+#: promocode/models.py:57
+msgid "max number activation"
+msgstr "максимальное кол-во активаций"
+
+#: promocode/models.py:66 promocode/models.py:67
+msgid "promocode type"
+msgstr "тип промокода"
+
+#: promocode/models.py:98 promocode/models.py:155
+msgid "created at"
+msgstr "создан"
+
+#: promocode/models.py:102
+msgid "users api endpoint"
+msgstr "Ссылка на API-endpoint для получения списка пользователей"
+
+#: promocode/models.py:105
+msgid "notify api endpoint"
+msgstr "Ссылка на API-endpoint для уведомления пользователя о новом промокоде"
+
+#: promocode/models.py:108
+msgid "is complete"
+msgstr "Завершено?"
+
+#: promocode/models.py:116 promocode/models.py:173
+msgid "type of promocode"
+msgstr "тип промокода"
+
+#: promocode/models.py:124
+msgid "task"
+msgstr "задание"
+
+#: promocode/models.py:125
+msgid "tasks"
+msgstr "задания"
+
+#: promocode/models.py:143
+msgid "id"
+msgstr "id"
+
+#: promocode/models.py:149
+msgid "promo value"
+msgstr "промокод"
+
+#: promocode/models.py:159
+msgid "is valid"
+msgstr "активный?"
+
+#: promocode/models.py:162
+msgid "personal user id"
+msgstr "id пользователя (персональный промокод)"
+
+#: promocode/models.py:167
+msgid "activate until"
+msgstr "использовать до"
+
+#: promocode/models.py:181
+msgid "promocode"
+msgstr "промокод"
+
+#: promocode/models.py:198
+msgid "promo id"
+msgstr "промокод"
+
+#: promocode/models.py:201
+msgid "user id"
+msgstr "пользователь"
+
+#: promocode/models.py:204
+msgid "activated at"
+msgstr "использовать до"
+
+#: promocode/models.py:210 promocode/models.py:211
+msgid "promocode history"
+msgstr "использованые промокоды"
+
+#: promocode_service/urls.py:7
+msgid "Loyalty system"
+msgstr "Система лояльности"
+
+#: promocode_service/urls.py:8
+msgid "Cinema Loyalty System"
+msgstr "Система лояльности для кинотеатра"
+
+#~ msgid "number activations"
+#~ msgstr "кол-во активаций"
+
+#~ msgid "expire at"
+#~ msgstr "активен до"
+
+#~ msgid "is reusable"
+#~ msgstr "многоразовый?"
