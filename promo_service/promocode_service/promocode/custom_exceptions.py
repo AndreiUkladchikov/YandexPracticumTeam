@@ -3,6 +3,8 @@ class PromocodeException(Exception):
 
 
 class PromocodeIsNotValid(PromocodeException):
+    """Promocode not valid exception."""
+
     def __init__(self, promocode_id):
         self.promocode_id = promocode_id
 
@@ -10,6 +12,8 @@ class PromocodeIsNotValid(PromocodeException):
 
 
 class ItIsPersonalPromocode(PromocodeException):
+    """Personal promocode exception."""
+
     def __init__(self, promocode_id):
         self.promocode_id = promocode_id
 
@@ -17,6 +21,8 @@ class ItIsPersonalPromocode(PromocodeException):
 
 
 class PromocodeIsSpoiled(PromocodeException):
+    """Promocode is spoiled exception."""
+
     def __init__(self, promocode_id):
         self.promocode_id = promocode_id
 
@@ -31,6 +37,8 @@ class PromocodeIsNotFound(PromocodeException):
 
 
 class MaxNumberOfActivationExceed(PromocodeException):
+    """Promocode max activations exception."""
+
     def __init__(self, promocode_id):
         self.promocode_id = promocode_id
 
@@ -38,6 +46,8 @@ class MaxNumberOfActivationExceed(PromocodeException):
 
 
 class UserIsNotInUserHistory(PromocodeException):
+    """Promocode history exception for user."""
+
     def __init__(self, user_id):
         self.user_id = user_id
 

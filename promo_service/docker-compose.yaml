@@ -12,8 +12,15 @@ services:
       context: ./promocode_service
       dockerfile: Dockerfile
       target: prod
+    env_file:
+      - ./promocode_service/promocode_service/.env
     volumes:
       - app_volume:/home/promo/web
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://${LOGSTASH_PUBLIC_HOST}:${LOGSTASH_PUBLIC_PORT}'
+        tag: promoapp
     depends_on:
       - postgres
 
@@ -25,8 +32,15 @@ services:
       context: ./promocode_service
       dockerfile: Dockerfile
       target: celery-prod
+    env_file:
+      - ./promocode_service/promocode_service/.env
     volumes:
       - app_volume:/home/promo/web
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://${LOGSTASH_PUBLIC_HOST}:${LOGSTASH_PUBLIC_PORT}'
+        tag: promoapp-celery
     depends_on:
       - redis
       - postgres
@@ -36,8 +50,15 @@ services:
       context: ./promocode_service
       dockerfile: Dockerfile
       target: celery-beat-prod
+    env_file:
+      - ./promocode_service/promocode_service/.env
     volumes:
       - app_volume:/home/promo/web
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://${LOGSTASH_PUBLIC_HOST}:${LOGSTASH_PUBLIC_PORT}'
+        tag: promoapp-celery-beat
     depends_on:
       - redis
       - postgres
@@ -47,6 +68,13 @@ services:
       context: ./promocode_service
       dockerfile: Dockerfile
       target: flower-prod
+    env_file:
+      - ./promocode_service/promocode_service/.env
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://${LOGSTASH_PUBLIC_HOST}:${LOGSTASH_PUBLIC_PORT}'
+        tag: promoapp-flower
     ports:
       - 5555:5555
     depends_on:
