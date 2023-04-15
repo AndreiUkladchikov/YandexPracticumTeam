@@ -44,7 +44,7 @@
 
 > docker compose -f docker-compose.yaml up -d
 
-Панель аднимитратора будет доступна по ссылке [http://127.0.0.1:8089/admin](http://127.0.0.1:8089/admin)
+Панель аднимитратора будет доступна по ссылке [http://127.0.0.1:8089/promoadmin](http://127.0.0.1:8089/promoadmin)
 
 Документация по API сервиса доступна по ссылке [http://127.0.0.1:8089/api/v1/schema/swagger-ui/](http://127.0.0.1:8089/api/v1/schema/swagger-ui/)
 

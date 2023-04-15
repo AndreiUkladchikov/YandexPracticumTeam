@@ -25,12 +25,12 @@ class SettingsFromEnv(BaseSettings):
     celery_broker_url: RedisDsn = Field(...)
     celery_result_backend: RedisDsn = Field(...)
 
-    django_log_level: str = Field('INFO')
+    django_log_level: str = Field("INFO")
 
     class Config:
 
         env_file = str(BASE_DIR / ".env")
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
         case_sensitive = False
 
 
@@ -39,9 +39,12 @@ config = SettingsFromEnv()
 
 SECRET_KEY = config.secret_key
 DEBUG = config.debug
+
 ALLOWED_HOSTS = config.allowed_hosts.split(",")
 CSRF_TRUSTED_ORIGINS = config.csrf_trusted_origins.split(",")
-INTERNAL_IPS = config.internal_ips.split(",")
+
+# allow internal ips when debug on
+INTERNAL_IPS = config.internal_ips.split(",") if DEBUG else []
 
 
 # Application definition
@@ -53,17 +56,20 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    'drf_spectacular',
-    'drf_spectacular_sidecar',
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
     "import_export",
     "rangefilter",
-    "debug_toolbar",
     "promocode",
-    'django_extensions',
+    "django_extensions",
 ]
 
+# remove debug_toolbar from installed apps when debug off
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -72,6 +78,10 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# remove debug_toolbar from middleware when debug off
+if not DEBUG:
+    MIDDLEWARE.pop(0)
 
 ROOT_URLCONF = "promocode_service.urls"
 
@@ -97,14 +107,14 @@ WSGI_APPLICATION = "promocode_service.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config.db_name,
-        'USER': config.db_user,
-        'PASSWORD': config.db_password,
-        'HOST': config.db_host,
-        'PORT': config.db_port,
-        'OPTIONS': {'options': '-c search_path=public', }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config.db_name,
+        "USER": config.db_user,
+        "PASSWORD": config.db_password,
+        "HOST": config.db_host,
+        "PORT": config.db_port,
+        "OPTIONS": {"options": "-c search_path=public", }
     }
 }
 
@@ -129,7 +139,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # DRF settings
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_PARSER_CLASSES": [
@@ -139,12 +149,12 @@ REST_FRAMEWORK = {
 
 # Swagger settings
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Promocode API',
-    'DESCRIPTION': 'API schema for Promocode service',
-    'VERSION': '1.0.0',
-    'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
-    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
-    'REDOC_DIST': 'SIDECAR',
+    "TITLE": "Promocode API",
+    "DESCRIPTION": "API schema for Promocode service",
+    "VERSION": "1.0.0",
+    "SWAGGER_UI_DIST": "SIDECAR",  # shorthand to use the sidecar instead
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
     # OTHER SETTINGS
 }
 
