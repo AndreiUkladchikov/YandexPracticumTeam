@@ -11,7 +11,7 @@ services:
     build:
       context: ./promocode_service
       dockerfile: Dockerfile
-      target: prod
+      target: tests
     env_file:
       - ./promocode_service/promocode_service/.env
     volumes:

@@ -37,6 +37,14 @@ EXPOSE 8000
 
 ENTRYPOINT ["/home/promo/web/entrypoint.dev.sh"]
 
+FROM base as tests
+
+USER promo
+
+EXPOSE 8000
+
+ENTRYPOINT ["/home/promo/web/entrypoint.test.sh"]
+
 FROM base as prod
 
 USER promo
