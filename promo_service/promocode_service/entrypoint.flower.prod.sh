@@ -12,6 +12,6 @@ load_prod_enviroment () {
 
 load_prod_enviroment
 
-celery -A promocode_service worker -l info
+celery flower -A promocode_service --port=5555 --broker=redis://redis:6379/0
 
 exec "$@"

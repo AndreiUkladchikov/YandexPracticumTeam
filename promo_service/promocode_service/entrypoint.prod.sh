@@ -39,4 +39,6 @@ load_prod_enviroment
 check_postgres_db
 start_prod_server
 
+gunicorn promocode_service.wsgi:application --bind 0.0.0.0:8000
+
 exec "$@"

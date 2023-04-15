@@ -12,6 +12,6 @@ load_prod_enviroment () {
 
 load_prod_enviroment
 
-celery -A promocode_service worker -l info
+celery -A promocode_service beat -l info
 
 exec "$@"

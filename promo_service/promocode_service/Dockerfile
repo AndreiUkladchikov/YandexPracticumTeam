@@ -56,3 +56,15 @@ FROM base as celery-prod
 USER promo
 
 ENTRYPOINT ["/home/promo/web/entrypoint.celery.prod.sh"]
+
+FROM base as celery-beat-prod
+
+USER promo
+
+ENTRYPOINT ["/home/promo/web/entrypoint.celery_beat.prod.sh"]
+
+FROM base as flower-prod
+
+USER promo
+
+ENTRYPOINT ["/home/promo/web/entrypoint.flower.prod.sh"]
