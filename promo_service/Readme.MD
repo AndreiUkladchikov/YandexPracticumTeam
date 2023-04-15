@@ -4,6 +4,8 @@
 
 Установите зависимости из promocode_service/requirements.txt и promocode_service/requirements.dev.txt
 
+Установите переменную DJANGO_LOG_LEVEL=DEBUG для детального вывода сообщений.
+
 > pipenv install -r promocode_service/requirements.txt && pipenv install -r promocode_service/requirements.dev.txt
 
 Скопируйте и настройте файл ./promocode_service/promocode_service/.env.dev как ./promocode_service/promocode_service/.env
@@ -44,7 +46,7 @@
 
 > docker compose -f docker-compose.yaml up -d
 
-Панель аднимитратора будет доступна по ссылке [http://127.0.0.1:8089/promoadmin](http://127.0.0.1:8089/promoadmin)
+Панель аднимитратора будет доступна по ссылке [http://127.0.0.1:8089/promoadmin/](http://127.0.0.1:8089/promoadmin/)
 
 Документация по API сервиса доступна по ссылке [http://127.0.0.1:8089/api/v1/schema/swagger-ui/](http://127.0.0.1:8089/api/v1/schema/swagger-ui/)
 

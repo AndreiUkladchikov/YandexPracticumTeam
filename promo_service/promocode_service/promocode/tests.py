@@ -30,6 +30,7 @@ history_data = {"user_id": user_id}
 
 
 class TestCheckPromocode(TestCase):
+    """Tests for check promocode route."""
 
     def setUp(self) -> None:
         promo_type_obj = PromocodeType.objects.create(**test_promo_type)
@@ -46,6 +47,7 @@ class TestCheckPromocode(TestCase):
 
 
 class TestApplyPromocode(TestCase):
+    """Tests for apply promocode route."""
 
     def setUp(self) -> None:
         promo_type_obj = PromocodeType.objects.create(**test_promo_type)
@@ -66,6 +68,7 @@ class TestApplyPromocode(TestCase):
 
 
 class TestPromocodeHistory(TestCase):
+    """Tests for promocode history."""
 
     def setUp(self) -> None:
         promo_type_obj = PromocodeType.objects.create(**test_promo_type)
@@ -89,7 +92,7 @@ class TestPromocodeHistory(TestCase):
 class TestTasks(TestCase):
 
     def test_create_promocodes_task(self):
-        """Тестируем корректность настройки celery"""
+        """Testing the correctness of the celery settings."""
         promocode_type = PromocodeType.objects.create(
             **test_promo_type
         )

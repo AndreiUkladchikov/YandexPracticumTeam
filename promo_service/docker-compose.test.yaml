@@ -12,7 +12,8 @@ services:
       context: ./promocode_service
       dockerfile: Dockerfile
       target: prod
-    command: python manage.py test
+    env_file:
+      - ./promocode_service/promocode_service/.env
     volumes:
       - app_volume:/home/promo/web
     ports:
@@ -29,7 +30,8 @@ services:
       context: ./promocode_service
       dockerfile: Dockerfile
       target: celery-prod
-    command: celery -A promocode_service worker -l info
+    env_file:
+      - ./promocode_service/promocode_service/.env
     volumes:
       - app_volume:/home/promo/web
     depends_on:
@@ -41,7 +43,8 @@ services:
       context: ./promocode_service
       dockerfile: Dockerfile
       target: celery-prod
-    command: celery -A promocode_service beat -l info
+    env_file:
+      - ./promocode_service/promocode_service/.env
     volumes:
       - app_volume:/home/promo/web
     depends_on:
@@ -53,7 +56,8 @@ services:
       context: ./promocode_service
       dockerfile: Dockerfile
       target: celery-prod
-    command: celery flower -A promocode_service --port=5555 --broker=redis://redis:6379/0
+    env_file:
+      - ./promocode_service/promocode_service/.env
     ports:
       - 5555:5555
     depends_on:
