@@ -58,13 +58,13 @@ class PromocodeType(models.Model):
         default=0,
     )
 
-    def __str__(self):
-        return self.description
-
     class Meta:
         db_table = "promocode_type"
         verbose_name = _("promocode type")
         verbose_name_plural = _("promocode type")
+
+    def __str__(self):
+        return self.description
 
 
 class Task(models.Model):
@@ -116,13 +116,13 @@ class Task(models.Model):
         verbose_name=_("type of promocode"),
     )
 
-    def __str__(self) -> str:
-        return self.description
-
     class Meta:
         db_table = "task"
         verbose_name = _("task")
         verbose_name_plural = _("tasks")
+
+    def __str__(self) -> str:
+        return self.description
 
 
 class Promocode(models.Model):
@@ -173,13 +173,13 @@ class Promocode(models.Model):
         verbose_name=_("type of promocode"),
     )
 
-    def __str__(self):
-        return self.promo_value
-
     class Meta:
         db_table = "promocode"
         verbose_name = _("promocode")
         verbose_name_plural = _("promocodes")
+
+    def __str__(self):
+        return self.promo_value
 
 
 class PromocodeUserHistory(models.Model):
@@ -214,3 +214,6 @@ class PromocodeUserHistory(models.Model):
                 fields=["promocode_id", "user_id"], name="unique pair promocode-user"
             )
         ]
+
+    def __str__(self) -> str:
+        return f"PromocodeUserHistory: {self.promocode_id} for {self.user_id} at {self.activated_at}"
