@@ -45,7 +45,9 @@ class PromocodeService:
 
     def _times_of_using_promocode(self) -> int:
         """Getting the count of promotional code activations."""
-        logger.debug(f"Getting the count of promocode activations {self}: {self.__dict__}")
+        logger.debug(
+            f"Getting the count of promocode activations {self}: {self.__dict__}"
+        )
         return PromocodeUserHistory.objects.filter(
             promocode_id=self.promocode.id
         ).count()
@@ -53,13 +55,15 @@ class PromocodeService:
     def _get_max_number_of_activations(self) -> int:
         """Getting the maximum activation count of the promotional code."""
         logger.debug(f"Getting the maximum activation count {self}: {self.__dict__}")
-        return PromocodeType.objects.filter(id=self.promocode.promocode_type_id.id)[
+        return PromocodeType.objects.filter(id=self.promocode.promocode_type.id)[
             0
         ].max_number_activation
 
     def _if_max_number_of_activations_exceed(self):
         """Checking the Promocode for exceeding the maximum count of activations."""
-        logger.debug(f"Checking the promocode for exceeding the maximum count of activations {self}: {self.__dict__}")
+        logger.debug(
+            f"Checking the promocode for exceeding the maximum count of activations {self}: {self.__dict__}"
+        )
         if self._get_max_number_of_activations() < self._times_of_using_promocode():
             raise MaxNumberOfActivationExceed(promocode_id=self.promocode.id)
 

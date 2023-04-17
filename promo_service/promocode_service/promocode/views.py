@@ -2,7 +2,6 @@ from uuid import UUID
 
 from django.http import JsonResponse
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
-from loguru import logger
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -65,14 +64,11 @@ class CheckPromocodeView(BaseView):
         promocode_request_data = PromocodeValidateSerializers(data=request.GET)
         promocode_request_data.is_valid(raise_exception=True)
 
-        promocode_value = promocode_request_data.data.get("promocode"),
-        user_id = promocode_request_data.data.get("user_id"),
+        promocode_value = promocode_request_data.data.get("promocode")
+        user_id = promocode_request_data.data.get("user_id")
 
         logger.debug(f"Check promocode {promocode_value} for user {user_id}")
-        res = check_promocode(
-            promocode_value=promocode_value,
-            user_id=user_id,
-        )
+        res = check_promocode(promocode_value, user_id)
 
         return JsonResponse(res)
 
@@ -97,10 +93,8 @@ class ApplyPromocodeView(BaseView):
         return JsonResponse(res)
 
 
-
 class UserHistoryView(BaseView, PageNumberPagination):
     """Class for viewing the history of applied promo codes."""
-
 
     page_size_query_param = "page_size"
 
@@ -125,6 +119,5 @@ class UserHistoryView(BaseView, PageNumberPagination):
         else:
             serializer = PromocodeHistorySerializer(instance=history, many=True)
         logger.debug(f"Get history for user {request_data.data.get('user_id')}")
-
 
         return Response(serializer.data)
