@@ -42,3 +42,14 @@ class UserIsNotInUserHistory(PromocodeException):
         self.user_id = user_id
 
         super().__init__("User is not in user history! " f"User id {user_id}")
+
+
+class PromocodeAlreadyActivatedByCurrentUser(PromocodeException):
+    def __init__(self, user_id, promo_id):
+        self.user_id = user_id
+        self.promocode_id = promo_id
+
+        super().__init__(
+            "Promocode has been already activated! "
+            f"User id {user_id}, promocode id {promo_id}"
+        )

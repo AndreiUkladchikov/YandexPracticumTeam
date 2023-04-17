@@ -8,6 +8,7 @@ import pytz
 from .custom_exceptions import (
     ItIsPersonalPromocode,
     MaxNumberOfActivationExceed,
+    PromocodeAlreadyActivatedByCurrentUser,
     PromocodeIsNotFound,
     PromocodeIsNotValid,
     PromocodeIsSpoiled,
@@ -46,7 +47,7 @@ class PromocodeService:
 
     def _get_max_number_of_activations(self) -> int:
         """Получение максимального числа активации промокода"""
-        return PromocodeType.objects.filter(id=self.promocode.promocode_type_id.id)[
+        return PromocodeType.objects.filter(id=self.promocode.promocode_type.id)[
             0
         ].max_number_activation
 
@@ -54,6 +55,14 @@ class PromocodeService:
         """Проверка промокода Promocode на превышение максимального числа активаций"""
         if self._get_max_number_of_activations() < self._times_of_using_promocode():
             raise MaxNumberOfActivationExceed(promocode_id=self.promocode.id)
+
+    def _if_promocode_already_activated_by_current_user(self, user_id: uuid.UUID):
+        if PromocodeUserHistory.objects.filter(
+            promocode_id=self.promocode.id, user_id=user_id
+        ):
+            raise PromocodeAlreadyActivatedByCurrentUser(
+                promo_id=self.promocode, user_id=user_id
+            )
 
     def _add_to_history(self, user_id: uuid.UUID):
         p = PromocodeUserHistory(promocode_id=self.promocode, user_id=user_id)
@@ -63,6 +72,8 @@ class PromocodeService:
         self._is_promocode_valid()
         self._is_personal_promocode(user_id)
         self._is_promocode_spoiled(pytz.UTC)
+
+        self._if_promocode_already_activated_by_current_user(user_id)
 
         self._if_max_number_of_activations_exceed()
 

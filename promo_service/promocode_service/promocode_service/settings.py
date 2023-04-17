@@ -3,13 +3,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 from pydantic import BaseSettings, Field, RedisDsn
 
-
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class SettingsFromEnv(BaseSettings):
-
     secret_key: str = Field(...)
     debug: bool = Field(False)
     allowed_hosts: str = Field(...)
@@ -25,12 +23,11 @@ class SettingsFromEnv(BaseSettings):
     celery_broker_url: RedisDsn = Field(...)
     celery_result_backend: RedisDsn = Field(...)
 
-    django_log_level: str = Field('INFO')
+    django_log_level: str = Field("INFO")
 
     class Config:
-
         env_file = str(BASE_DIR / ".env")
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
         case_sensitive = False
 
 
@@ -53,17 +50,17 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    'drf_spectacular',
-    'drf_spectacular_sidecar',
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
     "import_export",
     "rangefilter",
     "debug_toolbar",
     "promocode",
-    'django_extensions',
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -97,17 +94,18 @@ WSGI_APPLICATION = "promocode_service.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config.db_name,
-        'USER': config.db_user,
-        'PASSWORD': config.db_password,
-        'HOST': config.db_host,
-        'PORT': config.db_port,
-        'OPTIONS': {'options': '-c search_path=public', }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config.db_name,
+        "USER": config.db_user,
+        "PASSWORD": config.db_password,
+        "HOST": config.db_host,
+        "PORT": config.db_port,
+        "OPTIONS": {
+            "options": "-c search_path=public",
+        },
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -129,22 +127,19 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # DRF settings
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
-    "DEFAULT_PARSER_CLASSES": [
-        "rest_framework.parsers.JSONParser",
-    ],
 }
 
 # Swagger settings
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Promocode API',
-    'DESCRIPTION': 'API schema for Promocode service',
-    'VERSION': '1.0.0',
-    'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
-    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
-    'REDOC_DIST': 'SIDECAR',
+    "TITLE": "Promocode API",
+    "DESCRIPTION": "API schema for Promocode service",
+    "VERSION": "1.0.0",
+    "SWAGGER_UI_DIST": "SIDECAR",  # shorthand to use the sidecar instead
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
     # OTHER SETTINGS
 }
 
@@ -156,7 +151,9 @@ USE_TZ = True
 LANGUAGE_CODE = "ru-RU"
 USE_I18N = True
 USE_L10N = True
-LOCALE_PATHS = ["promocode_service/locale", ]
+LOCALE_PATHS = [
+    "promocode_service/locale",
+]
 
 
 # Static files (CSS, JavaScript, Images)
