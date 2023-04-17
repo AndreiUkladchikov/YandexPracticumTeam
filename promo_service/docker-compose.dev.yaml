@@ -14,7 +14,7 @@ services:
       target: dev
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./promocode_service:/home/promo/web
+      - promocode_service:/home/promo/web
     logging:
       driver: gelf
       options:
@@ -36,7 +36,7 @@ services:
       target: celery-dev
     command: celery -A promocode_service worker -l info
     volumes:
-      - ./promocode_service:/home/promo/web
+      - promocode_service:/home/promo/web
     logging:
       driver: gelf
       options:
@@ -54,7 +54,7 @@ services:
       target: celery-dev
     command: celery -A promocode_service beat -l info
     volumes:
-      - ./promocode_service:/home/promo/web
+      - promocode_service:/home/promo/web
     logging:
       driver: gelf
       options:
@@ -124,3 +124,4 @@ services:
 
 volumes:
   postgres_data:
+  promocode_service:

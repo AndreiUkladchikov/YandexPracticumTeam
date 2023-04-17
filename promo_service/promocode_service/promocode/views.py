@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .custom_exceptions import PromocodeException
+from .logger import logger
 from .serializers import (
     HistoryValidateSerializers,
     PromocodeHistorySerializer,
@@ -18,19 +19,19 @@ from .services import apply_promocode, check_promocode, get_user_history
 
 
 class BaseView(APIView):
-    """Базовый класс для всех Views, который обрабатывает исключения"""
+    """Base class for all Views that handles exceptions."""
 
     def dispatch(self, request, *args, **kwargs):
         try:
             response = super().dispatch(request, *args, **kwargs)
 
         except PromocodeException as e:
-            logger.exception(e)
+            logger.error(e)
             return self._response(
                 {"error": e.__str__()}, status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
-            logger.exception(e)
+            logger.error(e)
             return self._response(
                 data={"error": "Something went wrong!"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -50,9 +51,7 @@ class BaseView(APIView):
 
 
 class CheckPromocodeView(BaseView):
-    """
-    Класс для проверки промокода на валидность
-    """
+    """Class for validating a promotional code."""
 
     @extend_schema(
         parameters=[
@@ -65,17 +64,21 @@ class CheckPromocodeView(BaseView):
     def get(self, request):
         promocode_request_data = PromocodeValidateSerializers(data=request.GET)
         promocode_request_data.is_valid(raise_exception=True)
+
+        promocode_value = promocode_request_data.data.get("promocode"),
+        user_id = promocode_request_data.data.get("user_id"),
+
+        logger.debug(f"Check promocode {promocode_value} for user {user_id}")
         res = check_promocode(
-            promocode_value=promocode_request_data.data.get("promocode"),
-            user_id=promocode_request_data.data.get("user_id"),
+            promocode_value=promocode_value,
+            user_id=user_id,
         )
+
         return JsonResponse(res)
 
 
 class ApplyPromocodeView(BaseView):
-    """
-    Класс для применения промокода
-    """
+    """Class for applying a promo code."""
 
     @extend_schema(
         request=PromocodeValidateSerializers,
@@ -88,15 +91,16 @@ class ApplyPromocodeView(BaseView):
         promocode_value = promocode_request_data.data.get("promocode")
         user_id = promocode_request_data.data.get("user_id")
 
+        logger.debug(f"Apply promocode {promocode_value} for user {user_id}")
         res = apply_promocode(promocode_value, user_id)
 
         return JsonResponse(res)
 
 
+
 class UserHistoryView(BaseView, PageNumberPagination):
-    """
-    Класс для просмотра истории примененных промокодов
-    """
+    """Class for viewing the history of applied promo codes."""
+
 
     page_size_query_param = "page_size"
 
@@ -120,5 +124,7 @@ class UserHistoryView(BaseView, PageNumberPagination):
             )
         else:
             serializer = PromocodeHistorySerializer(instance=history, many=True)
+        logger.debug(f"Get history for user {request_data.data.get('user_id')}")
+
 
         return Response(serializer.data)

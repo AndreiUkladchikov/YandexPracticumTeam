@@ -36,9 +36,12 @@ config = SettingsFromEnv()
 
 SECRET_KEY = config.secret_key
 DEBUG = config.debug
+
 ALLOWED_HOSTS = config.allowed_hosts.split(",")
 CSRF_TRUSTED_ORIGINS = config.csrf_trusted_origins.split(",")
-INTERNAL_IPS = config.internal_ips.split(",")
+
+# allow internal ips when debug on
+INTERNAL_IPS = config.internal_ips.split(",") if DEBUG else []
 
 
 # Application definition
@@ -54,10 +57,13 @@ INSTALLED_APPS = [
     "drf_spectacular_sidecar",
     "import_export",
     "rangefilter",
-    "debug_toolbar",
     "promocode",
     "django_extensions",
 ]
+
+# remove debug_toolbar from installed apps when debug off
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
 
 MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
@@ -69,6 +75,10 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# remove debug_toolbar from middleware when debug off
+if not DEBUG:
+    MIDDLEWARE.pop(0)
 
 ROOT_URLCONF = "promocode_service.urls"
 
@@ -101,9 +111,7 @@ DATABASES = {
         "PASSWORD": config.db_password,
         "HOST": config.db_host,
         "PORT": config.db_port,
-        "OPTIONS": {
-            "options": "-c search_path=public",
-        },
+        "OPTIONS": {"options": "-c search_path=public", }
     }
 }
 
@@ -165,9 +173,20 @@ STATIC_ROOT = "./static"
 MEDIA_URL = "media/"
 MEDIA_ROOT = "./media"
 
+# Django logging
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {asctime} {message}",
+            "style": "{",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
