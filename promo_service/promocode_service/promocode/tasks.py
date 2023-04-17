@@ -8,6 +8,7 @@ from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
 
+from .logger import logger
 from .models import Promocode, PromocodeType, Task
 
 
@@ -23,18 +24,21 @@ from .models import Promocode, PromocodeType, Task
     retry_jitter=True,
 )
 def notify_user(self, user_id: UUID, promocode_value: str, notify_api_endpoint: str):
-    """Отправляем уведомление пользователю о новом промокоде через сервис нотификации."""
+    """We send a notification to the user about a new promotional code through the notification service."""
     if not settings.DEBUG:
+        logger.debug(f"Start send message to user {user_id} with promocode {promocode_value}")
         payload = {"user_id": user_id, "promocode": promocode_value}
         _ = requests.post(notify_api_endpoint, json=payload)
+        logger.debug(f"Message send to user {user_id} with promocode {promocode_value}")
     else:
+        logger.debug(f"Message send to user {user_id} with promocode {promocode_value}")
         pass
 
 
 @shared_task
 def create_promocodes_task(task_id: UUID) -> None:
-    """Создаем промокоды для пользователей полученных по указанному users_api_endpoint
-    и уведомляем пользователей о новом промокоде по notify_api_endpoint.
+    """Create promotional codes for users received by the specified users_api_endpoint
+    and notify users about a new promotional code by notify_api_endpoint.
     """
     task = Task.objects.get(id=task_id)
 
@@ -46,26 +50,32 @@ def create_promocodes_task(task_id: UUID) -> None:
 
     task.is_complete = True
     task.save()
+    logger.debug(f"Task {task.id} complete and save")
 
 
 def get_users(users_api_endpoint: str) -> list[str | UUID]:
-    """Получаем по указаному адресу список идентификаторов пользователей
-    для которых необходимо сгенерировать персональные промокоды.
+    """We get a list of user IDs at the specified address
+    for which it is necessary to generate personal promotional codes.
     """
     if not settings.DEBUG:
+        logger.debug(f"Start get users id list from url {users_api_endpoint}")
         resp = requests.get(users_api_endpoint)
         users = resp.json().get("users", [])
+        logger.debug(f"Get users id list from url {users_api_endpoint} complete")
     else:
         users = [uuid4() for _ in range(100)]
+        logger.debug(f"Get test users id list from url {users_api_endpoint}")
     return users
 
 
 def create_promocode(user_id: UUID, promocode_type: PromocodeType) -> Promocode:
-    """Создаем новый персональный промокод для пользователя."""
+    """We create a new personal promotional code for the user."""
+    logger.debug(f"Start create promocode {promocode_type.description} for user {user_id}")
     new_promocode = Promocode.objects.create(
         is_valid=True,
         personal_user_id=user_id,
         activate_until=timezone.now() + timedelta(days=promocode_type.duration),
         promocode_type=promocode_type,
     )
+    logger.debug(f"Promocode {promocode_type.description} for user {user_id} created")
     return new_promocode

@@ -12,11 +12,15 @@ services:
       context: ./promocode_service
       dockerfile: Dockerfile
       target: prod
-    command: gunicorn promocode_service.wsgi:application --bind 0.0.0.0:8000
+    env_file:
+      - ./promocode_service/promocode_service/.env
     volumes:
       - app_volume:/home/promo/web
-    ports:
-      - 8000:8000
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://${LOGSTASH_PUBLIC_HOST}:${LOGSTASH_PUBLIC_PORT}'
+        tag: promoapp
     depends_on:
       - postgres
 
@@ -28,9 +32,15 @@ services:
       context: ./promocode_service
       dockerfile: Dockerfile
       target: celery-prod
-    command: celery -A promocode_service worker -l info
+    env_file:
+      - ./promocode_service/promocode_service/.env
     volumes:
       - app_volume:/home/promo/web
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://${LOGSTASH_PUBLIC_HOST}:${LOGSTASH_PUBLIC_PORT}'
+        tag: promoapp-celery
     depends_on:
       - redis
       - postgres
@@ -39,10 +49,16 @@ services:
     build:
       context: ./promocode_service
       dockerfile: Dockerfile
-      target: celery-prod
-    command: celery -A promocode_service beat -l info
+      target: celery-beat-prod
+    env_file:
+      - ./promocode_service/promocode_service/.env
     volumes:
       - app_volume:/home/promo/web
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://${LOGSTASH_PUBLIC_HOST}:${LOGSTASH_PUBLIC_PORT}'
+        tag: promoapp-celery-beat
     depends_on:
       - redis
       - postgres
@@ -51,8 +67,14 @@ services:
     build:
       context: ./promocode_service
       dockerfile: Dockerfile
-      target: celery-prod
-    command: celery flower -A promocode_service --port=5555 --broker=redis://redis:6379/0
+      target: flower-prod
+    env_file:
+      - ./promocode_service/promocode_service/.env
+    logging:
+      driver: gelf
+      options:
+        gelf-address: 'udp://${LOGSTASH_PUBLIC_HOST}:${LOGSTASH_PUBLIC_PORT}'
+        tag: promoapp-flower
     ports:
       - 5555:5555
     depends_on:

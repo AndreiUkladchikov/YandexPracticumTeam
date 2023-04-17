@@ -1,14 +1,16 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from .logger import logger
 from .models import Task
 from .tasks import create_promocodes_task
 
 
 @receiver(post_save, sender=Task)
 def generate_promocodes(sender, instance: Task, created: bool, **kwargs: dict) -> None:
-    """Создаем промокоды для пользователей полученных по указанному users_api_endpoint
-    и уведомляем пользователей о новом промокоде по notify_api_endpoint.
+    """Create promotional codes for users received by the specified users_api_endpoint
+    and notify users about a new promotional code by notify_api_endpoint.
     """
     if created:
+        logger.debug(f'Task {instance.id} start.')
         create_promocodes_task.delay(instance.id)

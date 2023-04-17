@@ -7,6 +7,7 @@ from .models import Promocode, PromocodeType, PromocodeUserHistory, Task
 
 @admin.register(Promocode)
 class PromocodeAdmin(ExportMixin, admin.ModelAdmin):
+    """Django admin view configuration for Promocode."""
     ordering = ("-created_at",)
     list_display = (
         "promo_value",
@@ -35,6 +36,7 @@ class PromocodeAdmin(ExportMixin, admin.ModelAdmin):
 
 @admin.register(PromocodeUserHistory)
 class PromocodeUserHistoryAdmin(ExportMixin, admin.ModelAdmin):
+    """Django admin view configuration for promocode history."""
     ordering = ("-activated_at",)
     list_display = (
         "promocode_id",
@@ -57,6 +59,7 @@ class PromocodeUserHistoryAdmin(ExportMixin, admin.ModelAdmin):
 
 @admin.register(PromocodeType)
 class PromocodeTypeAdmin(ExportMixin, admin.ModelAdmin):
+    """Django admin view configuration for promocode types."""
     ordering = ("description",)
     list_display = (
         "description",
@@ -82,6 +85,7 @@ class PromocodeTypeAdmin(ExportMixin, admin.ModelAdmin):
 
 @admin.register(Task)
 class TaskAdmin(ExportMixin, admin.ModelAdmin):
+    """Django admin view configuration for tasks."""
     ordering = ("description",)
     list_display = (
         "description",
