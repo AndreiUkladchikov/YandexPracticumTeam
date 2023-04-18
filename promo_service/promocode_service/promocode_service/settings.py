@@ -3,13 +3,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 from pydantic import BaseSettings, Field, RedisDsn
 
-
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class SettingsFromEnv(BaseSettings):
-
     secret_key: str = Field(...)
     debug: bool = Field(False)
     allowed_hosts: str = Field(...)
@@ -28,7 +26,6 @@ class SettingsFromEnv(BaseSettings):
     django_log_level: str = Field("INFO")
 
     class Config:
-
         env_file = str(BASE_DIR / ".env")
         env_file_encoding = "utf-8"
         case_sensitive = False
@@ -118,7 +115,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -142,9 +138,6 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
-    "DEFAULT_PARSER_CLASSES": [
-        "rest_framework.parsers.JSONParser",
-    ],
 }
 
 # Swagger settings
@@ -166,7 +159,9 @@ USE_TZ = True
 LANGUAGE_CODE = "ru-RU"
 USE_I18N = True
 USE_L10N = True
-LOCALE_PATHS = ["promocode_service/locale", ]
+LOCALE_PATHS = [
+    "promocode_service/locale",
+]
 
 
 # Static files (CSS, JavaScript, Images)
