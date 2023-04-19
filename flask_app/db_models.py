@@ -79,6 +79,11 @@ class UserRole(Base):
         nullable=False,
     )
 
+    expiry_date: datetime = Column(
+        datetime,
+        nullable=True    
+    )
+
     fk = relationship("User", back_populates="fk")
     fk_2 = relationship("Role", back_populates="fk")
 

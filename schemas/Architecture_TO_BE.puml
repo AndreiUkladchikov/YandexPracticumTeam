@@ -45,6 +45,12 @@ component ETL
 component Sender
 }
 
+node Promo-Service{
+component PromoApi
+database PromoPostgres
+component PromoAdmin
+}
+
 NotificationAdminPanel -up- TemplateDb
 NotificationApi -up- TemplateDb
 NotificationAdminPanel -up-> RabbitMQ_Queue1
@@ -79,6 +85,10 @@ ClickHouse<-->UGCBackend
 Auth<-up->UGCBackend
 UGCBackend-right-Kafka
 
+PromoAdmin<-up->PromoPostgres
+PromoApi<-up->PromoPostgres
+PromoAdmin-up-Auth
+PromoAdmin-up-NotificationApi
 
 
 @enduml

@@ -27,9 +27,12 @@
 4. Авторизуем пользователя
 5. Делаем запрос к определенному фильму (только для подписчков) - показывается, т.к. у пользователя теперь есть доступ (триал)    
 
+
+
 ## Первичная настройка и запуск:
 
 ### Film Service
+Проект в /fast_api и /postgres_to_es (ELK)
 - docker-compose -f docker-compose-dev.yml up -d
 - Создать базу: python db_create/create_pgdb.py
 - Заполнить базу данными из sqlite: python db_create/main.py
@@ -39,8 +42,15 @@
 API: http://localhost:8080/api/openapi
 
 ### Auth Service
+Проект в /flask_app
+Note!! В .env Должна быть ссылка на Sentry - сбор логов
+- docker-compose -f docker-compose-auth.yml up -d
+- осуществить миграции:  docker exec -it auth_server alembic upgrade head
+- сгенерировать основные роли: docker exec -it auth_server python create_roles.py
 
-ToDo: Write + Add test users 
+ToDo: создать пользователей
+
+API: http://localhost:5001/apidoc/swagger/
 
 ### Notification Service 
 
