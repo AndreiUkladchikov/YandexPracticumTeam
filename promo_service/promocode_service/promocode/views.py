@@ -67,7 +67,7 @@ class CheckPromocodeView(BaseView):
         promocode_value = promocode_request_data.data.get("promocode")
         user_id = promocode_request_data.data.get("user_id")
 
-        logger.debug(f"Check promocode {promocode_value} for user {user_id}")
+        logger.debug("Check promocode %s for user %s", promocode_value, user_id)
         res = check_promocode(promocode_value, user_id)
 
         return JsonResponse(res)
@@ -87,7 +87,7 @@ class ApplyPromocodeView(BaseView):
         promocode_value = promocode_request_data.data.get("promocode")
         user_id = promocode_request_data.data.get("user_id")
 
-        logger.debug(f"Apply promocode {promocode_value} for user {user_id}")
+        logger.debug("Apply promocode %s for user %s", promocode_value, user_id)
         res = apply_promocode(promocode_value, user_id)
 
         return JsonResponse(res)
@@ -118,6 +118,6 @@ class UserHistoryView(BaseView, PageNumberPagination):
             )
         else:
             serializer = PromocodeHistorySerializer(instance=history, many=True)
-        logger.debug(f"Get history for user {request_data.data.get('user_id')}")
+        logger.debug("Get history for user %s", request_data.data.get('user_id'))
 
         return Response(serializer.data)

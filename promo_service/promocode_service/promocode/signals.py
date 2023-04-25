@@ -12,5 +12,5 @@ def generate_promocodes(sender, instance: Task, created: bool, **kwargs: dict) -
     and notify users about a new promotional code by notify_api_endpoint.
     """
     if created:
-        logger.debug(f'Task {instance.id} start.')
+        logger.debug('Task %s start.', instance.id)
         create_promocodes_task.delay(instance.id)

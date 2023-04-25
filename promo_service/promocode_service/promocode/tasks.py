@@ -26,12 +26,12 @@ from .models import Promocode, PromocodeType, Task
 def notify_user(self, user_id: UUID, promocode_value: str, notify_api_endpoint: str):
     """We send a notification to the user about a new promotional code through the notification service."""
     if not settings.DEBUG:
-        logger.debug(f"Start send message to user {user_id} with promocode {promocode_value}")
+        logger.debug("Start send message to user %s with promocode %s", user_id, promocode_value)
         payload = {"user_id": user_id, "promocode": promocode_value}
         _ = requests.post(notify_api_endpoint, json=payload)
-        logger.debug(f"Message send to user {user_id} with promocode {promocode_value}")
+        logger.debug("Message send to user %s with promocode %s", user_id, promocode_value)
     else:
-        logger.debug(f"Message send to user {user_id} with promocode {promocode_value}")
+        logger.debug("Message send to user %s with promocode %s", user_id, promocode_value)
         pass
 
 
@@ -50,7 +50,7 @@ def create_promocodes_task(task_id: UUID) -> None:
 
     task.is_complete = True
     task.save()
-    logger.debug(f"Task {task.id} complete and save")
+    logger.debug("Task %s complete and save", task.id)
 
 
 def get_users(users_api_endpoint: str) -> list[str | UUID]:
@@ -58,24 +58,24 @@ def get_users(users_api_endpoint: str) -> list[str | UUID]:
     for which it is necessary to generate personal promotional codes.
     """
     if not settings.DEBUG:
-        logger.debug(f"Start get users id list from url {users_api_endpoint}")
+        logger.debug("Start get users id list from url %s", users_api_endpoint)
         resp = requests.get(users_api_endpoint)
         users = resp.json().get("users", [])
-        logger.debug(f"Get users id list from url {users_api_endpoint} complete")
+        logger.debug("Get users id list from url %s complete", users_api_endpoint)
     else:
         users = [uuid4() for _ in range(100)]
-        logger.debug(f"Get test users id list from url {users_api_endpoint}")
+        logger.debug("Get test users id list from url %s", users_api_endpoint)
     return users
 
 
 def create_promocode(user_id: UUID, promocode_type: PromocodeType) -> Promocode:
     """We create a new personal promotional code for the user."""
-    logger.debug(f"Start create promocode {promocode_type.description} for user {user_id}")
+    logger.debug("Start create promocode %s for user %s", promocode_type.description, user_id)
     new_promocode = Promocode.objects.create(
         is_valid=True,
         personal_user_id=user_id,
         activate_until=timezone.now() + timedelta(days=promocode_type.duration),
         promocode_type=promocode_type,
     )
-    logger.debug(f"Promocode {promocode_type.description} for user {user_id} created")
+    logger.debug("Promocode %s for user %s created", promocode_type.description, user_id)
     return new_promocode
