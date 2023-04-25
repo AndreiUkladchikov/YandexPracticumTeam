@@ -24,7 +24,7 @@ services:
     env_file:
       - "./flask_app/.env"
     ports:
-      - '${REDIS_PORT}:${REDIS_PORT}'
+      - '${AUTH_REDIS_PORT}:${AUTH_REDIS_PORT}'
         
   auth_service:
     build: ./flask_app
@@ -32,8 +32,8 @@ services:
     command: gunicorn --bind '${AUTH_SERVER_HOST}:${AUTH_SERVER_PORT}' wsgi_app:app
     env_file:
       - "./flask_app/.env"
-    expose:
-      - '${AUTH_SERVER_PORT}'
+    ports:
+      - '${AUTH_SERVER_PORT}:${AUTH_SERVER_PORT}'
 
   jaeger:
     image: jaegertracing/all-in-one
@@ -54,4 +54,4 @@ services:
     env_file:
       - "./flask_app/.env"
     ports:
-      - '${DB_PORT}:${DB_PORT}'
+      - '${AUTH_DB_PORT}:${AUTH_DB_PORT}'
