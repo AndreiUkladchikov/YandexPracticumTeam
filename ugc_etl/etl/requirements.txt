@@ -3,4 +3,4 @@ confluent-kafka==2.0.2
 loguru==0.6.0
 pydantic==1.10.2
 python-dotenv==0.21.1
-redis==4.4.2
+redis==4.4.4
